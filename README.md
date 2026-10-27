@@ -223,3 +223,7 @@ For subsequent work, create branches from the team's current default branch and
 open PRs for review. Coordinate changes to contracts and lockfiles; keep EE work
 inside its owned modules to minimize conflicts. Never force-push shared branches
 or commit `.env`, virtual environments, node_modules, or build output.
+
+## Interactive dashboard (Phase 2)
+
+See [the Phase 2 handoff](docs/phase-2-dashboard.md) for the implemented dashboard, demo assumptions, API adapter, verification, local startup and merge/deployment instructions.

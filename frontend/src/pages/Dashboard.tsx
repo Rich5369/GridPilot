@@ -1,32 +1,277 @@
-import { lazy, Suspense } from 'react'
-import { Activity, ArrowUpRight, Building2, ChartNoAxesCombined, CircleDollarSign, FlaskConical, LayoutDashboard, PlugZap, ShieldCheck, Zap } from 'lucide-react'
+import { lazy, Suspense, useState } from 'react'
+import {
+  Activity,
+  Building2,
+  CircleDollarSign,
+  FlaskConical,
+  GitCompareArrows,
+  LayoutDashboard,
+  PlugZap,
+  SlidersHorizontal,
+  Sparkles,
+  Zap,
+} from 'lucide-react'
 import { BackendStatus } from '../components/BackendStatus'
 import { MetricCard } from '../components/MetricCard'
-const EnergyChart = lazy(() => import('../components/EnergyChart').then(module => ({ default: module.EnergyChart })))
-
+import { ScenarioPanel } from '../components/configuration/ScenarioPanel'
+import {
+  CostBreakdown,
+  defaultBillingInputs,
+} from '../components/dashboard/CostBreakdown'
+import { EnergyAssistant } from '../components/ai/EnergyAssistant'
+import {
+  defaultEditor,
+  demoResult,
+  money,
+  toScenario,
+  validateEditor,
+} from '../data/demoScenario'
+import { optimizationError, optimizeScenario } from '../services/api'
+import type { OptimizationResult } from '../types/api'
+const EnergyChart = lazy(() =>
+  import('../components/EnergyChart').then((module) => ({
+    default: module.EnergyChart,
+  })),
+)
+const Comparison = lazy(() =>
+  import('../components/dashboard/Comparison').then((module) => ({
+    default: module.Comparison,
+  })),
+)
+const views = [
+  { id: 'overview', label: 'Energy overview', icon: LayoutDashboard },
+  {
+    id: 'configuration',
+    label: 'Scenario configuration',
+    icon: SlidersHorizontal,
+  },
+  { id: 'comparison', label: 'Optimization', icon: GitCompareArrows },
+  { id: 'assistant', label: 'AI assistant', icon: Sparkles },
+] as const
 export function Dashboard() {
-  return <div className="app-shell">
-    <aside className="sidebar">
-      <a className="brand" href="#overview"><span className="brand-icon"><Zap size={23} fill="currentColor" /></span>GridPilot<span className="brand-period">.</span></a>
-      <div className="workspace"><Building2 size={20}/><div><strong>Development workspace</strong><span>Commercial energy</span></div></div>
-      <p className="nav-label">WORKSPACE</p>
-      <a href="#overview" className="nav-active"><LayoutDashboard size={18}/>Overview</a>
-      <div className="sidebar-note"><span className="tag">FOUNDATION / 01</span><p>A smarter way to<br/>power your building.</p><span>Built for the Meta Global AI<br/>Developer Hackathon 2026</span></div>
-      <div className="sidebar-bottom"><span className="avatar">GP</span><div><strong>GridPilot team</strong><span>Development environment</span></div></div>
-    </aside>
-    <div className="main-shell">
-      <header className="topbar"><span>Workspace <span className="breadcrumb">/</span> <strong>Overview</strong></span><BackendStatus/></header>
-      <main id="overview">
-        <div className="page-heading"><div><p className="eyebrow">YOUR ENERGY, IN FOCUS</p><h1>Energy overview</h1><p className="muted">Commercial Energy Optimization Platform</p></div><button className="run-button" disabled title="Optimization is not implemented"><Zap size={17}/>Run Optimization</button></div>
-        <div className="demo-banner"><FlaskConical size={20}/><p><strong>A preview of what’s ahead.</strong> All values are fictional demo data. Simulation and optimization are not connected.</p><span className="tag">DEVELOPMENT</span></div>
-        <section className="metrics" aria-label="Illustrative demo metrics">
-          <MetricCard title="Electricity usage" value="1,289" unit="kWh" description="Illustrative daily energy" icon={PlugZap}/>
-          <MetricCard title="Electricity cost" value="$206.24" unit="USD" description="Illustrative energy-only cost" icon={CircleDollarSign}/>
-          <MetricCard title="Peak demand" value="98" unit="kW" description="Illustrative hourly maximum" icon={Activity}/>
-        </section>
-        <div className="content-grid"><Suspense fallback={<div className="panel chart-panel" role="status">Loading demo chart…</div>}><EnergyChart/></Suspense><section className="panel readiness"><span className="feature-icon"><ChartNoAxesCombined size={23}/></span><p className="eyebrow mt-6">THE NEXT STEP</p><h2>From visibility<br/>to optimization.</h2><p className="muted">A shared foundation for exploring building demand, electricity prices, and EV charging.</p><div className="readiness-row"><ShieldCheck size={18}/><span>Scenario contracts defined</span></div><div className="readiness-row"><span className="pending-dot"/><span>Simulator awaiting implementation</span></div><div className="readiness-row"><span className="pending-dot"/><span>Optimizer awaiting implementation</span></div><a href="#development-note">Development notes <ArrowUpRight size={16}/></a></section></div>
-        <footer id="development-note"><span>GridPilot · Project foundation</span><span>Daily energy costs exclude monthly demand charges. No savings calculated.</span></footer>
-      </main>
+  const [billingInputs, setBillingInputs] = useState(defaultBillingInputs)
+  const [appliedBilling, setAppliedBilling] = useState(defaultBillingInputs)
+  const [view, setView] = useState<string>('overview')
+  const [editor, setEditor] = useState({ ...defaultEditor })
+  const [result, setResult] = useState<OptimizationResult | null>(null)
+  const [submitted, setSubmitted] = useState('')
+  const [busy, setBusy] = useState(false)
+  const [message, setMessage] = useState('')
+  const invalid = Object.keys(validateEditor(editor)).length > 0
+  const draftChanged = JSON.stringify(editor) !== JSON.stringify(defaultEditor)
+  async function runOptimization() {
+    if (invalid || busy) return
+    const snapshot = JSON.stringify(editor)
+    setBusy(true)
+    setMessage('')
+    try {
+      const response = await optimizeScenario(toScenario(editor))
+      setResult(response)
+      setSubmitted(snapshot)
+      setView('comparison')
+      setMessage('Backend result received for the submitted scenario.')
+    } catch (error) {
+      setMessage(optimizationError(error))
+    } finally {
+      setBusy(false)
+    }
+  }
+  return (
+    <div className="app-shell">
+      <aside className="sidebar">
+        <a
+          className="brand"
+          href="#overview"
+          onClick={() => setView('overview')}
+        >
+          <span className="brand-icon">
+            <Zap size={23} fill="currentColor" />
+          </span>
+          GridPilot<span className="brand-period">.</span>
+        </a>
+        <div className="workspace">
+          <Building2 size={20} />
+          <div>
+            <strong>Northstar Office</strong>
+            <span>Fictional commercial building</span>
+          </div>
+        </div>
+        <p className="nav-label">WORKSPACE</p>
+        <nav aria-label="Main navigation">
+          {views.map(({ id, label, icon: Icon }) => (
+            <button
+              key={id}
+              className={view === id ? 'nav-active' : 'nav-item'}
+              aria-current={view === id ? 'page' : undefined}
+              onClick={() => setView(id)}
+            >
+              <Icon size={18} />
+              {label}
+            </button>
+          ))}
+        </nav>
+        <div className="sidebar-note">
+          <span className="tag">SCENARIO WORKSPACE</span>
+          <p>
+            Understand demand.
+            <br />
+            Plan with confidence.
+          </p>
+          <span>
+            24 hourly intervals
+            <br />
+            Commercial energy analytics
+          </span>
+        </div>
+        <div className="sidebar-bottom">
+          <span className="avatar">GP</span>
+          <div>
+            <strong>GridPilot team</strong>
+            <span>Phase 2 · Interactive dashboard</span>
+          </div>
+        </div>
+      </aside>
+      <div className="main-shell">
+        <header className="topbar">
+          <span>
+            Workspace <span className="breadcrumb">/</span>
+            <strong>{views.find((v) => v.id === view)?.label}</strong>
+          </span>
+          <BackendStatus />
+        </header>
+        <main id="overview">
+          <div className="page-heading">
+            <div>
+              <p className="eyebrow">YOUR ENERGY, IN FOCUS</p>
+              <h1>{views.find((v) => v.id === view)?.label}</h1>
+              <p className="muted">
+                Northstar Office · Single-day planning workspace
+              </p>
+            </div>
+            <button
+              className="run-button"
+              onClick={runOptimization}
+              disabled={busy || invalid}
+              aria-describedby="optimization-help"
+            >
+              <Zap size={17} />
+              {busy ? 'Requesting optimization…' : 'Run optimization'}
+            </button>
+          </div>
+          <p id="optimization-help" className="action-help">
+            {invalid
+              ? 'Correct the scenario validation errors before submitting.'
+              : 'Submits current inputs to FastAPI. A healthy connection does not guarantee solver availability.'}
+          </p>
+          {message && (
+            <div className="request-message" role="status">
+              {message}
+            </div>
+          )}
+          <div className="demo-banner">
+            <FlaskConical size={20} />
+            <p>
+              <strong>Demo Data.</strong> Overview charts and metrics use a
+              deterministic fictional office profile, not a real simulation or
+              solver result. Backend results, when available, appear separately
+              under Optimization.
+            </p>
+            <span className="tag">DEMO DATA</span>
+          </div>
+          {draftChanged && (
+            <div className="draft-banner">
+              Draft inputs differ from the displayed demo. Charts and costs
+              retain the original fixture; editing inputs does not run a
+              simulation.
+            </div>
+          )}
+          {view === 'overview' && (
+            <>
+              <section className="metrics" aria-label="Calculated demo metrics">
+                <MetricCard
+                  title="Daily electricity consumption"
+                  value={demoResult.energyKwh.toFixed(1)}
+                  unit="kWh"
+                  description="Calculated from 24 demo intervals"
+                  icon={PlugZap}
+                />
+                <MetricCard
+                  title="Daily energy charges"
+                  value={money(demoResult.energyCostUsd)}
+                  unit="USD"
+                  description="Demo baseline · energy-only operating cost"
+                  icon={CircleDollarSign}
+                />
+                <MetricCard
+                  title="Maximum modeled demand"
+                  value={demoResult.peakKw.toFixed(1)}
+                  unit="kW"
+                  description={`Displayed scenario limit: ${demoResult.scenario.building_max_demand_kw} kW`}
+                  icon={Activity}
+                />
+              </section>
+              <div className="scenario-strip">
+                <span>
+                  <Building2 size={16} />
+                  Demo building limit{' '}
+                  <strong>
+                    {demoResult.scenario.building_max_demand_kw} kW
+                  </strong>
+                </span>
+                <span>
+                  Draft building limit <strong>{editor.limit || '—'} kW</strong>
+                </span>
+                <button onClick={() => setView('configuration')}>
+                  Edit scenario →
+                </button>
+              </div>
+              <div className="content-grid">
+                <Suspense
+                  fallback={
+                    <div className="panel loading" role="status">
+                      Loading demand chart…
+                    </div>
+                  }
+                >
+                  <EnergyChart result={demoResult} />
+                </Suspense>
+                <CostBreakdown
+                  energy={demoResult.energyCostUsd}
+                  inputs={billingInputs}
+                  setInputs={setBillingInputs}
+                  applied={appliedBilling}
+                  setApplied={setAppliedBilling}
+                />
+              </div>
+              <Suspense fallback={<p role="status">Loading comparison…</p>}>
+                <Comparison
+                  result={result}
+                  stale={submitted !== JSON.stringify(editor)}
+                />
+              </Suspense>
+            </>
+          )}
+          {view === 'configuration' && (
+            <ScenarioPanel editor={editor} onChange={setEditor} />
+          )}
+          {view === 'comparison' && (
+            <Suspense fallback={<p role="status">Loading comparison…</p>}>
+              <Comparison
+                result={result}
+                stale={submitted !== JSON.stringify(editor)}
+              />
+            </Suspense>
+          )}
+          {view === 'assistant' && <EnergyAssistant />}
+          <footer>
+            <span>GridPilot · Commercial energy intelligence</span>
+            <span>
+              Building-local hours · USD · No verified savings without solver
+              results
+            </span>
+          </footer>
+        </main>
+      </div>
     </div>
-  </div>
+  )
 }
