@@ -1,23 +1,177 @@
-import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
+import {
+  Area,
+  ComposedChart,
+  CartesianGrid,
+  Legend,
+  Line,
+  ReferenceLine,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from 'recharts'
+import type { SimulationResult } from '../types/dashboard'
 
-// Fictional display-only profile. Not an API response or simulation result.
-const demoDemand = [24, 22, 21, 20, 22, 28, 41, 58, 72, 79, 85, 91, 87, 94, 98, 90, 78, 65, 51, 43, 36, 31, 28, 25]
-const data = demoDemand.map((demand, hour) => ({ hour: `${String(hour).padStart(2, '0')}:00`, demand }))
-export function EnergyChart() {
-  return <section className="panel chart-panel" aria-labelledby="energy-title">
-    <div className="section-heading"><div><h2 id="energy-title">Energy consumption</h2><p className="muted text-sm mt-1">Chart placeholder · fictional 24-hour demand profile</p></div><span className="tag">DEMO DATA</span></div>
-    <div className="chart" role="img" aria-label="Illustrative hourly demand ranges from 20 to 98 kW; this is not simulated data.">
-      <ResponsiveContainer width="100%" height="100%">
-        <AreaChart data={data} margin={{ top: 12, right: 12, bottom: 0, left: 0 }}>
-          <defs><linearGradient id="demandFill" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#0d9488" stopOpacity={0.22}/><stop offset="100%" stopColor="#0d9488" stopOpacity={0.01}/></linearGradient></defs>
-          <CartesianGrid strokeDasharray="3 5" vertical={false} stroke="#e5ebe8" />
-          <XAxis dataKey="hour" interval={5} axisLine={false} tickLine={false} tick={{ fill: '#667970', fontSize: 12 }} dy={10}/>
-          <YAxis unit=" kW" width={65} axisLine={false} tickLine={false} tick={{ fill: '#667970', fontSize: 11 }}/>
-          <Tooltip formatter={(value) => [`${value} kW`, 'Demo demand']} contentStyle={{ borderRadius: 12, border: '1px solid #dce5df' }}/>
-          <Area type="monotone" dataKey="demand" stroke="#0d9488" strokeWidth={2.5} fill="url(#demandFill)" isAnimationActive={false}/>
-        </AreaChart>
-      </ResponsiveContainer>
-    </div>
-    <div className="chart-footer"><span><i /> Illustrative demand</span><span>1-hour intervals · kW</span></div>
-  </section>
+export function EnergyChart({ result }: { result: SimulationResult }) {
+  return (
+    <section className="panel chart-panel" aria-labelledby="energy-title">
+      <div className="section-heading">
+        <div>
+          <p className="eyebrow">24-HOUR LOAD PROFILE</p>
+          <h2 id="energy-title">Building electricity demand</h2>
+          <p className="muted text-sm mt-1">
+            Hourly average power · not cumulative energy
+          </p>
+        </div>
+        <span className="tag">
+          {result.source === 'demo' ? 'DEMO DATA' : 'SIMULATION'}
+        </span>
+      </div>
+      <div
+        className="chart"
+        aria-label="24 hourly demand intervals in kilowatts. Exact values are available in the table below."
+      >
+        <ResponsiveContainer width="100%" height="100%">
+          <ComposedChart
+            data={result.hours}
+            margin={{ top: 15, right: 15, bottom: 5, left: 0 }}
+          >
+            <CartesianGrid
+              strokeDasharray="3 5"
+              vertical={false}
+              stroke="#e5ebe8"
+            />
+            <XAxis
+              dataKey="label"
+              interval="preserveStartEnd"
+              minTickGap={20}
+              tick={{ fontSize: 11 }}
+              tickLine={false}
+              axisLine={false}
+            />
+            <YAxis
+              unit=" kW"
+              width={60}
+              domain={[0, 'auto']}
+              tick={{ fontSize: 11 }}
+              tickLine={false}
+              axisLine={false}
+            />
+            <Tooltip
+              formatter={(v, name) => [`${Number(v).toFixed(2)} kW`, name]}
+              contentStyle={{ borderRadius: 8 }}
+            />
+            <Legend wrapperStyle={{ fontSize: 11, paddingTop: 16 }} />
+            <Area
+              type="stepAfter"
+              dataKey="background"
+              name="Background"
+              stackId="load"
+              stroke="#9aaea6"
+              fill="#cbd8d2"
+              isAnimationActive={false}
+            />
+            <Area
+              type="stepAfter"
+              dataKey="hvac"
+              name="HVAC"
+              stackId="load"
+              stroke="#409b8c"
+              fill="#83c3b5"
+              isAnimationActive={false}
+            />
+            <Area
+              type="stepAfter"
+              dataKey="ev"
+              name="EV charging"
+              stackId="load"
+              stroke="#6889bc"
+              fill="#a4bce0"
+              isAnimationActive={false}
+            />
+            <Area
+              type="stepAfter"
+              dataKey="flexible"
+              name="Flexible equipment"
+              stackId="load"
+              stroke="#c1a45f"
+              fill="#e2cf99"
+              isAnimationActive={false}
+            />
+            <Line
+              type="stepAfter"
+              dataKey="total"
+              name="Total demand"
+              stroke="#173f34"
+              strokeWidth={2}
+              dot={false}
+              isAnimationActive={false}
+            />
+            <ReferenceLine
+              y={result.scenario.building_max_demand_kw}
+              stroke="#b46a41"
+              strokeDasharray="6 4"
+              ifOverflow="extendDomain"
+              label={{
+                value: `Limit ${result.scenario.building_max_demand_kw} kW`,
+                position: 'insideTopRight',
+                fill: '#99552f',
+                fontSize: 11,
+              }}
+            />
+          </ComposedChart>
+        </ResponsiveContainer>
+      </div>
+      <div className="chart-footer">
+        <span>24 × 1-hour intervals · 00:00–24:00</span>
+        <span>Limit belongs to displayed scenario</span>
+      </div>
+      <details className="hourly-table">
+        <summary>View all 24 hourly values</summary>
+        <div className="table-scroll">
+          <table>
+            <caption>
+              Demo demand and energy charges; each row represents one hour.
+            </caption>
+            <thead>
+              <tr>
+                {[
+                  'Hour',
+                  'Background kW',
+                  'HVAC kW',
+                  'EV kW',
+                  'Flexible kW',
+                  'Total kW',
+                  'Energy kWh',
+                  '$/kWh',
+                  'Charge USD',
+                ].map((v) => (
+                  <th key={v}>{v}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {result.hours.map((h) => (
+                <tr key={h.hour}>
+                  {[
+                    h.label,
+                    h.background,
+                    h.hvac,
+                    h.ev.toFixed(1),
+                    h.flexible,
+                    h.total.toFixed(1),
+                    h.energyKwh.toFixed(1),
+                    h.price.toFixed(2),
+                    h.energyCostUsd.toFixed(3),
+                  ].map((v, i) => (
+                    <td key={i}>{v}</td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </details>
+    </section>
+  )
 }
