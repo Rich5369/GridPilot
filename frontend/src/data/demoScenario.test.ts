@@ -101,3 +101,10 @@ it('keeps billing-period demand exposure separate from daily energy costs', () =
   })
   expect(calculateCosts(20, 0, 0, 40, 30).demand).toBe(0)
 })
+
+
+it('does not display negative zero for sub-cent solver differences', async () => {
+  const { money } = await import('./demoScenario')
+  expect(money(-0.0000001)).toBe('$0.00')
+  expect(money(-0.01)).toBe('-$0.01')
+})

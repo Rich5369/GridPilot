@@ -85,3 +85,19 @@ it('displays HTTP 501 clearly and never claims solver success', async () => {
   await click('AI assistant')
   expect(container.textContent).toContain('NOT CONNECTED')
 })
+
+it('shows loading, prevents repeat submissions and recovers after failure', async () => {
+  await act(async () => root.render(<Dashboard />))
+  let rejectRequest!: (error: Error) => void
+  fetchMock.mockImplementationOnce(() => new Promise((_resolve, reject) => { rejectRequest = reject }))
+  const run = [...container.querySelectorAll('button')].find(b => b.textContent === 'Run optimization')!
+  await act(async () => { run.click(); run.click() })
+  expect(fetchMock.mock.calls.filter(([url]) => String(url).endsWith('/api/optimize'))).toHaveLength(1)
+  expect(run.disabled).toBe(true)
+  expect(run.getAttribute('aria-busy')).toBe('true')
+  expect(container.textContent).toContain('up to 45 seconds')
+  await act(async () => rejectRequest(new DOMException('expired', 'TimeoutError')))
+  expect(run.disabled).toBe(false)
+  expect(container.textContent).toContain('timed out after 45 seconds')
+  expect(container.textContent).toContain('No optimization result yet')
+})
