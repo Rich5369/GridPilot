@@ -91,6 +91,7 @@ npm --prefix frontend run build
 npm --prefix frontend run lint
 # With local backend and frontend running:
 backend/.venv/bin/python scripts/smoke.py
+backend/.venv/bin/python scripts/verify_optimizer_http.py
 GRIDPILOT_LIVE_API=1 npm --prefix frontend run test:integration
 ```
 
@@ -113,3 +114,43 @@ Executed verification for this integration:
 Local servers and backend tests required execution outside the restricted sandbox.
 No fresh dependency installation or browser visual QA was performed; the existing
 local environment was used. No commits, pushes, merges or deployments were made.
+
+### Checklist re-verification (2026-10-27)
+
+Remote main at `c9cda1f` includes merged PR #5 and the existing integration commit
+`e4b42f9`; no competing route implementation was needed. Re-verification used
+`feature/phase-3-optimization-integration`, whose source matches that merge.
+
+`scripts/verify_optimizer_http.py` now submits only each demonstration's
+`config.scenario` to a real local Uvicorn server and compares it with an independent
+`optimize_scenario` call. It checks feasibility, reasons/nulls, energy-only costs,
+peaks, aggregate energy, cost arithmetic and capacity. It uses absolute 1e-6
+power/energy and 2e-7 USD tolerances, preserves full precision, and permits
+equivalent optimal demand arrays. Run it with Python assertions enabled.
+
+| Case | HTTP | Baseline → optimized energy USD | Baseline → optimized peak kW |
+| --- | --- | --- | --- |
+| price_shift | 200 feasible | 7.9 → 7.3000001 | 3 → 2.999999666666665 |
+| tight_cap | 200 feasible | 5.6000000000000005 → 5.6000000000000005 | 5 → 3 |
+| infeasible | 200 infeasible with reasons | 6 → null | 5 → null |
+
+The infeasible baseline delivers incomplete requested EV energy: its $6 is not
+a valid savings comparison. The tiny price-shift cost excess is the documented
+primary-cost tolerance used during peak minimization.
+
+Fresh checks passed: 84 backend tests, 36 frontend tests (one opt-in test skipped),
+one live TypeScript-client test, production build, HTTP smoke check, three-case
+HTTP/direct comparison, and `pip check`. Lint exits successfully with two existing
+Fast Refresh warnings; backend tests emit the existing TestClient deprecation.
+The smoke client's optimization timeout now matches the 45-second browser budget.
+Browser QA additionally asserts the demo label, displayed peak reduction and
+stale-result notice after editing inputs.
+The fresh Chromium run passed the real browser-to-solver flow, feasible and
+infeasible displays, changed-input request contents, stale-result warning,
+six-second delayed response, 422/503/500/network failures, native 45-second
+timeout and recovery, and desktop/mobile overflow checks. Captured artifacts
+are in `/tmp/gridpilot-phase35-qa`; the desktop feasible screenshot was visually
+inspected. The browser scenario returned $21.44 → $21.440000100000002 and
+23.9 → 15.499999875 kW, displayed as $21.44 → $21.44 and 8.40 kW peak reduction.
+No remaining local integration blocker was found. No push, merge or deployment
+was performed; the pre-existing `frontend/.gitignore` edit was preserved.
