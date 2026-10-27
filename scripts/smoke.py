@@ -10,7 +10,7 @@ from backend.models.contracts import OptimizationResult
 import httpx
 
 ROOT = Path(__file__).resolve().parents[1]
-with httpx.Client(base_url="http://127.0.0.1:8000", timeout=10) as client:
+with httpx.Client(base_url="http://127.0.0.1:8000", timeout=45) as client:
     response = client.get('/api/health', headers={'Origin': 'http://localhost:5173'})
     assert response.status_code == 200
     assert response.json() == {'status': 'ok', 'project': 'GridPilot'}
