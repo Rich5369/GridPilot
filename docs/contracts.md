@@ -48,8 +48,12 @@ Confirm these assumptions before implementing a solver.
 `simulate_baseline(scenario: Scenario) -> BaselineResult` in
 `backend/simulator/interface.py` returns `demand_kw` (24 values),
 `electricity_cost_usd`, `peak_demand_kw`, and `constraint_violations`.
-The teammate must define and document the uncontrolled scheduling policy first
-(e.g. charge on arrival); no policy is implemented yet.
+The EE baseline implements charge-on-arrival scheduling for EV and flexible
+loads, with fractional final-hour power. It preserves supplied fixed demand and
+reports window-capacity or building-limit violations without silently curtailing
+loads. The richer `simulate_building` result adds HVAC, background schedules and
+conditional tariff components; it is an engineering-module result, not a
+FastAPI response. `POST /api/optimize` remains an explicit 501 placeholder.
 
 `optimize_scenario(scenario: Scenario) -> OptimizationResult` in
 `backend/optimizer/interface.py` returns:
