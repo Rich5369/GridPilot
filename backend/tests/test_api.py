@@ -80,9 +80,11 @@ def test_docs_and_schema():
     assert '501' in schema['paths']['/api/optimize']['post']['responses']
 
 
-def test_optimizer_does_not_fabricate_results():
-    with pytest.raises(NotImplementedError):
-        optimize_scenario(Scenario.model_validate(SAMPLE))
+def test_optimizer_returns_verified_result_without_changing_http_placeholder():
+    result = optimize_scenario(Scenario.model_validate(SAMPLE))
+    assert result.feasibility_status == "feasible"
+    assert not result.constraint_violations
+    assert result.optimized_electricity_cost_usd == pytest.approx(80.64)
 
 
 def test_infeasible_result_requires_reasons_and_no_optimized_values():
