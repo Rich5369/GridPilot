@@ -5,9 +5,11 @@ AI Developer Hackathon 2026. A two-person team is building a dashboard and API
 alongside an independently developed energy simulator and optimizer.
 
 **Current scope:** a working React dashboard with clearly labeled fictional demo
-values, live backend health status, validated scenario contracts, and explicit
-unimplemented simulation/optimization boundaries. No optimizer, savings claims,
-Meta AI integration, database, or deployment has been implemented.
+values, live backend health status, validated scenario contracts, and an
+implemented EE baseline simulator. See the
+[engineering README](backend/simulator/README.md) for setup, sample results and
+integration details. No optimizer, savings claims, Meta AI integration, database,
+or deployment has been implemented.
 
 ## Stack and prerequisites
 
@@ -198,10 +200,10 @@ lock snapshot. To deliberately upgrade backend dependencies, install from
 | EE | `backend/simulator/`, `backend/optimizer/`; cost calculations, electrical constraints, EV scheduling |
 | Both | `backend/models/`, `frontend/src/types/`, `docs/contracts.md`, sample scenarios; agree on contract changes first |
 
-First EE task: define the uncontrolled baseline policy and implement
-`simulate_baseline` with hand-checkable energy/cost/peak and constraint tests.
-Then implement `optimize_scenario` independently. Current stubs raise
-`NotImplementedError`; routes intentionally do not call them yet.
+The EE baseline policy and `simulate_baseline` are implemented and tested; see
+[engineering documentation](backend/simulator/README.md). Next implement
+`optimize_scenario` independently. The optimizer still raises `NotImplementedError`;
+routes intentionally do not call the engineering functions yet.
 
 Next CS task: build a scenario form against the existing contract, validate the
 24 hourly inputs and windows, and render API validation errors. Keep optimizer

@@ -9,7 +9,6 @@ from pydantic import ValidationError
 from backend.main import app
 from backend.models.contracts import OptimizationResult, Scenario
 from backend.optimizer.interface import optimize_scenario
-from backend.simulator.interface import simulate_baseline
 
 client = TestClient(app)
 SAMPLE = json.loads((Path(__file__).resolve().parents[2] / "sample_data/scenario.demo.json").read_text())
@@ -81,10 +80,9 @@ def test_docs_and_schema():
     assert '501' in schema['paths']['/api/optimize']['post']['responses']
 
 
-@pytest.mark.parametrize('function', [simulate_baseline, optimize_scenario])
-def test_stubs_do_not_fabricate_results(function):
+def test_optimizer_does_not_fabricate_results():
     with pytest.raises(NotImplementedError):
-        function(Scenario.model_validate(SAMPLE))
+        optimize_scenario(Scenario.model_validate(SAMPLE))
 
 
 def test_infeasible_result_requires_reasons_and_no_optimized_values():

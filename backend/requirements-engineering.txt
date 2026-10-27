@@ -1,0 +1,4 @@
+# Install alongside existing backend dependencies; shared lockfile unchanged.
+-r requirements.txt
+numpy>=2.2,<3
+ortools>=9.15,<10
