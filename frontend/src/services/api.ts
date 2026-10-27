@@ -5,6 +5,18 @@ const baseUrl = (
   (import.meta.env.DEV ? 'http://localhost:8000' : '')
 ).replace(/\/+$/, '')
 
+// Two sequential GLOP solves allow 10 seconds each. Leave room for
+// scheduling, serialization, network latency and a modest service cold start.
+export function optimizationTimeoutMs(value: unknown): number {
+  const parsed = Number(value)
+  return Number.isInteger(parsed) && parsed >= 1000 && parsed <= 120000
+    ? parsed
+    : 45000
+}
+export const OPTIMIZATION_TIMEOUT_MS = optimizationTimeoutMs(
+  import.meta.env.VITE_OPTIMIZATION_TIMEOUT_MS,
+)
+
 export class ApiError extends Error {
   status: number
   body: unknown
@@ -85,6 +97,7 @@ export async function optimizeScenario(
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(scenario),
+    signal: AbortSignal.timeout(OPTIMIZATION_TIMEOUT_MS),
   })
   if (
     body &&
@@ -107,8 +120,17 @@ export function optimizationError(error: unknown): string {
       return 'Optimization is not implemented yet. No calculations were performed. Demo data remains available.'
     if (error.status === 422)
       return 'The backend rejected this scenario (HTTP 422). Review the configuration and API contract.'
+    if (error.status === 503)
+      return 'The optimization solver is unavailable or could not finish (HTTP 503). Feasibility was not determined. Try again later.'
+    if (error.status === 500)
+      return 'Optimization failed or its result could not be verified (HTTP 500). No new result was accepted. Try again later.'
     return `Optimization service returned HTTP ${error.status}. Please try again later.`
   }
+  if (
+    (error instanceof Error || error instanceof DOMException) &&
+    error.name === 'TimeoutError'
+  )
+    return `Optimization timed out after ${OPTIMIZATION_TIMEOUT_MS / 1000} seconds. No new result was received. The server may still be processing this request; wait before retrying.`
   if (
     error instanceof TypeError ||
     (error instanceof Error &&

@@ -21,8 +21,8 @@ units. `sample_data/scenario.demo.json` is fictional input, not measured data.
 All power/energy values must be finite. Unknown fields are rejected. Invalid
 shapes/windows return HTTP 422. Physical infeasibility (e.g. fixed demand above
 capacity or too much EV energy for its window) is **not** an input shape error:
-future optimization must report it as infeasible. Today all structurally valid
-scenarios return 501, including physically infeasible ones.
+optimization reports it as infeasible with HTTP 200 and null optimized fields.
+Solver failures are separate HTTP 500/503 errors; see [Phase 3](phase-3-api.md).
 
 ## Time, power and energy assumptions
 
@@ -41,7 +41,7 @@ Provisional model: grid-side EV energy, 100% charging efficiency, no discharge,
 no solar/batteries/export, continuously adjustable and interruptible flexible
 loads. Fixed demand excludes controllable EV/flexible loads; total demand adds
 them once. HVAC thermal dynamics and minimum run times are out of scope.
-Confirm these assumptions before implementing a solver.
+The current solver optimizes only EV charging; flexible loads retain their baseline schedule.
 
 ## Independent module boundaries
 
@@ -53,7 +53,7 @@ loads, with fractional final-hour power. It preserves supplied fixed demand and
 reports window-capacity or building-limit violations without silently curtailing
 loads. The richer `simulate_building` result adds HVAC, background schedules and
 conditional tariff components; it is an engineering-module result, not a
-FastAPI response. `POST /api/optimize` remains an explicit 501 placeholder.
+FastAPI response. `POST /api/optimize` calls the existing optimizer adapter.
 
 `optimize_scenario(scenario: Scenario) -> OptimizationResult` in
 `backend/optimizer/interface.py` returns:
@@ -72,8 +72,10 @@ FastAPI response. `POST /api/optimize` remains an explicit 501 placeholder.
 A feasible result requires all optimized values and no violations. An infeasible
 result requires at least one reason and all optimized fields null. Baseline
 values describe the documented uncontrolled baseline even if it violates capacity.
-No zero-filled fallback results: stubs raise `NotImplementedError`. The HTTP
-placeholder returns only `status` and `message`, not `OptimizationResult`.
+No zero-filled fallback results are returned. Both feasible and proven infeasible
+responses use `OptimizationResult` with HTTP 200. Unresolved or unavailable solver
+responses use HTTP 503; internal solver and verification failures use HTTP 500.
+Errors use `{"detail":{"code":"...","message":"..."}}` without result fields.
 
 ## Demand charges
 

@@ -73,3 +73,54 @@ it('rejects incomplete, nonfinite, negative, or inconsistent response shapes', (
     }),
   ).toBe(true)
 })
+
+it('uses a longer optimization deadline and keeps health requests short', async () => {
+  const { getHealth, OPTIMIZATION_TIMEOUT_MS } = await import('./api')
+  const timeout = vi.spyOn(AbortSignal, 'timeout')
+  vi.stubGlobal('fetch', vi.fn().mockResolvedValueOnce(new Response(JSON.stringify(valid)))
+    .mockResolvedValueOnce(new Response(JSON.stringify({ status: 'ok', project: 'GridPilot' }))))
+  await optimizeScenario(demoScenario)
+  await getHealth()
+  expect(timeout.mock.calls.map(([ms]) => ms)).toEqual([OPTIMIZATION_TIMEOUT_MS, 5000])
+  timeout.mockRestore()
+})
+it('bounds optimization timeout configuration and falls back safely', async () => {
+  const { optimizationTimeoutMs } = await import('./api')
+  expect(optimizationTimeoutMs('60000')).toBe(60000)
+  for (const value of [undefined, '', 'NaN', '-1', '0', '999', '120001', 'Infinity', '3000.5'])
+    expect(optimizationTimeoutMs(value)).toBe(45000)
+})
+it('explains timeout without claiming the server stopped', () => {
+  const message = optimizationError(new DOMException('expired', 'TimeoutError'))
+  expect(message).toContain('timed out after 45 seconds')
+  expect(message).toContain('server may still be processing')
+})
+it.each([422, 503, 500])('preserves HTTP %s failures without accepting results', async (status) => {
+  vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response(JSON.stringify({ detail: { code: 'failure', message: 'private' } }), { status })))
+  try {
+    await optimizeScenario(demoScenario)
+    expect.unreachable()
+  } catch (error) {
+    expect(optimizationError(error)).toContain(`HTTP ${status}`)
+    expect(optimizationError(error)).not.toContain('private')
+  }
+})
+it('aborts a pending optimization when its configured deadline expires', async () => {
+  vi.useFakeTimers()
+  const timeout = vi.spyOn(AbortSignal, 'timeout').mockImplementation((ms) => {
+    const controller = new AbortController()
+    setTimeout(() => controller.abort(new DOMException('expired', 'TimeoutError')), ms)
+    return controller.signal
+  })
+  vi.stubGlobal('fetch', vi.fn((_url, init: RequestInit) => new Promise((_resolve, reject) => {
+    init.signal!.addEventListener('abort', () => reject(init.signal!.reason))
+  })))
+  try {
+    const request = expect(optimizeScenario(demoScenario)).rejects.toMatchObject({ name: 'TimeoutError' })
+    await vi.advanceTimersByTimeAsync(45000)
+    await request
+  } finally {
+    timeout.mockRestore()
+    vi.useRealTimers()
+  }
+})

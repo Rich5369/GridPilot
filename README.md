@@ -4,12 +4,13 @@ Commercial Energy Optimization Platform — project foundation for the Meta Glob
 AI Developer Hackathon 2026. A two-person team is building a dashboard and API
 alongside an independently developed energy simulator and optimizer.
 
-**Current scope:** a working React dashboard with clearly labeled fictional demo
-values, live backend health status, validated scenario contracts, and an
-implemented EE baseline simulator. See the
-[engineering README](backend/simulator/README.md) for setup, sample results and
-integration details. No optimizer, savings claims, Meta AI integration, database,
-or deployment has been implemented.
+**Current scope:** an interactive React dashboard and scenario editor, live FastAPI
+integration, an implemented EE baseline simulator, and verified OR-Tools EV
+optimization. `POST /api/optimize` returns real feasible or infeasible results.
+The overview chart still uses clearly labeled fictional demo values; optimization
+comparisons use backend results. Meta AI, a database, and backend deployment are
+not implemented. See [the Phase 3 API guide](docs/phase-3-api.md) and
+[engineering documentation](backend/simulator/README.md).
 
 ## Stack and prerequisites
 
@@ -40,8 +41,8 @@ backend/
   api/                  HTTP routes (CS-owned)
   ai/                   Reserved for future Meta AI integration
   models/contracts.py   Shared Pydantic contracts
-  simulator/            EE-owned baseline interface
-  optimizer/            EE-owned optimizer interface
+  simulator/            EE-owned baseline simulator
+  optimizer/            EE-owned OR-Tools EV optimizer
   tests/                API and contract tests
   requirements.txt      Direct dependency compatibility ranges
   requirements-lock.txt Resolved versions from the verified environment
@@ -94,7 +95,7 @@ npm run dev
 Open http://localhost:5173. The backend indicator should become **Backend connected**.
 Stop the backend and press the retry icon to see **Backend offline**; restart it
 and retry to reconnect. Checking times out after five seconds. No polling is enabled.
-The disabled Run Optimization button intentionally sends no request.
+Run Optimization submits the scenario editor to the backend and displays the verified result.
 
 ### Linux / macOS / Codespaces
 
@@ -120,6 +121,7 @@ command. A remote host's localhost is not your browser's localhost.
 | File / variable | Purpose |
 | --- | --- |
 | `frontend/.env`: `VITE_API_BASE_URL` | Public backend origin, default `http://localhost:8000`; exclude `/api` |
+| `frontend/.env`: `VITE_OPTIMIZATION_TIMEOUT_MS` | Optimization deadline in ms, default 45000; integer 1000–120000, invalid values fall back to default |
 | `backend/.env`: `CORS_ORIGINS` | Comma-separated allowed frontend origins; defaults to localhost and 127.0.0.1 on port 5173 |
 | Root `.env.example` | Reference only; the app does not load a root `.env` |
 
@@ -137,7 +139,9 @@ CORS follows [FastAPI's explicit origin configuration](https://fastapi.tiangolo.
 | Endpoint | Current behavior |
 | --- | --- |
 | `GET /api/health` | 200: `{"status":"ok","project":"GridPilot"}` |
-| `POST /api/optimize` | Validates `Scenario`; 501: `{"status":"not_implemented","message":"Optimization is not implemented yet. No calculations were performed."}` |
+| `POST /api/optimize` | 200: `OptimizationResult`, feasible or mathematically infeasible |
+| Solver unavailable / unresolved | 503 with structured `detail.code` and `detail.message` |
+| Solver / verification / unexpected failure | 500 with a sanitized structured error; no optimization result |
 | Invalid optimization request | 422 with Pydantic validation details |
 | `GET /docs` | Interactive Swagger UI |
 | `GET /openapi.json` | Machine-readable API schema |
@@ -146,7 +150,7 @@ Try the fictional scenario in Swagger or PowerShell:
 
 ```powershell
 Invoke-RestMethod http://localhost:8000/api/health
-# curl.exe prints the intentional HTTP 501 response without treating it as a successful calculation:
+# Submit a real optimization request:
 curl.exe -i -X POST http://localhost:8000/api/optimize -H "Content-Type: application/json" --data-binary "@sample_data/scenario.demo.json"
 ```
 
@@ -169,8 +173,8 @@ npm --prefix frontend run lint
 On Linux substitute `backend/.venv/bin/python` for the Windows executable.
 Frontend tests cover success, network failure, retry, invalid health response and
 timeout. The live API test is skipped by default so unit tests need no server.
-Backend tests cover health, placeholder response, validation, CORS, Swagger/schema,
-infeasibility semantics and explicit module stubs.
+Backend tests cover real OR-Tools execution through FastAPI, infeasibility, validation,
+CORS, Swagger/schema, serialization and sanitized solver/verification errors.
 
 With both servers running, run the smoke check:
 
@@ -183,12 +187,14 @@ Remove-Item Env:GRIDPILOT_LIVE_API
 
 Linux live-client test: `GRIDPILOT_LIVE_API=1 npm --prefix frontend run test:integration`.
 The smoke check verifies real frontend HTTP serving, API health, CORS preflight,
-Swagger, validation and the 501 response. The integration test exercises the same
+Swagger, validation and real feasible/infeasible optimization responses. The integration test exercises the same
 TypeScript API client the dashboard uses. DOM tests do not substitute for a real
 browser layout/accessibility review; check desktop and mobile widths manually.
 
 `npm ci` uses the committed frontend lockfile; backend installs use the resolved
-lock snapshot. To deliberately upgrade backend dependencies, install from
+lock snapshot, which now includes NumPy and OR-Tools. The existing engineering
+lockfile is preserved; engineering direct requirements include the shared runtime
+requirements rather than duplicating version ranges. To deliberately upgrade backend dependencies, install from
 `requirements.txt`, test, then regenerate `requirements-lock.txt` with
 `python -m pip freeze`. Review both dependency files in pull requests.
 
@@ -200,14 +206,16 @@ lock snapshot. To deliberately upgrade backend dependencies, install from
 | EE | `backend/simulator/`, `backend/optimizer/`; cost calculations, electrical constraints, EV scheduling |
 | Both | `backend/models/`, `frontend/src/types/`, `docs/contracts.md`, sample scenarios; agree on contract changes first |
 
-The EE baseline policy and `simulate_baseline` are implemented and tested; see
-[engineering documentation](backend/simulator/README.md). Next implement
-`optimize_scenario` independently. The optimizer still raises `NotImplementedError`;
-routes intentionally do not call the engineering functions yet.
+The EE baseline simulator and EV-only optimizer are implemented. FastAPI now calls
+`optimize_scenario` and returns the existing `OptimizationResult` contract. HVAC,
+background and flexible-equipment schedules are held fixed; only EV charging is
+optimized. Shared API costs remain daily energy-only. No Meta AI integration is
+included.
 
-Next CS task: build a scenario form against the existing contract, validate the
-24 hourly inputs and windows, and render API validation errors. Keep optimizer
-results unavailable until the real implementation is wired in and tested.
+The Phase 3.5 hardening work adds a configurable optimization timeout and browser QA.
+See [the hardening and deployment guide](docs/phase-3.5-hardening.md). Next CS task:
+review deployment configuration and perform a production-origin smoke check after approval. Coordinate future equipment
+or HVAC optimization and contract extensions with EE before implementation.
 
 Use short feature branches and small pull requests:
 

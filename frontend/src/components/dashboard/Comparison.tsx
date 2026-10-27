@@ -102,7 +102,7 @@ export function Comparison({
             </span>
           </div>
           <p className="muted">
-            Positive differences indicate reductions. Energy-only costs exclude
+            Costs are in USD. Positive differences indicate reductions. Energy-only costs exclude
             fixed and demand charges.
           </p>
           <div className="chart">

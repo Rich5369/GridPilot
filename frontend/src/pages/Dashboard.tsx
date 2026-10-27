@@ -1,4 +1,4 @@
-import { lazy, Suspense, useState } from 'react'
+import { lazy, Suspense, useRef, useState } from 'react'
 import {
   Activity,
   Building2,
@@ -26,7 +26,11 @@ import {
   toScenario,
   validateEditor,
 } from '../data/demoScenario'
-import { optimizationError, optimizeScenario } from '../services/api'
+import {
+  OPTIMIZATION_TIMEOUT_MS,
+  optimizationError,
+  optimizeScenario,
+} from '../services/api'
 import type { OptimizationResult } from '../types/api'
 const EnergyChart = lazy(() =>
   import('../components/EnergyChart').then((module) => ({
@@ -56,11 +60,13 @@ export function Dashboard() {
   const [result, setResult] = useState<OptimizationResult | null>(null)
   const [submitted, setSubmitted] = useState('')
   const [busy, setBusy] = useState(false)
+  const inFlight = useRef(false)
   const [message, setMessage] = useState('')
   const invalid = Object.keys(validateEditor(editor)).length > 0
   const draftChanged = JSON.stringify(editor) !== JSON.stringify(defaultEditor)
   async function runOptimization() {
-    if (invalid || busy) return
+    if (invalid || inFlight.current) return
+    inFlight.current = true
     const snapshot = JSON.stringify(editor)
     setBusy(true)
     setMessage('')
@@ -73,6 +79,7 @@ export function Dashboard() {
     } catch (error) {
       setMessage(optimizationError(error))
     } finally {
+      inFlight.current = false
       setBusy(false)
     }
   }
@@ -127,7 +134,7 @@ export function Dashboard() {
           <span className="avatar">GP</span>
           <div>
             <strong>GridPilot team</strong>
-            <span>Phase 2 · Interactive dashboard</span>
+            <span>Live optimization workspace</span>
           </div>
         </div>
       </aside>
@@ -152,6 +159,7 @@ export function Dashboard() {
               className="run-button"
               onClick={runOptimization}
               disabled={busy || invalid}
+              aria-busy={busy}
               aria-describedby="optimization-help"
             >
               <Zap size={17} />
@@ -159,9 +167,11 @@ export function Dashboard() {
             </button>
           </div>
           <p id="optimization-help" className="action-help">
-            {invalid
-              ? 'Correct the scenario validation errors before submitting.'
-              : 'Submits current inputs to FastAPI. A healthy connection does not guarantee solver availability.'}
+            {busy
+              ? `Optimization is running. This request can take up to ${OPTIMIZATION_TIMEOUT_MS / 1000} seconds. Please wait.`
+              : invalid
+                ? 'Correct the scenario validation errors before submitting.'
+                : 'Submits current inputs to FastAPI. A healthy connection does not guarantee solver availability.'}
           </p>
           {message && (
             <div className="request-message" role="status">

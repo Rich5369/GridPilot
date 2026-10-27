@@ -73,7 +73,7 @@ class BaselineResult(Contract):
 
 
 class OptimizationResult(Contract):
-    """Future result only; the current HTTP endpoint never returns this model."""
+    """Verified feasible or proven infeasible result returned by the HTTP API."""
     feasibility_status: Literal["feasible", "infeasible"]
     baseline_electricity_cost_usd: float = Field(allow_inf_nan=False)
     baseline_peak_demand_kw: NonNegative

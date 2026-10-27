@@ -177,5 +177,5 @@ export const demoResult: SimulationResult = {
 }
 export const money = (value: number) =>
   new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(
-    value,
+    Math.abs(value) < 0.005 ? 0 : value,
   )
