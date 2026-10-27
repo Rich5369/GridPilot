@@ -19,8 +19,8 @@ backend/.venv/bin/python -m pytest backend/tests -q
 The engineering lock captures the verified environment without changing the
 CS-owned lockfile. `requirements-engineering.txt` specifies direct ranges for
 future upgrades. NumPy, Pydantic, pytest and OR-Tools are installed; pandas and
-protobuf are among OR-Tools' transitive requirements. OR-Tools is reserved for the
-next milestone and is not imported by simulation. On Windows replace
+protobuf are among OR-Tools' transitive requirements. The EV optimizer uses GLOP;
+OR-Tools is not imported by baseline simulation. On Windows replace
 `backend/.venv/bin/python` with `backend\.venv\Scripts\python.exe`.
 
 ```python
@@ -126,30 +126,172 @@ workspace the existing FastAPI TestClient suite required execution outside the
 sandbox; the 19 engineering tests ran inside it. Python 3.14.2, NumPy 2.5.4,
 Pydantic 2.14.1, pytest 9.1.1 and OR-Tools 9.15.6755 were verified.
 
-## Integration decisions and future optimizer
+## EV-only optimization and integration
 
-Shared models, routes and frontend types are unchanged. The existing
-`simulate_baseline(Scenario) -> BaselineResult` boundary is implemented. Its
-`electricity_cost_usd` remains energy-only; always inspect `constraint_violations`.
-The detailed `SimulationResult` is an EE-local proposed contract, not yet an HTTP
-response. It adds feasibility, 24-point equipment schedules and hourly charges,
-kWh, explicit tariff components, nullable operating cost, assumptions and warnings.
-Equipment keys use `background:`, `ev:` and `flexible:` prefixes plus `hvac`.
+The GLOP continuous linear optimizer changes only EV power. Background, HVAC and
+flexible-equipment schedules stay fixed, including their contribution to the site
+cap. Fixed demand already includes background and HVAC; it is added once. All
+24 intervals exist for every EV, with zero upper bounds outside its exclusive
+arrival/deadline window. Each EV delivers exactly the requested grid-side energy;
+negative prices never permit overcharging. Business hours do not restrict EV
+windows or zero supplied fixed demand.
 
-The CS teammate should agree on any shared schema extension before wiring the
-detailed result into routes or TypeScript. `POST /api/optimize` intentionally
-remains 501; `optimize_scenario` still raises `NotImplementedError`. Older
-foundation documentation describing the simulator as a stub is superseded here.
+Run four reproducible cases (unchanged office, price shifting, tight site cap,
+and an impossible energy/deadline requirement):
 
-`optimizer/scheduler.py` proposes a `SchedulingEngine` protocol, structured result,
-comparison, constraint-satisfaction flag and infeasibility reasons. Feasible
-solver outputs must supply schedules and comparisons; unavailable optimization
-must not fabricate optimized values. `optimizer/constraints.py` checks individual
-window capacity and aggregate baseline limits. The protocol is not a solver.
+```bash
+backend/.venv/bin/python -m backend.optimizer
+backend/.venv/bin/python -m backend.optimizer --json
+backend/.venv/bin/python -m pytest backend/tests -q
+```
 
-Next implement OR-Tools EV scheduling with continuous hourly power, exact required
-energy, deadline/windows, charger limits and the total building demand cap. Verify
-solver infeasibility and independently check returned schedules. Preserve HVAC and
-background loads. Compare equivalent feasible scenarios under identical tariff
-assumptions. Then add flexible equipment; joint HVAC thermal optimization remains
-out of scope.
+Shared, energy-only entry point:
+
+```python
+from backend.models.contracts import Scenario
+from backend.optimizer.interface import optimize_scenario
+from backend.optimizer.solver import (
+    OptimizationUnresolvedError, OptimizationSolverError, OptimizationVerificationError,
+)
+
+scenario = Scenario.model_validate_json(
+    Path('sample_data/scenario.demo.json').read_text())
+result = optimize_scenario(scenario)
+# Check feasibility_status before consuming nullable optimized fields.
+# Catch the typed errors above in the future API adapter.
+```
+
+Detailed entry point implementing the existing `SchedulingEngine` protocol:
+
+```python
+from backend.optimizer.scheduler import ORToolsSchedulingEngine
+
+result = ORToolsSchedulingEngine(time_limit_ms=10000).optimize(config)
+print(result.status, result.solver_metadata)
+if result.optimized is not None:
+    print(result.optimized.equipment_schedules_kw)
+    print(result.comparison)
+```
+
+Shared models, API routes and frontend types are unchanged. The existing shared
+result fields remain daily energy-only. The detailed result is EE-local pending
+team agreement; it adds solver metadata, status/failure details and comparisons.
+`POST /api/optimize` still returns the intentional 501 placeholder, even though the
+Python engine now works. Older foundation documentation calling the engine a stub
+is superseded by this README. For a feasible optimized shared result,
+`constraint_violations` is empty even when its uncontrolled baseline exceeded the
+cap; call `simulate_baseline` for baseline violations or use the detailed engine,
+which preserves baseline compliance independently.
+
+### Objectives and numerical tolerances
+
+`optimize_scenario` minimizes daily energy charges. The detailed engine minimizes
+energy charges plus the conditional incremental demand estimate when a nonzero
+rate and an existing monthly peak are supplied. With unknown billing history it
+minimizes energy only and preserves null demand/operating-cost estimates with
+warnings. A zero rate needs no billing history. The allocated fixed fee is
+unchanged and excluded from both objectives and savings.
+
+After a proven primary optimum, a separate second solve minimizes maximum hourly
+building demand while keeping primary cost within **$0.0000001 (1e-7)** of the
+optimum. There is no arbitrary weighted sum of dollars and kW. The reported actual
+energy cost may increase by that tolerance to obtain a lower peak; values are not
+rounded internally. Solver metadata records the primary optimum (excluding the
+fixed fee), objective type, primary status, and peak tie-break status. `optimal`
+means the primary objective was proved optimal, with the returned cost within the
+documented tolerance; only a separately optimal tie-break proves minimum peak.
+Each solve gets its own time limit (10 seconds by default).
+
+GLOP primal/dual feasibility tolerances are set to 1e-9. Independent verification
+uses absolute **1e-6 kW** power/cap and **1e-6 kWh** delivered-energy tolerances;
+the independent dollar check uses twice the primary objective tolerance. Raw
+values are checked before removing only sub-tolerance negative numerical noise.
+The actual peak is also checked against a proved secondary optimum.
+Fixed component profiles and flexible schedules must match exactly; aggregation
+of shared fixed demand allows 1e-8 kW roundoff, matching BuildingConfig validation.
+No meaningful violations are hidden by rounding.
+
+### Independent schedule evaluation
+
+`simulator.interface.evaluate_scenario_schedules(scenario, schedules)` evaluates
+supplied shared schedules (`fixed`, `ev:<id>`, `flexible:<id>`).
+`simulator.engine.evaluate_building_schedules(config, schedules)` evaluates supplied
+named component schedules (`background:<name>`, `hvac`, `ev:<id>`, `flexible:<id>`).
+They check keys, vector shapes, finite nonnegative values, fixed preservation,
+equipment energy/windows/power and the total cap, then recompute demand, kWh,
+hourly charges, actual peak and canonical tariff components. They return violations
+for physically invalid schedules; malformed vectors/keys raise validation errors.
+The detailed solver does not call the baseline simulator to evaluate optimized
+EVs. The historical `SimulationResult.baseline_operating_cost_usd` field means the
+operating cost of the supplied schedule, including in `result.optimized`.
+
+Comparisons separate energy-charge reduction from conditional demand-charge
+reduction. Unknown billing history leaves total/demand comparisons null. A baseline
+cap violation alone does not invalidate an equal-work comparison, but its
+noncompliance remains visible. Incomplete baseline energy invalidates savings;
+comparison reductions are null with reasons (and physically impossible requests
+normally return no optimized result at all).
+
+### Results and failure semantics
+
+- `optimal`: primary optimum proved and returned schedule independently verified.
+- `feasible`: independently verified incumbent without primary optimality proof;
+  no peak tie-break is attempted.
+- `infeasible`: analytic capacity proof or GLOP INFEASIBLE; no optimized schedule,
+  cost or comparison. Reasons apply under the held fixed/flexible profiles of
+  this phase; future flexible optimization might change feasibility.
+- `unresolved`: primary solve did not return a solution/proof, including time
+  limits. It is not mathematical infeasibility.
+- `error`: unavailable solver, native exception, abnormal/unbounded/invalid model,
+  or inconsistent secondary failure. No optimized values are returned.
+- `verification_failed`: returned solver values or detailed evaluation failed
+  independent physical/cost checks; no optimized values are returned.
+
+The shared feasible/infeasible contract cannot carry unresolved/error statuses.
+Its adapter raises `OptimizationUnresolvedError`, `OptimizationSolverError` or
+`OptimizationVerificationError`, with details on the exception's `outcome`.
+The detailed engine returns richer statuses and preserves the baseline on all
+solver failures. A secondary NOT_SOLVED retains the verified primary optimum,
+with a warning and unresolved tie-break status; a secondary feasible incumbent
+is explicitly distinguished from a proved peak optimum.
+
+### Demonstration results
+
+Actual GLOP results, shown to nine decimals where the cost tolerance matters:
+
+| Case | Baseline energy USD | Optimized energy USD | Baseline / optimized peak kW | Outcome |
+| --- | ---: | ---: | --- | --- |
+| Existing office | 40.184000000 | 40.184000100 | 28.5 / 18.349999896 | Optimal |
+| Price shifting | 7.900000000 | 7.300000100 | 3 / 2.999999667 | Optimal |
+| Tight cap (3 kW) | 5.600000000 | 5.600000000 | 5 / 3 | Optimal; baseline overloaded |
+| Impossible deadline | 6.000000000 | unavailable | 5 / unavailable | Infeasible; baseline incomplete |
+
+The office still uses 208 kWh, delivering 18 and 12 kWh to its EVs. Its energy-only
+optimum has no improvement over baseline; the $1e-7 increase is the stated peak
+tie-break allowance. Conditional demand increment drops $6 to $0; allocated fee
+remains $2, so modeled operating cost changes $48.184 to $42.1840001. This is a
+conditional one-day comparison, not a guaranteed monthly utility saving.
+The price-shift case delivers 2 kWh by hour 2 with approximately $0.60 less energy
+cost. The tight-cap case coordinates two 2 kWh EV requirements by hour 2, meeting
+the 3 kW cap without changing energy cost. The infeasible case requests 5 kWh for
+one EV in a two-hour 2 kW window, which can deliver at most 4 kWh; no savings are
+computed against that partial baseline. Full precision schedules and per-EV
+completion data are available with `--json`.
+
+Remaining scope: flexible-equipment optimization is next. Overnight windows,
+charger assignment, losses, solar/storage/export, thermal/comfort optimization,
+real tariff billing intervals and live utility integration remain unsupported.
+The CS teammate can now call the tested Python entry points, handle typed errors,
+and agree on an API mapping before replacing the placeholder. No API/frontend or
+AI integration is included in this phase.
+
+### EV milestone verification
+
+Verified on `feature/ev-optimizer`, based on merged PR #3 at main revision
+`303ad9c`. The pre-edit baseline was 38 passing backend tests. The final suite is
+**78 passed** (40 new optimizer cases), with the existing Starlette/httpx
+TestClient deprecation warning. The full suite ran outside the managed sandbox
+because of the existing TestClient restriction; focused engineering tests ran
+inside it. Both optimizer demo modes and the baseline CLI ran successfully.
+All backend modules imported, `python -m pip check` reported no broken requirements,
+and `git diff --check` passed. No dependencies or shared schemas changed.

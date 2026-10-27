@@ -43,3 +43,26 @@ def simulate_baseline(scenario: Scenario) -> BaselineResult:
         constraint_violations=(equipment_window_violations(scenario)
                                + demand_limit_violations(demand, scenario.building_max_demand_kw)),
     )
+
+
+def evaluate_scenario_schedules(scenario: Scenario,
+                                schedules: dict[str, list[float]]) -> BaselineResult:
+    """Evaluate supplied loads, requiring fixed/flexible baseline preservation.
+
+    This is also used for solver verification; no loads are rescheduled here.
+    BaselineResult's historical name does not change its energy-only semantics.
+    """
+    from backend.optimizer.constraints import schedule_violations
+    from backend.simulator.energy import hourly_demand
+
+    expected = {key: values for key, values in baseline_schedules(scenario).items()
+                if not key.startswith("ev:")}
+    if set(schedules) != set(expected) | {f"ev:{ev.id}" for ev in scenario.ev_requirements}:
+        raise ValueError("Equipment schedule keys do not match configured scenario")
+    checked = {key: hourly_demand(values).tolist() for key, values in schedules.items()}
+    violations = schedule_violations(scenario, checked, expected)
+    demand = sum_loads(checked.values())
+    return BaselineResult(
+        demand_kw=demand,
+        electricity_cost_usd=total_energy_charges(demand, scenario.electricity_prices_usd_per_kwh),
+        peak_demand_kw=peak_demand_kw(demand), constraint_violations=violations)
