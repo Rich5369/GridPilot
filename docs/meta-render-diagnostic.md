@@ -14,7 +14,7 @@ Environment variables take precedence over backend/.env. No alternate key source
 or automatic mock fallback is used. Actual Render values and credential identity
 cannot be verified from this checkout; inspect Render's environment privately.
 The configuration log reports endpoint/target agreement and key presence without
-printing a key, key fingerprint, or arbitrary URL that might contain credentials.
+printing a key or arbitrary URL that might contain credentials.
 
 After reviewing and approving deployment, set
 `MODEL_API_DIAGNOSTIC_ON_STARTUP=1` in Render. Remove the obsolete
@@ -26,13 +26,17 @@ No deployment was performed by this change.
 
 Each operation uses a fresh connection, a 25-second HTTP timeout for each
 transport phase, a 30-second asyncio total deadline, zero SDK retries, and no
-redirect following. Three sequential operations take at most approximately 90
+redirect following. Four sequential operations take at most approximately 120
 seconds in the background. A failure does not prevent subsequent operations:
 
 1. Unauthenticated GET to the configured base URL plus /status.
 2. Authenticated GET /models, up to five pages and 200 sanitized model IDs
    within the same 30-second operation deadline.
-3. Minimal authenticated POST /chat/completions with the configured model and a
+3. Direct HTTPX GET to https://api.meta.ai/v1/models using the effective key
+   read from an OpenAI client constructed with production options. This bypasses
+   SDK model parsing and any configured base URL override. Logs only status,
+   model count, target presence, and sanitized failure metadata. No redirects.
+4. Minimal authenticated POST /chat/completions with the configured model and a
    fixed nonsensitive test message. This matches the live integration's Chat
    Completions protocol. It intentionally omits structured-output options to
    isolate basic inference access. With default production configuration it tests
@@ -110,3 +114,35 @@ MODEL_API_KEY source. The smoke script's basic stage pins muse-spark-1.3; live
 inference and the startup probe use MODEL_API_MODEL with that default. The recorded
 successful local diagnostic confirmed the default endpoint and exact target model.
 Actual Render overrides and credential identity remain unverified by this checkout.
+
+## Credential identity comparison
+
+With MODEL_API_DIAGNOSTIC_ON_STARTUP=1, the configuration record includes
+`raw_env_key_sha256_12`, `production_sdk_key_sha256_12`, and
+`raw_env_key_has_edge_whitespace`. Fingerprints are the first 12 hexadecimal
+characters of SHA-256 over the exact UTF-8 credential; no trimming is applied.
+Missing credentials produce null fingerprints. These fields are logs only.
+Run the same startup diagnostic in Codespaces and Render to compare them.
+
+Matching raw and SDK fingerprints within each host confirms the SDK holds the
+same credential bytes as the environment (subject to truncated-hash collision).
+Different raw fingerprints across hosts indicate different credential bytes,
+even if the keys were intended to be identical. Whitespace changes fingerprints.
+Matching fingerprints across hosts shifts investigation toward provider access,
+egress/proxy routing, endpoint configuration, or runtime differences.
+
+Compare `models` (SDK) with `models_http` (direct HTTP): both expose
+`model_count` and `target_model_present`. SDK counts sanitized distinct IDs across
+bounded pages; HTTP counts all entries in the first response. Compare small,
+complete valid listings directly. A discrepancy with base_url_matches_meta=false
+first points to the endpoint override; otherwise investigate SDK parsing,
+headers/defaults, or changing upstream responses. Matching empty HTTP 200
+responses rule out SDK parsing as the sole cause, but do not establish why the
+provider returned no models. Preserve sanitized error/request IDs for provider
+support. Disable the flag after collecting one pass.
+
+Inspection found no credential fallback or dotenv override: main.py and the
+default smoke test load backend/.env with override=False. The local SDK is
+OpenAI 2.54.0 / HTTPX 0.28.1, matching requirements-lock.txt; requirements.txt
+permits other compatible versions. Render's installed versions and network
+configuration require deployment evidence. No Render environment was changed.
