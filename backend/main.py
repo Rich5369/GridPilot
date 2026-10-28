@@ -1,5 +1,6 @@
 import os
 from pathlib import Path
+from contextlib import asynccontextmanager
 
 from dotenv import load_dotenv
 from fastapi import FastAPI
@@ -8,7 +9,14 @@ from fastapi.middleware.cors import CORSMiddleware
 from backend.api.routes import router
 
 load_dotenv(Path(__file__).with_name(".env"))
-app = FastAPI(title="GridPilot API", version="0.1.0")
+@asynccontextmanager
+async def lifespan(app):
+    from backend.ai.startup_diagnostic import list_models_on_startup
+    await list_models_on_startup()
+    yield
+
+
+app = FastAPI(title="GridPilot API", version="0.1.0", lifespan=lifespan)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[origin.strip() for origin in os.getenv(

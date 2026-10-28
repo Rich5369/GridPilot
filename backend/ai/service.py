@@ -10,6 +10,12 @@ from backend.ai.models import Proposal, ExplanationSelection
 T = TypeVar('T', bound=BaseModel)
 logger = logging.getLogger(__name__)
 
+def provider_client_options():
+    """Shared credentials and endpoint for generation and access diagnostics."""
+    return dict(api_key=os.environ['MODEL_API_KEY'],
+                base_url=os.getenv('MODEL_API_BASE_URL', 'https://api.meta.ai/v1'),
+                timeout=25.0, max_retries=0)
+
 def safe_token(value):
     """Only bounded identifiers, never arbitrary provider text or credentials."""
     key = os.getenv('MODEL_API_KEY', '')
@@ -69,7 +75,7 @@ def generate(schema: type[T], instructions: str, payload: dict) -> tuple[T, str]
     from openai import OpenAI, APITimeoutError, RateLimitError, APIError
     import json
     try:
-        with OpenAI(api_key=os.environ['MODEL_API_KEY'], base_url=os.getenv('MODEL_API_BASE_URL', 'https://api.meta.ai/v1'), timeout=25.0, max_retries=0) as client:
+        with OpenAI(**provider_client_options()) as client:
             response = client.chat.completions.create(
                 model=os.getenv('MODEL_API_MODEL', 'muse-spark-1.3'),
                 messages=[{'role': 'system', 'content': instructions}, {'role': 'user', 'content': json.dumps(payload)}],
