@@ -16,6 +16,10 @@ def provider_client_options():
                 base_url=os.getenv('MODEL_API_BASE_URL', 'https://api.meta.ai/v1'),
                 timeout=25.0, max_retries=0)
 
+def provider_model():
+    return os.getenv('MODEL_API_MODEL', 'muse-spark-1.3')
+
+
 def safe_token(value):
     """Only bounded identifiers, never arbitrary provider text or credentials."""
     key = os.getenv('MODEL_API_KEY', '')
@@ -77,7 +81,7 @@ def generate(schema: type[T], instructions: str, payload: dict) -> tuple[T, str]
     try:
         with OpenAI(**provider_client_options()) as client:
             response = client.chat.completions.create(
-                model=os.getenv('MODEL_API_MODEL', 'muse-spark-1.3'),
+                model=provider_model(),
                 messages=[{'role': 'system', 'content': instructions}, {'role': 'user', 'content': json.dumps(payload)}],
                 response_format=response_format(schema),
                 max_completion_tokens=1500,
