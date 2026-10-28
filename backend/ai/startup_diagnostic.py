@@ -2,12 +2,13 @@
 import asyncio
 from contextvars import ContextVar
 import logging
+import hashlib
 import os
 import socket
 import time
 
 import httpx
-from openai import AsyncOpenAI, APITimeoutError
+from openai import OpenAI, AsyncOpenAI, APITimeoutError
 
 from backend.ai.service import provider_client_options, provider_error_metadata, safe_token, provider_model
 
@@ -50,6 +51,7 @@ async def summarize_models(raw, result):
             if len(ids) >= MAX_MODEL_IDS:
                 break
         result['model_ids'] = sorted(ids)
+        result['model_count'] = len(ids)
         if TARGET_MODEL in ids:
             result['target_model_present'] = True
         if len(ids) >= MAX_MODEL_IDS:
@@ -100,6 +102,32 @@ async def probe(operation):
                     result.update(upstream_status=response.status_code,
                                   request_id=safe_token(response.headers.get('x-request-id')))
                     response.raise_for_status()
+                elif operation == 'models_http':
+                    # Read the effective key from the same client class/options as production.
+                    with OpenAI(**provider_client_options()) as production_client:
+                        effective_key = production_client.api_key
+                    response = await transport.get(
+                        'https://api.meta.ai/v1/models',
+                        headers={'Authorization': 'Bearer ' + effective_key})
+                    result['upstream_status'] = response.status_code
+                    if response.is_error:
+                        try:
+                            body = response.json()
+                        except ValueError:
+                            body = {}
+                        error = body.get('error', {}) if isinstance(body, dict) else {}
+                        if isinstance(error, dict):
+                            for field in ('code', 'type', 'param'):
+                                result['provider_' + field] = safe_token(error.get(field))
+                        response.raise_for_status()
+                    body = response.json()
+                    models = body.get('data') if isinstance(body, dict) else None
+                    if not isinstance(models, list) or any(
+                            not isinstance(item, dict) or not isinstance(item.get('id'), str)
+                            for item in models):
+                        raise ValueError('Invalid model list')
+                    result.update(model_count=len(models), target_model_present=any(
+                        item['id'] == TARGET_MODEL for item in models))
                 else:
                     options.update(timeout=REQUEST_SECONDS, max_retries=0, http_client=transport)
                     async with AsyncOpenAI(**options) as client:
@@ -122,6 +150,10 @@ async def probe(operation):
             metadata['upstream_status'] = result['upstream_status']
         if metadata['request_id'] is None:
             metadata['request_id'] = result['request_id']
+        if operation == 'models_http':
+            metadata['upstream_status'] = result['upstream_status']
+            for field in ('provider_code', 'provider_type', 'provider_param'):
+                metadata[field] = result.get(field)
         result.update(metadata)
         chain = exception_chain(exc)
         result['cause_types'] = [safe_token(type(item).__name__) for item in chain]
@@ -153,7 +185,17 @@ async def list_models_on_startup():
         item.addFilter(filter_)
     token = _active.set(True)
     try:
+        raw_key = os.environ.get('MODEL_API_KEY')
+        effective_key = None
+        if raw_key:
+            with OpenAI(**provider_client_options()) as production_client:
+                effective_key = production_client.api_key
+        def fingerprint(value):
+            return hashlib.sha256(value.encode('utf-8')).hexdigest()[:12] if value is not None else None
         logger.warning('Meta diagnostic configuration %s', {
+            'raw_env_key_sha256_12': fingerprint(raw_key),
+            'production_sdk_key_sha256_12': fingerprint(effective_key),
+            'raw_env_key_has_edge_whitespace': raw_key != raw_key.strip() if raw_key is not None else False,
             'base_url_matches_meta': os.getenv('MODEL_API_BASE_URL', 'https://api.meta.ai/v1').rstrip('/') == 'https://api.meta.ai/v1',
             'model': safe_token(provider_model()),
             'model_matches_target': provider_model() == 'muse-spark-1.3',
@@ -162,7 +204,7 @@ async def list_models_on_startup():
             'mode': safe_token(os.getenv('MODEL_API_MODE', 'live')),
             'request_timeout_seconds': REQUEST_SECONDS, 'deadline_seconds': DEADLINE_SECONDS,
             'max_retries': 0})
-        for operation in ('status', 'models', 'inference'):
+        for operation in ('status', 'models', 'models_http', 'inference'):
             await probe(operation)
     finally:
         _active.reset(token)

@@ -36,7 +36,7 @@ def test_disabled(monkeypatch, flag):
     asyncio.run(diagnostic.list_models_on_startup())
 
 
-def test_three_independent_requests(monkeypatch, caplog):
+def test_four_independent_requests(monkeypatch, caplog):
     calls = []
     def handler(request):
         calls.append(request)
@@ -52,9 +52,9 @@ def test_three_independent_requests(monkeypatch, caplog):
     install(monkeypatch, handler)
     monkeypatch.setenv('MODEL_API_DIAGNOSTIC_ON_STARTUP', '1')
     asyncio.run(diagnostic.list_models_on_startup())
-    assert [r.url.path for r in calls] == ['/v1/status', '/v1/models', '/v1/chat/completions']
+    assert [r.url.path for r in calls] == ['/v1/status', '/v1/models', '/v1/models', '/v1/chat/completions']
     results = [r.args for r in caplog.records if r.msg == 'Meta diagnostic %s']
-    assert len(results) == 3
+    assert len(results) == 4
     assert results[1]['provider_code'] == 'model_not_found'
     assert results[1]['request_id'] == 'req-safe'
     assert all(r['elapsed_seconds'] >= 0 for r in results)
@@ -166,7 +166,7 @@ def test_bounded_model_listing_does_not_claim_absence(monkeypatch):
     raw = SimpleNamespace(parse=lambda: Page())
     result = {}
     asyncio.run(diagnostic.summarize_models(raw, result))
-    assert result == dict(model_ids=['other-model'], models_complete=False, target_model_present=None)
+    assert result == dict(model_ids=['other-model'], model_count=1, models_complete=False, target_model_present=None)
 
 
 def test_model_id_cap(monkeypatch):
@@ -199,3 +199,74 @@ def test_target_on_later_page():
     assert result['model_ids'] == ['muse-spark-1.3', 'other-model']
     assert result['target_model_present'] is True
     assert result['models_complete'] is True
+
+
+@pytest.mark.parametrize('key', ['test-secret-key', ' test-secret-key '])
+def test_fingerprints_are_opt_in_and_truncated(monkeypatch, caplog, key):
+    import hashlib
+    monkeypatch.setenv('MODEL_API_KEY', key)
+    async def no_probe(operation):
+        pass
+    monkeypatch.setattr(diagnostic, 'probe', no_probe)
+    asyncio.run(diagnostic.list_models_on_startup())
+    assert not caplog.records
+    monkeypatch.setenv('MODEL_API_DIAGNOSTIC_ON_STARTUP', '1')
+    asyncio.run(diagnostic.list_models_on_startup())
+    record = next(r.args for r in caplog.records if r.msg == 'Meta diagnostic configuration %s')
+    digest = hashlib.sha256(key.encode()).hexdigest()
+    assert record['raw_env_key_sha256_12'] == digest[:12]
+    assert record['production_sdk_key_sha256_12'] == digest[:12]
+    assert record['raw_env_key_has_edge_whitespace'] == (key != key.strip())
+    assert key not in caplog.text
+    assert digest not in caplog.text
+
+
+@pytest.mark.parametrize('ids', [[], ['muse-spark-1.3', 'other']])
+def test_direct_http_bypasses_sdk_listing(monkeypatch, ids, caplog):
+    def forbidden(*args, **kwargs):
+        pytest.fail('SDK listing must not be used')
+    from openai.resources.models import AsyncModels
+    monkeypatch.setattr(AsyncModels, 'list', forbidden)
+    def handler(request):
+        assert str(request.url) == 'https://api.meta.ai/v1/models'
+        assert request.headers['authorization'] == 'Bearer test-secret-key'
+        return httpx.Response(200, json={'data': [{'id': item} for item in ids]})
+    install(monkeypatch, handler)
+    result = asyncio.run(diagnostic.probe('models_http'))
+    assert result['ok']
+    assert result['model_count'] == len(ids)
+    assert result['target_model_present'] == ('muse-spark-1.3' in ids)
+    assert 'test-secret-key' not in caplog.text
+
+
+def test_effective_client_key_is_inspected(monkeypatch, caplog):
+    import hashlib
+    from types import SimpleNamespace
+    from contextlib import nullcontext
+    effective = 'effective-test-credential'
+    monkeypatch.setattr(diagnostic, 'OpenAI', lambda **kw: nullcontext(
+        SimpleNamespace(api_key=effective)))
+    def handler(request):
+        assert request.headers['authorization'] == 'Bearer ' + effective
+        return httpx.Response(200, json={'data': []})
+    install(monkeypatch, handler)
+    original = diagnostic.probe
+    async def direct_only(operation):
+        if operation == 'models_http':
+            return await original(operation)
+    monkeypatch.setattr(diagnostic, 'probe', direct_only)
+    monkeypatch.setenv('MODEL_API_DIAGNOSTIC_ON_STARTUP', '1')
+    asyncio.run(diagnostic.list_models_on_startup())
+    config = next(r.args for r in caplog.records if r.msg == 'Meta diagnostic configuration %s')
+    assert config['production_sdk_key_sha256_12'] == hashlib.sha256(effective.encode()).hexdigest()[:12]
+    assert config['raw_env_key_sha256_12'] != config['production_sdk_key_sha256_12']
+    assert effective not in caplog.text
+
+
+@pytest.mark.parametrize('body', [None, {'unexpected': []}, {'data': [{}]}])
+def test_direct_invalid_response_is_safe(monkeypatch, caplog, body):
+    install(monkeypatch, lambda request: httpx.Response(200, json=body))
+    result = asyncio.run(diagnostic.probe('models_http'))
+    assert not result['ok']
+    assert result['upstream_status'] == 200
+    assert 'test-secret-key' not in caplog.text
