@@ -14,6 +14,9 @@ from backend.ai.service import provider_client_options, provider_error_metadata,
 logger = logging.getLogger(__name__)
 REQUEST_SECONDS = 25.0
 DEADLINE_SECONDS = 30.0
+TARGET_MODEL = 'muse-spark-1.3'
+MAX_MODEL_PAGES = 5
+MAX_MODEL_IDS = 200
 _active = ContextVar('meta_diagnostic', default=False)
 
 
@@ -32,6 +35,32 @@ def exception_chain(exc):
 
 def diagnostic_transport(**kwargs):
     return httpx.AsyncClient(**kwargs)
+
+
+async def summarize_models(raw, result):
+    """Only bounded, sanitized IDs; absence is conclusive only for a complete list."""
+    result.update(model_ids=[], models_complete=False, target_model_present=None)
+    page = raw.parse()
+    ids = set()
+    for page_index in range(MAX_MODEL_PAGES):
+        for model in page.data:
+            identifier = safe_token(model.id)
+            if identifier:
+                ids.add(identifier)
+            if len(ids) >= MAX_MODEL_IDS:
+                break
+        result['model_ids'] = sorted(ids)
+        if TARGET_MODEL in ids:
+            result['target_model_present'] = True
+        if len(ids) >= MAX_MODEL_IDS:
+            return
+        if not page.has_next_page():
+            result['models_complete'] = True
+            result['target_model_present'] = TARGET_MODEL in ids
+            return
+        if page_index + 1 == MAX_MODEL_PAGES:
+            return
+        page = await page.get_next_page()
 
 
 async def probe(operation):
@@ -82,7 +111,9 @@ async def probe(operation):
                                 messages=[{'role': 'user', 'content': 'Reply with the word ready.'}])
                         result.update(upstream_status=raw.status_code,
                                       request_id=safe_token(raw.headers.get('x-request-id')))
-                        # One page only; no pagination, model IDs, or generated content logged.
+                        if operation == 'models':
+                            await summarize_models(raw, result)
+                        # Never log generated content or arbitrary model metadata.
                 result['ok'] = True
                 phase = 'http_success'
     except Exception as exc:

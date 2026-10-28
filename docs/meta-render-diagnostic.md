@@ -30,7 +30,8 @@ redirect following. Three sequential operations take at most approximately 90
 seconds in the background. A failure does not prevent subsequent operations:
 
 1. Unauthenticated GET to the configured base URL plus /status.
-2. Authenticated GET /models, first page only.
+2. Authenticated GET /models, up to five pages and 200 sanitized model IDs
+   within the same 30-second operation deadline.
 3. Minimal authenticated POST /chat/completions with the configured model and a
    fixed nonsensitive test message. This matches the live integration's Chat
    Completions protocol. It intentionally omits structured-output options to
@@ -43,12 +44,19 @@ proxy configuration, as does the production SDK. Network phases may therefore
 refer to a proxy. Inference may incur the provider's ordinary request charge.
 
 Read `Meta diagnostic` records separately by operation. `ok` means HTTP success,
-not validation of generated content. No response content, prompts, model lists,
-headers, exception messages, trace payloads, or credentials are logged.
+not validation of generated content. Only sanitized model IDs are logged from
+the model-list response; other response content, prompts, headers, exception
+messages, trace payloads, and credentials are excluded.
 SDK/transport logs are suppressed within the diagnostic task only.
 
 - status fails before HTTP: investigate Render egress/connectivity before model access.
 - status succeeds, models returns 401: credential rejection; 403: permission rejection.
+- The models result includes `model_ids`, `models_complete`, and
+  `target_model_present` for the exact ID `muse-spark-1.3`. True means listed;
+  false means absent from a complete list. Null means unknown because listing
+  was incomplete (page/ID cap, failure, or timeout). IDs use the existing bounded
+  identifier sanitizer, including rejection of the configured key and known
+  credential prefixes. No owner fields or arbitrary model metadata are logged.
 - models succeeds, inference returns 404/model_not_found: investigate model access,
   configured ID, and endpoint routing; listing success alone does not prove inference access.
 - inference returns 400/422: provider request validation; minimal success followed
@@ -82,3 +90,23 @@ endpoint and muse-spark-1.3 returned HTTP 200: status 0.162s, models 0.985s,
 inference 1.519s. Credentials came from the workspace's existing server-side
 configuration. Restricted-sandbox runs exhibited DNS and asyncio-deadline failures;
 these are workspace restrictions and are not evidence about Render.
+
+
+## Minimal Render follow-up
+
+The reported Render results (status 200, models 200, inference 404/model_not_found)
+do not include model IDs, so target presence cannot be determined retrospectively.
+After an approved deployment, enable one diagnostic pass and inspect the models
+record plus configuration agreement flags. If target_model_present=false with
+models_complete=true, request access for Render's credential or correct the model
+configuration using the exact accessible ID intended for the application. If true
+but inference still returns 404, take both request IDs and the endpoint/model
+agreement flags to Meta support; do not assume listing grants inference access.
+Disable the flag after collecting results.
+
+The local smoke script and live adapter both use the OpenAI SDK Chat Completions
+protocol, the same MODEL_API_BASE_URL default https://api.meta.ai/v1, and the
+MODEL_API_KEY source. The smoke script's basic stage pins muse-spark-1.3; live
+inference and the startup probe use MODEL_API_MODEL with that default. The recorded
+successful local diagnostic confirmed the default endpoint and exact target model.
+Actual Render overrides and credential identity remain unverified by this checkout.
