@@ -126,9 +126,9 @@ workspace the existing FastAPI TestClient suite required execution outside the
 sandbox; the 19 engineering tests ran inside it. Python 3.14.2, NumPy 2.5.4,
 Pydantic 2.14.1, pytest 9.1.1 and OR-Tools 9.15.6755 were verified.
 
-## EV-only optimization and integration
+## Default EV-only optimization and integration
 
-The GLOP continuous linear optimizer changes only EV power. Background, HVAC and
+By default the GLOP continuous linear optimizer changes only EV power. Background, HVAC and
 flexible-equipment schedules stay fixed, including their contribution to the site
 cap. Fixed demand already includes background and HVAC; it is added once. All
 24 intervals exist for every EV, with zero upper bounds outside its exclusive
@@ -176,9 +176,9 @@ if result.optimized is not None:
 Shared models, API routes and frontend types are unchanged. The existing shared
 result fields remain daily energy-only. The detailed result is EE-local pending
 team agreement; it adds solver metadata, status/failure details and comparisons.
-`POST /api/optimize` still returns the intentional 501 placeholder, even though the
-Python engine now works. Older foundation documentation calling the engine a stub
-is superseded by this README. For a feasible optimized shared result,
+`POST /api/optimize` calls this EV-only adapter; it does not enable the optional
+joint mode described below. Older foundation documentation calling the engine or
+route a stub is superseded by the implemented integration. For a feasible optimized shared result,
 `constraint_violations` is empty even when its uncontrolled baseline exceeded the
 cap; call `simulate_baseline` for baseline violations or use the detailed engine,
 which preserves baseline compliance independently.
@@ -207,7 +207,7 @@ uses absolute **1e-6 kW** power/cap and **1e-6 kWh** delivered-energy tolerances
 the independent dollar check uses twice the primary objective tolerance. Raw
 values are checked before removing only sub-tolerance negative numerical noise.
 The actual peak is also checked against a proved secondary optimum.
-Fixed component profiles and flexible schedules must match exactly; aggregation
+Fixed component profiles (and held flexible schedules in EV-only mode) must match exactly; aggregation
 of shared fixed demand allows 1e-8 kW roundoff, matching BuildingConfig validation.
 No meaningful violations are hidden by rounding.
 
@@ -238,8 +238,8 @@ normally return no optimized result at all).
 - `feasible`: independently verified incumbent without primary optimality proof;
   no peak tie-break is attempted.
 - `infeasible`: analytic capacity proof or GLOP INFEASIBLE; no optimized schedule,
-  cost or comparison. Reasons apply under the held fixed/flexible profiles of
-  this phase; future flexible optimization might change feasibility.
+  cost or comparison. Reasons apply under the selected mode: flexible equipment
+  is held in EV-only mode and movable in joint mode.
 - `unresolved`: primary solve did not return a solution/proof, including time
   limits. It is not mathematical infeasibility.
 - `error`: unavailable solver, native exception, abnormal/unbounded/invalid model,
@@ -278,12 +278,138 @@ one EV in a two-hour 2 kW window, which can deliver at most 4 kWh; no savings ar
 computed against that partial baseline. Full precision schedules and per-EV
 completion data are available with `--json`.
 
-Remaining scope: flexible-equipment optimization is next. Overnight windows,
+Optional flexible-equipment optimization is available in the detailed engine
+as described below. Overnight windows,
 charger assignment, losses, solar/storage/export, thermal/comfort optimization,
 real tariff billing intervals and live utility integration remain unsupported.
-The CS teammate can now call the tested Python entry points, handle typed errors,
-and agree on an API mapping before replacing the placeholder. No API/frontend or
-AI integration is included in this phase.
+The shared API remains EV-only; no API/frontend or AI change is needed to use
+the optional engineering mode locally.
+
+## Optional joint EV and flexible-equipment optimization
+
+Implemented on `feature/joint-flexible-load-optimization`, starting from main
+`8180e09aee27c452de9ef32f989243806dc3e3b1` (PR #11). A fresh fetch found no newer
+main revision. This is a local detailed-engine capability, not an enabled
+dashboard, What-if or AI feature.
+
+Enable it explicitly on the existing engine:
+
+```python
+from backend.optimizer.__main__ import joint_demonstration_configs
+from backend.optimizer.scheduler import ORToolsSchedulingEngine
+
+config = joint_demonstration_configs()['joint_recovery']
+result = ORToolsSchedulingEngine(optimize_flexible=True).optimize(config)
+print(result.scheduling_mode, result.status)  # joint, optimal
+if result.optimized is not None:
+    print(result.optimized.equipment_schedules_kw)
+```
+
+`ORToolsSchedulingEngine()` and `optimize_scenario(Scenario)` remain EV-only.
+Detailed results identify `scheduling_mode` as `ev_only` or `joint`, including
+infeasibility and failure results. The shared HTTP models have no new fields.
+The uncontrolled baseline still starts all loads at their earliest availability.
+
+### Model and independent validation
+
+One GLOP solver core supports both modes. Joint mode adds continuous hourly power
+variables for every flexible item alongside the EV variables. Each item has
+zero power outside its availability window, nonnegative power at or below its
+maximum, and an equality enforcing its exact energy requirement. Negative prices
+cannot cause extra work or overcharging. All loads count exactly once toward
+the site cap. Background/HVAC stay immutable; only those immutable loads are
+deducted from available capacity in joint mode. Necessary shared-window
+diagnostics include both EV and flexible energy; more complex conflicts are
+left to the same LP. An overloaded earliest-start equipment placement alone
+does not prove joint infeasibility.
+
+Both independent evaluators accept the explicit keyword `optimize_flexible=True`:
+
+```python
+evaluate_scenario_schedules(config.scenario, shared_schedules, optimize_flexible=True)
+evaluate_building_schedules(config, detailed_schedules, optimize_flexible=True)
+```
+
+Use schedules with the existing shared or detailed keys described above. Joint
+evaluation still checks each item's energy, window and power, the site cap,
+and fixed-profile preservation. It permits a valid flexible shift; default
+evaluation rejects that shift. The detailed scheduler transfers the actual
+optimized flexible schedules into its result before independent reevaluation.
+
+The same energy/conditional-demand primary objective, unknown-history nulls,
+secondary peak minimization, per-solve time limits, physical/objective tolerances,
+and solver-status distinctions documented above apply. Secondary timeout can
+return only an independently verified primary optimum, with a warning.
+
+Flexible loads represent **interruptible, continuously adjustable power** over
+24 one-hour intervals with exclusive end hours. The mode does not model
+uninterrupted machine cycles, startup costs, minimum run times, binary on/off
+decisions or HVAC thermal dynamics. No new solver dependency is introduced.
+
+### Reproduce the joint demonstrations
+
+Use the existing environment; no dependency upgrade is required. These commands
+run one case at a time and can add `--json` for full-precision schedules:
+
+```bash
+backend/.venv/bin/python -m backend.optimizer --optimize-flexible --example joint_recovery
+backend/.venv/bin/python -m backend.optimizer --optimize-flexible --example joint_price_shift
+backend/.venv/bin/python -m backend.optimizer --optimize-flexible --example joint_infeasible
+# Contrast with held equipment using exactly the same inputs:
+backend/.venv/bin/python -m backend.optimizer --example joint_recovery
+backend/.venv/bin/python -m backend.optimizer --example joint_price_shift
+# All seven cases in joint mode; original four cases remain the unflagged default:
+backend/.venv/bin/python -m backend.optimizer --optimize-flexible
+backend/.venv/bin/python -m backend.optimizer
+backend/.venv/bin/python -m pytest backend/tests/test_joint_optimizer.py -q
+backend/.venv/bin/python -m pytest backend/tests -q
+```
+
+Each new case uses fixed demand 1 kW throughout, site cap 3 kW, and equipment
+requiring 2 kWh at at most 2 kW within [0,2). Measured results:
+
+| Case | EV-only outcome / energy cost | Joint outcome / energy cost | Joint energy / peak |
+| --- | --- | --- | --- |
+| A `joint_recovery` | Infeasible / no optimized cost | Optimal / $5.600000000 | 28 kWh / 3 kW |
+| B `joint_price_shift` | Optimal / $7.900000000 | Optimal / $7.300000100 | 26 kWh / 2.999999667 kW |
+| C `joint_infeasible` | Infeasible / no optimized cost | Infeasible / no optimized cost | No optimized values |
+
+**A:** Flat $0.20/kWh. The EV requires 2 kWh at maximum 2 kW in [0,1).
+The baseline places both items in hour 0: 1 + 2 + 2 = 5 kW, above the cap.
+Holding equipment there leaves no EV headroom. Joint scheduling runs EV 2 kW
+in hour 0 and equipment 2 kW in hour 1, with all other hours at 1 kW.
+Energy is 24 + 2 + 2 = 28 kWh, charge 28 × $0.20 = $5.60, peak 3 kW.
+
+**B:** No EVs. Prices are $0.40 at hour 0, $0.10 at hour 1 and $0.30 otherwise.
+Fixed energy costs $0.40 + $0.10 + 22 × $0.30 = $7.10. Earliest-start equipment
+adds $0.80; shifting its 2 kWh to hour 1 adds $0.20 instead. The primary optimum
+is $7.30; the peak tie-break returns $7.300000100 with equipment power about
+0.000000333 at hour 0 and 1.999999667 at hour 1. This is the existing $1e-7
+cost allowance, not missing energy: both modes consume 26 kWh and deliver 2 kWh.
+
+**C:** Flat $0.20/kWh. EV energy is 3 kWh, at most 2 kW in [0,2).
+Individually both EV and equipment fit their windows, but jointly require
+3 + 2 = 5 kWh. Site headroom is (3 − 1) × 2 = 4 kWh. Joint mode reports
+that shared-window shortfall with reasons, null optimized result and no
+comparison. Baseline delivers 29 kWh at $5.80 but violates the cap; its cost
+is not a feasible alternative or a fabricated optimized value.
+
+Verification: **38 new joint tests passed; full backend suite 149 passed**,
+with the existing Starlette TestClient deprecation warning. All existing tests
+and their assertions were retained. Tests independently reconstruct demand,
+cost, peak, item energy/windows/bounds and immutable profiles from returned
+schedules, and cover negative prices, zero energy, no EVs, malformed/invalid
+schedules, held-placement recovery, analytic and solver-proved infeasibility,
+unchanged aggregate with altered named fixed profiles, conditional demand and failure/fallback
+semantics. Both flagged and original unflagged CLI runs succeeded. This workspace
+used `/tmp/gridpilot-joint-venv` installed from `backend/requirements-lock.txt`;
+the full TestClient suite required execution outside the sandbox as before.
+
+Richard would need a separately agreed application mode selector, API mapping,
+frontend labeling and mode-aware AI explanations before exposing joint scheduling
+to dashboard users. He should preserve the current default and carry mode
+provenance through comparisons so an EV-only result is not described as joint.
+No frontend, AI, API route, HTTP schema or deployment setting changed here.
 
 ### EV milestone verification
 

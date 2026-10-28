@@ -23,10 +23,11 @@ def simulate_building(config: BuildingConfig | dict) -> SimulationResult:
 
 def evaluate_building_schedules(config: BuildingConfig | dict,
                                 schedules: dict[str, list[float]], *,
-                                baseline: bool = False) -> SimulationResult:
+                                baseline: bool = False,
+                                optimize_flexible: bool = False) -> SimulationResult:
     """Recompute metrics from supplied schedules; report every physical violation.
 
-    Fixed background, HVAC and flexible loads must equal baseline schedules.
+    Background and HVAC must equal baseline; flexible loads are held in EV-only mode.
     The baseline flag describes scheduling provenance, never disables validation.
     """
     config = BuildingConfig.model_validate(config)
@@ -35,14 +36,17 @@ def evaluate_building_schedules(config: BuildingConfig | dict,
         raise ValueError("Equipment schedule keys do not match configured building")
     schedules = {key: hourly_demand(value).tolist() for key, value in schedules.items()}
     fixed_violations = [f"Fixed schedule {key} changed" for key, value in expected.items()
-                        if not key.startswith("ev:") and schedules[key] != value]
+                        if (key == 'hvac' or key.startswith('background:')
+                            or (key.startswith('flexible:') and not optimize_flexible))
+                        and schedules[key] != value]
     # Evaluate the supplied fixed components too, so altered fixed loads can never
     # disappear from reported totals even though they fail the preservation check.
     shared = {key: value for key, value in schedules.items()
               if key.startswith(("ev:", "flexible:"))}
     shared["fixed"] = sum_loads(value for key, value in schedules.items()
                                if key == "hvac" or key.startswith("background:"))
-    evaluated = evaluate_scenario_schedules(config.scenario, shared)
+    evaluated = evaluate_scenario_schedules(config.scenario, shared,
+                                            optimize_flexible=optimize_flexible)
     violations = fixed_violations + evaluated.constraint_violations
     demand_charge = incremental_demand_charge(evaluated.peak_demand_kw, config.tariff)
     warnings = ["Hourly average peak is not necessarily a utility billing demand.",
@@ -67,7 +71,8 @@ def evaluate_building_schedules(config: BuildingConfig | dict,
         assumptions=["24 one-hour intervals; deadline/end hours exclusive; no DST.",
                      "EV energy is grid-side; efficiency 100%; no discharge.",
                      ("Charge on arrival; flexible equipment runs at earliest availability." if baseline
-                      else "Supplied EV schedules evaluated; flexible equipment held at baseline."),
+                      else ("Supplied EV and flexible schedules evaluated jointly." if optimize_flexible
+                            else "Supplied EV schedules evaluated; flexible equipment held at baseline.")),
                      "Fractional last-hour power; flexible loads continuously adjustable.",
                      "Fixed schedules authoritative outside business hours; HVAC has no thermal model.",
                      "Fixed fee allocated to modeled day; demand charge is incremental monthly peak exposure.",
