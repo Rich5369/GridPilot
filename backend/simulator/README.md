@@ -295,3 +295,156 @@ because of the existing TestClient restriction; focused engineering tests ran
 inside it. Both optimizer demo modes and the baseline CLI ran successfully.
 All backend modules imported, `python -m pip check` reported no broken requirements,
 and `git diff --check` passed. No dependencies or shared schemas changed.
+
+## What-if EE acceptance: cost, power and departure time
+
+These are illustrative modeled scenarios using the actual frontend office defaults,
+not measured building data or monthly utility savings. Acceptance used
+`test/ee-what-if-validation`, based on current main `ce323ce` (merged PR #9).
+The optimizer and frontend were not changed.
+
+### Exact inputs and UI walkthrough
+
+For each pair, start at **Scenario configuration → Reset to Default Scenario**.
+Set **Arrival hour = 15** and the current deadline from the table below. Leave
+all other defaults unchanged, including the current 25 kW demand limit. Open
+**What-if scenarios → Create alternative from current** (or **Reset alternative
+from current** if an alternative already exists), then edit only the alternative
+fields listed. Click **Compare both scenarios**. Configure and reset the alternative
+again for every pair; do not accidentally retain the previous pair's parameters.
+
+| Pair | Current deadline / cap | Alternative deadline / cap | Alternative edits |
+| --- | --- | --- | --- |
+| A: More charging time | 18:00 / 25 kW | 22:00 / 25 kW | Deadline 22 |
+| B: Lower building limit | 22:00 / 25 kW | 22:00 / 15 kW | Limit 15 |
+| C: Insufficient capacity | 18:00 / 25 kW | 18:00 / 15 kW | Limit 15 |
+
+All six requests preserve the complete input configuration:
+
+- Operating hours `[8, 18)` are metadata. Explicit EV availability can extend
+  beyond closing time without changing the predetermined HVAC profile.
+- Two EVs, each requiring 14.4 kWh, each rated 7.2 kW, both arriving at 15:00.
+  Only the deadline and site cap vary as listed above. End hours are exclusive.
+- Prices: $0.28/kWh during `[14, 20)`, $0.12/kWh otherwise.
+- Background: 1.5 kW in all 24 intervals. HVAC hourly kW:
+  `[0,0,0,0,0,0,1,2,4,5,5,6,6,6,6,5,5,4,2,1,0,0,0,0]`.
+- Therefore `fixed_demand_kw` is
+  `[1.5,1.5,1.5,1.5,1.5,1.5,2.5,3.5,5.5,6.5,6.5,7.5,7.5,7.5,7.5,6.5,6.5,5.5,3.5,2.5,1.5,1.5,1.5,1.5]`.
+- Fixed flexible equipment `office-equipment`: 6 kWh required, maximum 3 kW,
+  available `[10, 16)`. Its baseline schedule remains 3 kW at hours 10 and 11,
+  zero otherwise. It is counted once in site demand and energy.
+- EV IDs are `office-ev-1` and `office-ev-2`; no demand-charge or fixed-fee fields
+  are sent to the shared Scenario endpoint. Only energy charges are compared.
+
+### Measured results and independent calculations
+
+All baselines charge the EVs at 15:00 and 16:00. They deliver all requested energy,
+consume 128.8 kWh, cost $25.184 and peak at 20.9 kW. Under a 15 kW site limit,
+that uncontrolled baseline violates capacity; this is separate from optimized
+feasibility. Unlike the earlier impossible-EV demo, these baselines do not omit work.
+
+| Pair | Optimized current / alternative energy USD | Optimized current / alternative peak kW | Optimized kWh | Feasibility |
+| --- | --- | --- | --- | --- |
+| A | 25.184 / 20.5760001 | 15.76666666666667 / 15.8999996875 | 128.8 / 128.8 | both feasible |
+| B | 20.5760001 / 20.864000100000002 | 15.8999996875 / 14.999999687499997 | 128.8 / 128.8 | both feasible |
+| C | 25.184 / null | 15.76666666666667 / null | 128.8 / unavailable | current feasible; alternative infeasible |
+
+The non-EV loads consume 100 kWh: 94 kWh fixed background/HVAC plus 6 kWh
+flexible equipment. Of this, 32 kWh occurs at peak prices, giving
+`32 × 0.28 + 68 × 0.12 = $17.12`. EV energy is always 28.8 kWh when feasible,
+so total building energy is `100 + 28.8 = 128.8 kWh`.
+
+**A — More time enables cheaper charging.** With an 18:00 deadline, all available
+charging hours are expensive: `17.12 + 28.8 × 0.28 = $25.184`. The lowest peak
+at that cost distributes EV charging over hours 15–17:
+`(6.5 + 6.5 + 5.5 + 28.8) / 3 = 15.7666667 kW`.
+A 22:00 deadline opens two cheap intervals, hours 20 and 21. The energy optimum
+moves all 28.8 kWh there: `17.12 + 28.8 × 0.12 = $20.576`, a $4.608 reduction.
+The resulting ideal peak is `1.5 + 28.8 / 2 = 15.9 kW`, slightly higher than
+before. Energy cost is the primary objective; minimum peak is a separate tie-break.
+Later departure buys operating flexibility, not reduced requested charging service.
+
+**B — A lower power limit has a small energy-price premium.** A 15 kW cap leaves
+`15 - 1.5 = 13.5 kW` for EVs in each cheap hour: `13.5 × 2 = 27 kWh`.
+The remaining 1.8 kWh must use expensive hours. Cost is
+`17.12 + 27 × 0.12 + 1.8 × 0.28 = $20.864`, a $0.288 increase for a lower peak.
+Every EV still receives 14.4 kWh by 22:00; the daily energy remains unchanged.
+
+**C — The earlier deadline and lower cap cannot satisfy the requirements.**
+Before 18:00, site headroom for charging is `8.5 + 8.5 + 9.5 = 26.5 kWh`, below
+28.8 kWh required. Individual charger/window capacity is sufficient, but shared
+building capacity is not. The API returns this reason and null optimized demand,
+cost and peak. No between-scenario optimized-cost comparison is available.
+
+The proven primary optima were $25.184, $20.576 and $20.864, confirmed through
+internal `primary_status=optimal` and `primary_optimum_usd`, not inferred from the
+shared API's feasibility flag. Returned costs can be $1e-7 higher because of the
+existing peak tie-break allowance. Physical checks use absolute 1e-6 kW/kWh and
+cost checks 2e-7 USD. Equivalent optimal schedules need not match hour for hour.
+No numerical discrepancy required an engine change.
+
+### Explain the comparison to a facility manager
+
+“Keeping the vehicles until 22:00 lets us deliver the same charging energy for
+about $4.61 less that day. If we also restrict the building to 15 kW, the model
+still completes charging, for about $0.29 more than the cheaper unconstrained
+option. Requiring that same charging by 18:00 under the 15 kW cap is impossible.
+We must change a requirement rather than silently undercharge the vehicles.”
+
+Each card's baseline-to-optimized benefit is distinct from the difference between
+operating scenarios. Those individual benefits are approximately $0, $4.608 and
+$4.32 for the three feasible configurations. The between-scenario convention is
+**alternative minus current**: Pair A is about **-$4.61**, **+0.13 kW**, and zero
+kWh; Pair B is about **+$0.29**, **-0.90 kW**, and zero kWh. Pair C differences
+are unavailable. Reducing the `Energy per EV` input would instead request less
+service; do not present that as delivering the same work more efficiently.
+Energy-only cost reductions are not monthly demand-charge savings.
+
+### Regression and real-workflow verification
+
+```bash
+backend/.venv/bin/python -m pytest backend/tests/test_what_if_acceptance.py -q
+backend/.venv/bin/python -m pytest backend/tests -q
+npm --prefix frontend test -- src/components/dashboard/WhatIf.test.tsx src/data/demoScenario.test.ts
+```
+
+The new EE file adds seven focused tests: the three feasible endpoint calculations
+with independent physical checks, deadline relaxation, cap tightening (including
+infeasibility), and comparison signs/equal service. These reuse the existing
+engine and verify primary optimality metadata. The complete backend suite passed
+**111 tests**, with the existing TestClient deprecation warning. The existing
+What-if/frontend-adapter tests passed **19 tests**. No shared contract changed.
+
+Local Chromium acceptance used the genuine frontend at `http://127.0.0.1:5173`
+and API at `http://localhost:8000`. All six complete browser POST bodies matched
+Scenarios exported from the actual `toScenario` adapter and the EE test inputs.
+Captured responses were compared with independent local engine calls. Energy,
+peak, capacity, delivered EV energy/windows/power, held profiles and financial
+arithmetic passed. Per-EV schedules were checked in the engine, since the shared
+HTTP response exposes only aggregate demand. Displayed costs, peaks, individual
+baseline benefits and between-scenario signs matched the genuine responses.
+Pair C correctly suppressed optimized values and between-scenario comparisons.
+No AI calls, mock solver responses or hosted deployment were needed for this run.
+
+Temporary evidence is in `/tmp/gridpilot-whatif-ee`: `pair-A.json`, `pair-B.json`,
+`pair-C.json` contain exact submitted requests, responses and displayed text;
+corresponding PNGs show each comparison. `frontend-scenarios.json` records the
+actual adapter exports. The focused browser command was:
+
+```bash
+NODE_PATH=/tmp/gridpilot-browser/node_modules node /tmp/gridpilot-whatif-ee/browser-acceptance.cjs
+```
+
+**Remaining frontend issue for Richard:** Pair B displays `-0.00 kWh` for the
+between-scenario consumption difference. The actual response-array subtraction
+is `-2.842170943040401e-14 kWh`, numerical roundoff, with both scenarios delivering
+128.8 kWh. Reproduce using Pair B's exact UI steps above, then inspect the final
+“Optimized consumption difference.” `WhatIf.tsx` formats the raw subtraction
+with `.toFixed(2)`. Proposed correction: normalize a difference whose absolute
+value is below half the displayed 0.01 kWh unit (0.005 kWh) to zero **for display
+only**, retaining full-precision data/calculations, and add a frontend formatting
+regression. The browser acceptance script intentionally exits nonzero to flag
+this display defect after completing all three numerical comparisons. Numerical
+acceptance passed; display acceptance is qualified by this issue. Frontend code
+was left unchanged for Richard. This run does not assert hosted What-if acceptance
+or authenticated live Meta behavior.
