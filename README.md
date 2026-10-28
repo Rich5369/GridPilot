@@ -209,8 +209,8 @@ requirements rather than duplicating version ranges. To deliberately upgrade bac
 The EE baseline simulator and EV-only optimizer are implemented. FastAPI now calls
 `optimize_scenario` and returns the existing `OptimizationResult` contract. HVAC,
 background and flexible-equipment schedules are held fixed; only EV charging is
-optimized. Shared API costs remain daily energy-only. No Meta AI integration is
-included.
+optimized. Shared API costs remain daily energy-only. Meta Model API integration is implemented with explicit mock mode; authenticated
+live verification is pending. See [Phase 5 setup and Render activation](docs/phase-5-meta-api.md).
 
 The Phase 3.5 hardening work adds a configurable optimization timeout and browser QA.
 See [the hardening and deployment guide](docs/phase-3.5-hardening.md). Next CS task:

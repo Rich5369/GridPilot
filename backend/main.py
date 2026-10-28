@@ -19,3 +19,6 @@ app.add_middleware(
     allow_headers=["Content-Type"],
 )
 app.include_router(router)
+
+from backend.ai.routes import router as ai_router
+app.include_router(ai_router)

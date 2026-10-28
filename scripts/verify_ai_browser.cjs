@@ -1,0 +1,48 @@
+// Optional Playwright QA. Backend :8000 live without key, :8001 MODEL_API_MODE=mock;
+// frontend :5173. Provider output is a mock fixture; optimizer calls are real.
+const { chromium } = require('playwright')
+const assert = require('node:assert/strict')
+;(async () => {
+  const browser = await chromium.launch({ headless: true })
+  try {
+    const page = await browser.newPage({ viewport: { width: 1440, height: 1100 } })
+    const errors = []
+    page.on('pageerror', e => errors.push(e.message))
+    const nav = name => page.getByRole('navigation').getByRole('button', { name, exact: true }).click()
+    await page.goto('http://127.0.0.1:5173')
+    await nav('AI assistant')
+    await page.getByRole('button', { name: 'Keep peak power demand below 15 kW.', exact: true }).click()
+    await page.getByRole('button', { name: 'Review proposed changes', exact: true }).click()
+    await page.getByText('Meta AI is unavailable:', { exact: false }).waitFor()
+    // Forward browser requests to the explicit mock-mode backend.
+    await page.route('**/api/ai/**', async route => {
+      const response = await route.fetch({ url: route.request().url().replace(':8000', ':8001') })
+      await route.fulfill({ response })
+    })
+    await page.getByRole('button', { name: 'Review proposed changes', exact: true }).click()
+    await page.getByText('MOCK MODE — NOT META AI', { exact: true }).waitFor()
+    await page.getByRole('button', { name: 'Cancel', exact: true }).click()
+    await nav('Scenario configuration')
+    assert.equal(await page.locator('#limit').inputValue(), '25')
+    await nav('AI assistant')
+    await page.getByRole('button', { name: 'Keep peak power demand below 15 kW.', exact: true }).click()
+    await page.getByRole('button', { name: 'Review proposed changes', exact: true }).click()
+    await page.getByRole('button', { name: 'Apply Changes', exact: true }).click()
+    await nav('Scenario configuration')
+    assert.equal(await page.locator('#limit').inputValue(), '15')
+    const resultPromise = page.waitForResponse(r => r.url().endsWith('/api/optimize'))
+    await page.getByRole('button', { name: 'Run optimization', exact: true }).click()
+    const result = await resultPromise
+    assert.equal(result.status(), 200)
+    assert.equal((await result.json()).feasibility_status, 'feasible')
+    await nav('AI assistant')
+    await page.getByRole('button', { name: 'Explain latest backend result', exact: true }).click()
+    await page.getByText('Mock selection — not Meta AI', { exact: true }).waitFor()
+    await page.getByText('The modeled scenario is feasible.', { exact: true }).waitFor()
+    await page.setViewportSize({ width: 390, height: 844 })
+    assert(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), 'Mobile overflow')
+    await page.screenshot({ path: '/tmp/gridpilot-phase5-mobile.png', fullPage: true })
+    assert.deepEqual(errors, [])
+    console.log('PASS: missing credentials, mock review/cancel/apply, real optimizer, grounded explanation, mobile overflow, no browser errors. Live Meta API NOT tested.')
+  } finally { await browser.close() }
+})().catch(error => { console.error(error); process.exitCode = 1 })
