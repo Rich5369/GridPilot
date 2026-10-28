@@ -13,8 +13,8 @@ type Proposal = {
 }
 type Explanation = { source: 'meta' | 'mock'; explanation: string[]; limitations: string }
 const examples = ['Keep peak power demand below 15 kW.', 'Make sure both EVs finish charging by 5 PM.', 'What happens if peak electricity prices increase by 25%?']
-export function EnergyAssistant({ editor, onChange, resultScenario }: {
-  editor: ScenarioEditor; onChange: (editor: ScenarioEditor) => void; resultScenario: Scenario | null
+export function EnergyAssistant({ editor, onChange, resultScenario, onCompareProposal }: {
+  editor: ScenarioEditor; onChange: (editor: ScenarioEditor) => void; resultScenario: Scenario | null; onCompareProposal?: (e: ScenarioEditor) => void
 }) {
   const [request, setRequest] = useState('')
   const [proposal, setProposal] = useState<Proposal | null>(null)
@@ -41,7 +41,7 @@ export function EnergyAssistant({ editor, onChange, resultScenario }: {
       setError(detail || 'AI request failed or timed out. Optimization remains available.')
     } finally { setBusy(false); pending.current = false }
   }
-  function apply() {
+  function apply(compare = false) {
     if (!proposal?.proposed_scenario || snapshot !== JSON.stringify(editor)) return
     const changes = proposal.changes
     const next = { ...editor }
@@ -55,7 +55,7 @@ export function EnergyAssistant({ editor, onChange, resultScenario }: {
     if (Object.keys(validateEditor(next)).length || Object.entries(toScenario(next)).some(([key, value]) => JSON.stringify(value) !== JSON.stringify(proposal.proposed_scenario![key as keyof Scenario]))) {
       setError('This proposal cannot be represented by the current editor. No changes applied.'); return
     }
-    onChange(next); setProposal(null); setExplanation(null)
+    if (compare) onCompareProposal?.(next); else onChange(next); setProposal(null); setExplanation(null)
     setError('Changes applied to draft. Run optimization to calculate feasibility and results.')
   }
   const stale = snapshot !== JSON.stringify(editor)
@@ -72,7 +72,7 @@ export function EnergyAssistant({ editor, onChange, resultScenario }: {
     {proposal && <div aria-label="Proposed scenario changes"><p><strong>{proposal.source === 'mock' ? 'Mock fixture — not a Meta AI response' : 'Meta AI proposal'}</strong></p><p>{proposal.message}</p>
       <dl>{Object.entries(proposal.changes).filter(([, v]) => v != null).map(([k, v]) => <div key={k}><dt>{k.replaceAll('_', ' ')}</dt><dd>{v}</dd></div>)}</dl>
       {stale && <p>Draft changed. Request a new proposal.</p>}
-      {proposal.status === 'proposed' && <button onClick={apply} disabled={stale || busy}>Apply Changes</button>} <button onClick={() => setProposal(null)}>Cancel</button>
+      {proposal.status === 'proposed' && <button onClick={() => apply()} disabled={stale || busy}>Apply Changes</button>} {proposal.status === 'proposed' && onCompareProposal && <button onClick={() => apply(true)} disabled={stale || busy}>Compare as alternative</button>} <button onClick={() => setProposal(null)}>Cancel</button>
     </div>}
     {explanation && <div aria-label="Result explanation"><h3>{explanation.source === 'mock' ? 'Mock selection — not Meta AI' : 'Meta AI selected, verified result facts'}</h3><p>Recomputed for the latest submitted scenario; current draft edits are excluded.</p>{explanation.explanation.map(p => <p key={p}>{p}</p>)}<p className="muted">{explanation.limitations}</p></div>}
   </section>
