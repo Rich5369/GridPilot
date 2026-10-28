@@ -1,11 +1,46 @@
 """Server-only Meta adapter. No credential fallback to mock; no model code execution."""
 import os
+import logging
+import re
 from typing import TypeVar
 from pydantic import BaseModel, ValidationError
 from fastapi import HTTPException
 from backend.ai.models import Proposal, ExplanationSelection
 
 T = TypeVar('T', bound=BaseModel)
+logger = logging.getLogger(__name__)
+
+def safe_token(value):
+    """Only bounded identifiers, never arbitrary provider text or credentials."""
+    key = os.getenv('MODEL_API_KEY', '')
+    if (not isinstance(value, str) or not re.fullmatch(r'[A-Za-z0-9_.:-]{1,128}', value)
+            or (key and key in value) or value.startswith(('LLM_', 'sk-'))):
+        return None
+    return value
+
+def provider_error_metadata(exc):
+    """Do not serialize the exception, response, headers, or error message."""
+    status = getattr(exc, 'status_code', None)
+    body = getattr(exc, 'body', None)
+    error = body.get('error', body) if isinstance(body, dict) else {}
+    error = error if isinstance(error, dict) else {}
+    return {
+        'upstream_status': status if type(status) is int else None,
+        'exception_type': safe_token(type(exc).__name__),
+        'provider_code': safe_token(getattr(exc, 'code', None) or error.get('code')),
+        'provider_type': safe_token(error.get('type')),
+        'provider_param': safe_token(error.get('param')),
+        'request_id': safe_token(getattr(exc, 'request_id', None)),
+    }
+
+def log_provider_error(exc):
+    # No exc_info: SDK exception strings can contain sensitive response bodies.
+    logger.warning('Meta API failure %s', provider_error_metadata(exc))
+
+def response_format(schema):
+    return {'type': 'json_schema', 'json_schema': {
+        'name': schema.__name__, 'strict': False, 'schema': schema.model_json_schema()}}
+
 
 def fail(status, code, message):
     return HTTPException(status_code=status, detail={'code': code, 'message': message})
@@ -38,18 +73,21 @@ def generate(schema: type[T], instructions: str, payload: dict) -> tuple[T, str]
             response = client.chat.completions.create(
                 model=os.getenv('MODEL_API_MODEL', 'muse-spark-1.3'),
                 messages=[{'role': 'system', 'content': instructions}, {'role': 'user', 'content': json.dumps(payload)}],
-                response_format={'type': 'json_schema', 'json_schema': {'name': schema.__name__, 'strict': False, 'schema': schema.model_json_schema()}},
+                response_format=response_format(schema),
                 max_completion_tokens=1500,
             )
         choice = response.choices[0]
         if choice.finish_reason != 'stop' or choice.message.refusal:
             raise ValueError('Incomplete or refused')
         return schema.model_validate_json(choice.message.content or '', strict=True), 'meta'
-    except APITimeoutError:
+    except APITimeoutError as exc:
+        log_provider_error(exc)
         raise fail(504, 'ai_timeout', 'Meta AI timed out. Try again later.') from None
-    except RateLimitError:
+    except RateLimitError as exc:
+        log_provider_error(exc)
         raise fail(429, 'ai_rate_limited', 'Meta AI rate limit reached. Try again later.') from None
-    except APIError:
+    except APIError as exc:
+        log_provider_error(exc)
         raise fail(502, 'ai_provider_error', 'Meta AI request failed. Check backend credentials and model access.') from None
     except (ValidationError, ValueError, IndexError, AttributeError):
         raise fail(502, 'ai_invalid_response', 'Meta AI returned an invalid response. No changes were applied.') from None
