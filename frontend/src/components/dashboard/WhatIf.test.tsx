@@ -39,3 +39,42 @@ it('does not publish a late result as current after configuration changes', asyn
   expect(vi.mocked(optimizeScenario).mock.calls[0][0].building_max_demand_kw).toBe(25)
   expect(vi.mocked(optimizeScenario).mock.calls[1][0].building_max_demand_kw).toBe(15)
 })
+
+it.each([
+  ['reported Pair B roundoff', 128.8, 128.79999999999998, '0.00'],
+  ['negative zero', 0, -0, '0.00'],
+  ['ordinary zero', 0, 0, '0.00'],
+  ['meaningful negative difference', 1, 0.1, '-0.90'],
+  ['negative one hundredth', 1, 0.99, '-0.01'],
+  ['negative below rounding threshold', 1, 0.995001, '0.00'],
+  ['negative above rounding threshold', 1, 0.994999, '-0.01'],
+  ['negative at rounding threshold', 0.005, 0, '-0.01'],
+  ['positive below rounding threshold', 1, 1.004999, '0.00'],
+  ['positive above rounding threshold', 1, 1.005001, '0.01'],
+  ['positive at rounding threshold', 0, 0.005, '0.01'],
+  ['meaningful positive difference', 1, 1.9, '0.90'],
+])('renders signed What-if differences correctly for %s', async (_name, current, alternative, expected) => {
+  // Put energy in one hourly interval so the component performs the actual sum
+  // and alternative-minus-current subtraction. Peak uses the same input values.
+  const response = (value: number) => ({
+    feasibility_status: 'feasible' as const,
+    baseline_electricity_cost_usd: value,
+    optimized_electricity_cost_usd: value,
+    baseline_peak_demand_kw: value,
+    optimized_peak_demand_kw: value,
+    baseline_demand_kw: [value, ...Array<number>(23).fill(0)],
+    optimized_demand_kw: [value, ...Array<number>(23).fill(0)],
+    constraint_violations: [],
+  })
+  const currentResult = response(current), alternativeResult = response(alternative)
+  const originals = structuredClone([currentResult, alternativeResult])
+  vi.mocked(optimizeScenario).mockResolvedValueOnce(currentResult).mockResolvedValueOnce(alternativeResult)
+  await mount(); await click('Compare both scenarios')
+  const displayed = (label: string) => [...host.querySelectorAll('dt')]
+    .find(term => term.textContent === label)?.nextElementSibling?.textContent
+  expect(displayed('Optimized consumption difference')).toBe(`${expected} kWh`)
+  expect(displayed('Optimized peak demand difference')).toBe(`${expected} kW`)
+  expect(host.textContent).not.toContain('-0.00 kWh')
+  expect(host.textContent).not.toContain('-0.00 kW')
+  expect([currentResult, alternativeResult]).toEqual(originals)
+})

@@ -448,3 +448,39 @@ this display defect after completing all three numerical comparisons. Numerical
 acceptance passed; display acceptance is qualified by this issue. Frontend code
 was left unchanged for Richard. This run does not assert hosted What-if acceptance
 or authenticated live Meta behavior.
+
+### PR #10 display follow-up: negative zero resolved locally
+
+The historical Pair B finding above was reproduced and corrected on
+`fix/what-if-zero-display`, starting from main `4e81623f1947ab081047dbe3e8ee50392f6d149d`.
+`WhatIf.tsx` now formats the two between-scenario power/energy differences to
+exactly two decimals, then changes only the resulting string `-0.00` to `0.00`.
+This preserves alternative-minus-current arithmetic, raw responses and meaningful
+negative values, including values that round to `-0.01`. No solver, simulator,
+API contract or route changed. The neighboring peak difference uses the same
+narrow display-only correction; USD formatting is unchanged.
+
+Twelve new rendered-component cases cover the reported roundoff, signed/ordinary
+zero, meaningful positive/negative differences and both sides of the two-decimal
+rounding threshold, including the boundary itself. The regression reproduced the
+original failure before the fix. All **14 What-if tests** and the frontend
+production build passed afterward; the existing timeout/late-result assertions
+and engineering acceptance tests were left intact.
+
+The documented Pair B was rerun through local Chromium and genuine FastAPI/GLOP
+responses. Complete requests matched the previous Scenario captures. Current and
+alternative remained feasible, each consuming 128.8 kWh. Energy charges remained
+$20.5760001 / $20.864000100000002, with peaks 15.8999996875 /
+14.999999687499997 kW. The between-scenario display correctly showed **$0.29**,
+**-0.90 kW**, and **0.00 kWh**. The focused browser check exited successfully,
+with no display issues or browser page errors. Local evidence is under
+`/tmp/gridpilot-whatif-zero-display` (`pair-B.json`, `pair-B.png`,
+`browser-summary.json`); the focused command was:
+
+```bash
+NODE_PATH=/tmp/gridpilot-browser/node_modules node /tmp/gridpilot-whatif-zero-display/verify-pair-b.cjs
+```
+
+The specific local PR #10 formatting acceptance issue is resolved. This follow-up
+does not claim a deployed fix, hosted What-if acceptance or authenticated Meta
+verification. The historical defect record above remains unchanged.
