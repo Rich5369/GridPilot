@@ -1,4 +1,4 @@
-"""Continuous EV-only LP and independent verification, shared by both adapters."""
+"""One continuous LP with EV-only (default) and joint flexible-load modes."""
 from dataclasses import dataclass, field
 from math import isfinite
 from typing import Literal
@@ -6,7 +6,9 @@ from typing import Literal
 from ortools.linear_solver import pywraplp
 
 from backend.models.contracts import BaselineResult, Scenario
-from backend.optimizer.constraints import equipment_window_violations, schedule_violations
+from backend.optimizer.constraints import (
+    equipment_window_violations, movable_equipment, schedule_violations,
+)
 from backend.simulator.building import Tariff
 from backend.simulator.energy import sum_loads
 from backend.simulator.interface import baseline_schedules, evaluate_scenario_schedules
@@ -75,52 +77,58 @@ def _primary_cost(evaluated, tariff):
     return evaluated.electricity_cost_usd + (demand if demand is not None else 0.0)
 
 
-def _verify(scenario, schedules, fixed):
+def _verify(scenario, schedules, fixed, *, optimize_flexible=False):
     """Inspect raw values first, then remove only sub-tolerance negative noise."""
-    expected_keys = set(fixed) | {f'ev:{ev.id}' for ev in scenario.ev_requirements}
+    expected_keys = set(fixed) | {
+        item[0] for item in movable_equipment(scenario, optimize_flexible=optimize_flexible)}
     if set(schedules) != expected_keys or any(
             len(values) != 24 or any(not isfinite(p) for p in values)
             for values in schedules.values()):
         raise ValueError('Invalid schedule keys, shape or nonfinite solver values')
-    violations = schedule_violations(scenario, schedules, fixed, PHYSICAL_TOLERANCE)
+    violations = schedule_violations(scenario, schedules, fixed, PHYSICAL_TOLERANCE,
+                                     optimize_flexible=optimize_flexible)
     if violations:
         raise ValueError('; '.join(violations))
     cleaned = {key: [max(0.0, value) for value in values]
                for key, values in schedules.items()}
-    evaluated = evaluate_scenario_schedules(scenario, cleaned)
+    evaluated = evaluate_scenario_schedules(scenario, cleaned,
+                                            optimize_flexible=optimize_flexible)
     if evaluated.constraint_violations:
         raise ValueError('; '.join(evaluated.constraint_violations))
     return cleaned, evaluated
 
 
-def _infeasibility_diagnostics(scenario, fixed_demand):
+def _infeasibility_diagnostics(scenario, fixed_demand, *, optimize_flexible=False):
     reasons = equipment_window_violations(scenario)
+    fixed_label = ('immutable background/HVAC demand' if optimize_flexible
+                   else 'fixed demand including held flexible loads')
     for h, power in enumerate(fixed_demand):
         if power > scenario.building_max_demand_kw + PHYSICAL_TOLERANCE:
-            reasons.append(f'Hour {h}: fixed demand including held flexible loads '
+            reasons.append(f'Hour {h}: {fixed_label} '
                            f'({power:g} kW) exceeds site cap ({scenario.building_max_demand_kw:g} kW)')
     # Necessary shared-capacity conditions over windows; solver handles more
-    # complex interactions. Only vehicles wholly within a window are counted.
-    endpoints = sorted({0, 24} | {ev.arrival_hour for ev in scenario.ev_requirements}
-                       | {ev.deadline_hour for ev in scenario.ev_requirements})
+    # complex interactions. Count all movable items wholly within each window.
+    items = movable_equipment(scenario, optimize_flexible=optimize_flexible)
+    endpoints = sorted({0, 24} | {item[2] for item in items} | {item[3] for item in items})
     for start in endpoints:
         for end in endpoints:
             if end <= start:
                 continue
-            evs = [ev for ev in scenario.ev_requirements
-                   if ev.arrival_hour >= start and ev.deadline_hour <= end]
-            required = sum(ev.energy_required_kwh for ev in evs)
+            required = sum(item[4] for item in items if item[2] >= start and item[3] <= end)
             capacity = sum(max(0.0, scenario.building_max_demand_kw - fixed_demand[h])
                            for h in range(start, end))
             if required > capacity + PHYSICAL_TOLERANCE:
-                reasons.append(f'Window [{start}, {end}): EVs require {required:g} kWh '
-                               f'but shared charging capacity is at most {capacity:g} kWh')
+                label = 'EVs and flexible equipment' if optimize_flexible else 'EVs'
+                capacity_label = 'shared capacity' if optimize_flexible else 'shared charging capacity'
+                reasons.append(f'Window [{start}, {end}): {label} require {required:g} kWh '
+                               f'but {capacity_label} is at most {capacity:g} kWh')
     return reasons
 
 
 def solve_ev_charging(scenario: Scenario, tariff: Tariff | None = None, *,
-                      time_limit_ms: int = 10000) -> SolveOutcome:
-    """Optimize EVs only. A second LP minimizes peak within $1e-7 of optimum.
+                      time_limit_ms: int = 10000,
+                      optimize_flexible: bool = False) -> SolveOutcome:
+    """Optimize EVs, optionally joint flexible loads; minimize peak within $1e-7.
 
     FEASIBLE without proof is independently checked but never called optimal.
     A secondary time limit retains a verified primary solution with a warning.
@@ -136,13 +144,18 @@ def solve_ev_charging(scenario: Scenario, tariff: Tariff | None = None, *,
     if tariff.demand_charge_usd_per_kw and tariff.existing_monthly_peak_kw is None:
         outcome.warnings.append('Billing peak unknown: optimizing energy only; demand and total cost remain null.')
     baseline = baseline_schedules(scenario)
-    fixed = {key: values for key, values in baseline.items() if not key.startswith('ev:')}
+    items = movable_equipment(scenario, optimize_flexible=optimize_flexible)
+    movable_keys = {item[0] for item in items}
+    fixed = {key: values for key, values in baseline.items() if key not in movable_keys}
     fixed_demand = sum_loads(fixed.values())
-    diagnostics = _infeasibility_diagnostics(scenario, fixed_demand)
+    diagnostics = _infeasibility_diagnostics(scenario, fixed_demand,
+                                            optimize_flexible=optimize_flexible)
+    scope = ('immutable background/HVAC schedules' if optimize_flexible
+             else 'fixed background/HVAC/flexible schedules')
     if diagnostics:
         outcome.status = 'infeasible'
         outcome.primary_status = 'analytic_infeasibility'
-        outcome.reasons = diagnostics + ['Infeasible under the fixed background/HVAC/flexible schedules of this phase.']
+        outcome.reasons = diagnostics + [f'Infeasible under the {scope}.']
         return outcome
     secondary_peak_value = None
     try:
@@ -155,12 +168,11 @@ def solve_ev_charging(scenario: Scenario, tariff: Tariff | None = None, *,
             raise RuntimeError('GLOP rejected numerical parameters')
         infinity = solver.infinity()
         variables = {}
-        for index, ev in enumerate(scenario.ev_requirements):
-            row = [solver.NumVar(0, ev.max_charging_power_kw
-                                if ev.arrival_hour <= h < ev.deadline_hour else 0,
-                                f'ev_{index}_hour_{h}') for h in range(24)]
-            variables[f'ev:{ev.id}'] = row
-            solver.Add(solver.Sum(row) == ev.energy_required_kwh)
+        for index, (key, _, start, end, energy, power) in enumerate(items):
+            row = [solver.NumVar(0, power if start <= h < end else 0,
+                                f'load_{index}_hour_{h}') for h in range(24)]
+            variables[key] = row
+            solver.Add(solver.Sum(row) == energy)
         peak = solver.NumVar(0, scenario.building_max_demand_kw, 'peak_kw')
         total = [fixed_demand[h] + solver.Sum(row[h] for row in variables.values())
                  for h in range(24)]
@@ -179,8 +191,9 @@ def solve_ev_charging(scenario: Scenario, tariff: Tariff | None = None, *,
         outcome.primary_status = _status_name(status)
         if status == pywraplp.Solver.INFEASIBLE:
             outcome.status = 'infeasible'
-            outcome.reasons = ['GLOP proved no EV schedule satisfies all windows, charger limits, '
-                               'exact energies and shared site capacity under the fixed schedules of this phase.']
+            loads = 'EV/flexible' if optimize_flexible else 'EV'
+            outcome.reasons = [f'GLOP proved no {loads} schedule satisfies all windows, power limits, '
+                               f'exact energies and shared site capacity under the {scope}.']
             return outcome
         if status not in (pywraplp.Solver.OPTIMAL, pywraplp.Solver.FEASIBLE):
             outcome.status = 'unresolved' if status == pywraplp.Solver.NOT_SOLVED else 'error'
@@ -215,7 +228,8 @@ def solve_ev_charging(scenario: Scenario, tariff: Tariff | None = None, *,
         outcome.reasons = [f'Solver error: {type(exc).__name__}: {exc}']
         return outcome
     try:
-        schedules, evaluated = _verify(scenario, schedules, fixed)
+        schedules, evaluated = _verify(scenario, schedules, fixed,
+                                        optimize_flexible=optimize_flexible)
         recomputed = _primary_cost(evaluated, tariff)
         if status == pywraplp.Solver.OPTIMAL:
             if abs(recomputed - primary_value) > 2 * OBJECTIVE_TOLERANCE_USD:

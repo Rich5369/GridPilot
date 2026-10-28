@@ -34,6 +34,7 @@ class SolverMetadata(Contract):
 
 
 class SchedulingResult(Contract):
+    scheduling_mode: Literal['ev_only', 'joint'] = 'ev_only'
     status: Literal['optimal', 'feasible', 'infeasible', 'unresolved', 'error',
                     'verification_failed', 'not_implemented']
     baseline: SimulationResult
@@ -89,33 +90,38 @@ def _comparison(config, baseline, optimized):
 
 
 class ORToolsSchedulingEngine:
-    """EV-only LP engine; limits apply separately to primary and secondary solves."""
-    def __init__(self, time_limit_ms: int = 10000):
+    """Optional joint LP; limits apply separately to primary and secondary solves."""
+    def __init__(self, time_limit_ms: int = 10000, *, optimize_flexible: bool = False):
         self.time_limit_ms = time_limit_ms
+        self.optimize_flexible = optimize_flexible
 
     def optimize(self, config: BuildingConfig | dict) -> SchedulingResult:
         config = BuildingConfig.model_validate(config)
         baseline = simulate_building(config)
-        outcome = solve_ev_charging(config.scenario, config.tariff, time_limit_ms=self.time_limit_ms)
+        outcome = solve_ev_charging(config.scenario, config.tariff, time_limit_ms=self.time_limit_ms,
+                                    optimize_flexible=self.optimize_flexible)
+        mode = 'joint' if self.optimize_flexible else 'ev_only'
         metadata = SolverMetadata(
             objective=outcome.objective, primary_status=outcome.primary_status,
             peak_tiebreak_status=outcome.secondary_status,
             primary_optimum_usd=outcome.primary_optimum_usd, warnings=outcome.warnings)
         if outcome.schedules is None:
             return SchedulingResult(
-                status=outcome.status, baseline=baseline, solver_metadata=metadata,
+                status=outcome.status, scheduling_mode=mode, baseline=baseline, solver_metadata=metadata,
                 infeasibility_reasons=outcome.reasons if outcome.status == 'infeasible' else [],
                 failure_reasons=[] if outcome.status == 'infeasible' else outcome.reasons)
         schedules = {key: list(value) for key, value in baseline.equipment_schedules_kw.items()}
-        schedules.update({key: value for key, value in outcome.schedules.items() if key.startswith('ev:')})
+        schedules.update({key: value for key, value in outcome.schedules.items()
+                          if key.startswith('ev:') or (self.optimize_flexible and key.startswith('flexible:'))})
         try:
-            optimized = evaluate_building_schedules(config, schedules)
+            optimized = evaluate_building_schedules(config, schedules,
+                                                    optimize_flexible=self.optimize_flexible)
             if optimized.constraint_violations:
                 raise ValueError('; '.join(optimized.constraint_violations))
         except Exception as exc:
-            return SchedulingResult(status='verification_failed', baseline=baseline,
+            return SchedulingResult(status='verification_failed', scheduling_mode=mode, baseline=baseline,
                                     solver_metadata=metadata, failure_reasons=[str(exc)])
         return SchedulingResult(
-            status=outcome.status, baseline=baseline, optimized=optimized,
+            status=outcome.status, scheduling_mode=mode, baseline=baseline, optimized=optimized,
             comparison=_comparison(config, baseline, optimized), constraints_satisfied=True,
             solver_metadata=metadata)

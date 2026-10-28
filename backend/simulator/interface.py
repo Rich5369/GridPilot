@@ -46,8 +46,9 @@ def simulate_baseline(scenario: Scenario) -> BaselineResult:
 
 
 def evaluate_scenario_schedules(scenario: Scenario,
-                                schedules: dict[str, list[float]]) -> BaselineResult:
-    """Evaluate supplied loads, requiring fixed/flexible baseline preservation.
+                                schedules: dict[str, list[float]], *,
+                                optimize_flexible: bool = False) -> BaselineResult:
+    """Evaluate loads; flexible baseline preservation is required in EV-only mode.
 
     This is also used for solver verification; no loads are rescheduled here.
     BaselineResult's historical name does not change its energy-only semantics.
@@ -55,12 +56,14 @@ def evaluate_scenario_schedules(scenario: Scenario,
     from backend.optimizer.constraints import schedule_violations
     from backend.simulator.energy import hourly_demand
 
-    expected = {key: values for key, values in baseline_schedules(scenario).items()
-                if not key.startswith("ev:")}
-    if set(schedules) != set(expected) | {f"ev:{ev.id}" for ev in scenario.ev_requirements}:
+    baseline = baseline_schedules(scenario)
+    expected = {key: values for key, values in baseline.items()
+                if key == 'fixed' or (key.startswith('flexible:') and not optimize_flexible)}
+    if set(schedules) != set(baseline):
         raise ValueError("Equipment schedule keys do not match configured scenario")
     checked = {key: hourly_demand(values).tolist() for key, values in schedules.items()}
-    violations = schedule_violations(scenario, checked, expected)
+    violations = schedule_violations(scenario, checked, expected,
+                                     optimize_flexible=optimize_flexible)
     demand = sum_loads(checked.values())
     return BaselineResult(
         demand_kw=demand,
