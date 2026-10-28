@@ -2,6 +2,7 @@
 
 Start the backend, then run: backend/.venv/bin/python scripts/verify_optimizer_http.py
 """
+import argparse
 import json
 import math
 import sys
@@ -35,12 +36,31 @@ def verify(result, scenario):
             close(sum(demand), sum(scenario.fixed_demand_kw) + sum(ev.energy_required_kwh for ev in scenario.ev_requirements), 1e-6)
 
 
+def backend_origin(value):
+    """Require an HTTP(S) origin, so /api is appended exactly once."""
+    try:
+        url = httpx.URL(value)
+    except httpx.InvalidURL as exc:
+        raise argparse.ArgumentTypeError("Use a valid HTTP(S) backend origin") from exc
+    if (url.scheme not in ('http', 'https') or not url.host or url.userinfo
+            or url.path != '/' or url.query or url.fragment):
+        raise argparse.ArgumentTypeError("Use a backend origin without /api, credentials, query or fragment")
+    return str(url).rstrip('/')
+
+
 def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--base-url', type=backend_origin, default='http://127.0.0.1:8000',
+                        help='Backend origin without /api (default: %(default)s)')
+    args = parser.parse_args()
+    if not __debug__:
+        parser.error('Run without -O or PYTHONOPTIMIZE: numerical checks require assertions')
+    print(f'Target: {args.base_url}/api/optimize', flush=True)
     expected = {'price_shift': (7.9, 7.3, 3, 3), 'tight_cap': (5.6, 5.6, 5, 3),
                 'infeasible': (6, None, 5, None)}
     configs = demonstration_configs()
     # Match the production client's budget, rather than the old 5/10-second checks.
-    with httpx.Client(base_url='http://127.0.0.1:8000', timeout=45) as client:
+    with httpx.Client(base_url=args.base_url, timeout=45) as client:
         for name, values in expected.items():
             scenario = configs[name].scenario
             response = client.post('/api/optimize', json=scenario.model_dump(mode='json'))

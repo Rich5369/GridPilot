@@ -95,6 +95,27 @@ backend/.venv/bin/python scripts/verify_optimizer_http.py
 GRIDPILOT_LIVE_API=1 npm --prefix frontend run test:integration
 ```
 
+The same numerical verifier can target an already-running hosted backend. Supply
+its actual HTTP(S) origin, without `/api` or other paths:
+
+```bash
+backend/.venv/bin/python scripts/verify_optimizer_http.py --base-url "$GRIDPILOT_BACKEND_ORIGIN"
+```
+
+Set `GRIDPILOT_BACKEND_ORIGIN` to the backend URL supplied by the deployment owner;
+do not substitute a frontend URL or the documentation's example Render hostname.
+Omitting `--base-url` preserves `http://127.0.0.1:8000`. A trailing slash is accepted.
+The verifier prints its target, keeps the 45-second timeout, and posts each existing
+`config.scenario` to `/api/optimize`. It compares hosted results with independent
+local engine calls using the existing 1e-6 kW/kWh and 2e-7 USD tolerances, allowing
+equivalent optimal schedules. It does not start, stop or configure the target.
+HTTP errors, malformed responses and failed numerical checks exit nonzero; PASS
+is printed only after all three cases succeed. Run without `-O` or
+`PYTHONOPTIMIZE`, because the existing numerical checks use Python assertions;
+the script rejects optimized mode rather than silently skipping those checks.
+The infeasible example's $6 baseline cost covers incomplete service and is not a
+valid savings benchmark.
+
 Phase 2 and foundation verification documents record historical results; their
 501 checks describe the old endpoint. Current smoke and live-client checks expect
 real optimization responses.
@@ -154,3 +175,83 @@ inspected. The browser scenario returned $21.44 → $21.440000100000002 and
 23.9 → 15.499999875 kW, displayed as $21.44 → $21.44 and 8.40 kW peak reduction.
 No remaining local integration blocker was found. No push, merge or deployment
 was performed; the pre-existing `frontend/.gitignore` edit was preserved.
+
+### Hosted numerical acceptance (2026-10-27)
+
+Verified from `test/hosted-numerical-verification`, based on current remote main
+`7b91b4245470cbd6a119ea3282a848af19029423` (merged PR #6). No newer main
+revision was available. The verifier change adds external targeting only; the
+optimizer, scenarios, shared contracts, routes and frontend remain unchanged.
+
+Actual targets were discovered rather than inferred:
+
+- Public frontend: `https://gridpilot-weld.vercel.app`, from the repository homepage.
+- Backend: `https://gridpilot-api-1tpf.onrender.com`, from that frontend's published
+  JavaScript bundle. The bundle configures a 90000 ms optimization timeout.
+- PR preview URLs redirect to Vercel authentication; they were not used as evidence
+  of application connectivity. GitHub's deployment list supplied no backend URL.
+
+Run the hosted numerical check:
+
+```bash
+backend/.venv/bin/python scripts/verify_optimizer_http.py --base-url https://gridpilot-api-1tpf.onrender.com
+```
+
+All three cases returned HTTP 200 and matched independent local engine calls:
+
+| Case | Feasibility | Baseline / optimized energy USD | Baseline / optimized peak kW |
+| --- | --- | --- | --- |
+| price_shift | feasible | 7.9 / 7.3000001 | 3 / 2.999999666666665 |
+| tight_cap | feasible | 5.6000000000000005 / 5.6000000000000005 | 5 / 3 |
+| infeasible | infeasible, with reasons | 6 / null | 5 / null |
+
+The first hosted attempt exited unsuccessfully with a 45-second read timeout on
+its first optimization request and printed no PASS. A later health check returned
+200, and one retry passed all three cases. Startup delay is a possible explanation,
+not a diagnosis from service logs. The verifier deliberately retains its required
+45-second request timeout; the deployed frontend currently allows 90 seconds.
+The passing retry establishes numerical correctness for those responses, not a
+cold-start latency guarantee. The infeasible baseline still represents incomplete
+service, so its cost is not a savings benchmark.
+
+Local regression checks also passed against a temporary Uvicorn server using both
+the default localhost target and an explicit origin with a trailing slash. Deliberate
+HTTP 503, malformed JSON, malformed result schema and incorrect cost responses
+all exited nonzero without PASS. Invalid `/api` target paths and optimized Python
+mode were rejected. These failure cases were local test responses, not failures
+injected into the hosted backend.
+
+Focused Chromium QA reused the feasible/infeasible portion of
+`scripts/browser-qa.cjs` in a temporary script, targeting the public frontend.
+No hosted responses were mocked. The complete submitted Scenarios and responses
+were captured and compared with independent `optimize_scenario` calls:
+
+- With a 20 kW limit and 18 kWh per EV, the hosted browser response was feasible:
+  energy costs $21.44 / $21.440000100000002, peaks 23.9 / 15.499999875 kW.
+  The UI correctly displayed $21.44 / $21.44, $0.00 cost difference and 8.40 kW
+  peak reduction. Inputs included the frontend's actual background/HVAC profile
+  and flexible load; the synthetic CLI scenarios were not substituted.
+- Changing the limit to 1 kW marked the old result stale before submission. The
+  new response was infeasible, with reasons and all optimized fields null. The
+  comparison replaced optimized cost, cost difference and peak reduction with
+  Unavailable. Baseline values remained displayed as baseline values.
+- Cost arithmetic, peak-from-demand, aggregate energy, capacity and feasibility
+  matched direct engine results within the documented tolerances. Backend CORS
+  preflight explicitly allowed the public frontend origin. No browser page errors
+  were observed in this focused run.
+
+Temporary evidence is under `/tmp/gridpilot-hosted-qa`: `real-result.json`,
+`infeasible-result.json`, and desktop screenshots of overview and both result
+states. The focused browser command was:
+
+```bash
+NODE_PATH=/tmp/gridpilot-browser/node_modules node /tmp/gridpilot-hosted-browser-qa.cjs
+```
+
+The temporary script and artifacts are workspace-local, not committed fixtures or
+application dependencies. Optional Playwright/Chromium tooling and its required
+system libraries were installed for this check. This run did not repeat the full
+mobile/error/timeout browser suite recorded above. No hosting settings, deployment,
+external-service lifecycle, optimizer mathematics or application dependencies were
+changed. Status: verifier ready; hosted backend numerical checks passed on retry;
+hosted feasible/infeasible browser flow verified, with initial latency noted above.
