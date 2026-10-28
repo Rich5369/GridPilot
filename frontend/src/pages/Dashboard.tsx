@@ -31,6 +31,7 @@ import {
   optimizationError,
   optimizeScenario,
 } from '../services/api'
+import type { ScenarioEditor } from '../types/dashboard'
 import type { Scenario, OptimizationResult } from '../types/api'
 const EnergyChart = lazy(() =>
   import('../components/EnergyChart').then((module) => ({
@@ -42,6 +43,7 @@ const Comparison = lazy(() =>
     default: module.Comparison,
   })),
 )
+const WhatIf = lazy(() => import('../components/dashboard/WhatIf').then(m => ({ default: m.WhatIf })))
 const views = [
   { id: 'overview', label: 'Energy overview', icon: LayoutDashboard },
   {
@@ -50,6 +52,7 @@ const views = [
     icon: SlidersHorizontal,
   },
   { id: 'comparison', label: 'Optimization', icon: GitCompareArrows },
+  { id: 'whatif', label: 'What-if scenarios', icon: GitCompareArrows },
   { id: 'assistant', label: 'AI assistant', icon: Sparkles },
 ] as const
 export function Dashboard() {
@@ -57,6 +60,8 @@ export function Dashboard() {
   const [appliedBilling, setAppliedBilling] = useState(defaultBillingInputs)
   const [view, setView] = useState<string>('overview')
   const [editor, setEditor] = useState({ ...defaultEditor })
+  const [alternative, setAlternative] = useState<ScenarioEditor | null>(null)
+  const [whatIfVisited, setWhatIfVisited] = useState(false)
   const [result, setResult] = useState<OptimizationResult | null>(null)
   const [submitted, setSubmitted] = useState('')
   const [resultScenario, setResultScenario] = useState<Scenario | null>(null)
@@ -112,7 +117,7 @@ export function Dashboard() {
               key={id}
               className={view === id ? 'nav-active' : 'nav-item'}
               aria-current={view === id ? 'page' : undefined}
-              onClick={() => setView(id)}
+              onClick={() => { setView(id); if (id === 'whatif') setWhatIfVisited(true) }}
             >
               <Icon size={18} />
               {label}
@@ -274,7 +279,8 @@ export function Dashboard() {
               />
             </Suspense>
           )}
-          {view === 'assistant' && <EnergyAssistant editor={editor} onChange={setEditor} resultScenario={resultScenario} />}
+          {whatIfVisited && <div hidden={view !== 'whatif'}><Suspense fallback={<p role="status">Loading what-if comparison…</p>}><WhatIf editor={editor} onChange={setEditor} alternative={alternative} setAlternative={setAlternative} busy={busy} acquire={() => { if (inFlight.current) return false; inFlight.current = true; setBusy(true); return true }} release={() => { inFlight.current = false; setBusy(false) }} /></Suspense></div>}
+          {view === 'assistant' && <EnergyAssistant onCompareProposal={next => { setAlternative(next); setWhatIfVisited(true); setView('whatif') }} editor={editor} onChange={setEditor} resultScenario={resultScenario} />}
           <footer>
             <span>GridPilot · Commercial energy intelligence</span>
             <span>
