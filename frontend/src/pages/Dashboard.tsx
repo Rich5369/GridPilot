@@ -31,7 +31,7 @@ import {
   optimizationError,
   optimizeScenario,
 } from '../services/api'
-import type { OptimizationResult } from '../types/api'
+import type { Scenario, OptimizationResult } from '../types/api'
 const EnergyChart = lazy(() =>
   import('../components/EnergyChart').then((module) => ({
     default: module.EnergyChart,
@@ -59,6 +59,7 @@ export function Dashboard() {
   const [editor, setEditor] = useState({ ...defaultEditor })
   const [result, setResult] = useState<OptimizationResult | null>(null)
   const [submitted, setSubmitted] = useState('')
+  const [resultScenario, setResultScenario] = useState<Scenario | null>(null)
   const [busy, setBusy] = useState(false)
   const inFlight = useRef(false)
   const [message, setMessage] = useState('')
@@ -73,6 +74,7 @@ export function Dashboard() {
     try {
       const response = await optimizeScenario(toScenario(editor))
       setResult(response)
+      setResultScenario(toScenario(JSON.parse(snapshot)))
       setSubmitted(snapshot)
       setView('comparison')
       setMessage('Backend result received for the submitted scenario.')
@@ -272,7 +274,7 @@ export function Dashboard() {
               />
             </Suspense>
           )}
-          {view === 'assistant' && <EnergyAssistant />}
+          {view === 'assistant' && <EnergyAssistant editor={editor} onChange={setEditor} resultScenario={resultScenario} />}
           <footer>
             <span>GridPilot · Commercial energy intelligence</span>
             <span>

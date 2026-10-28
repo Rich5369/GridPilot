@@ -654,3 +654,13 @@ legend { font-size: 13px; font-weight: 650; padding: 0 8px; }
   .chart-footer { gap: 14px; line-height: 1.6; }
   .metric-value { font-size: 32px; }
 }
+
+.ai-examples, .ai-actions { display: flex; flex-wrap: wrap; gap: 12px; margin: 16px 0; }
+.assistant textarea { display: block; width: 100%; box-sizing: border-box; margin-top: 8px; padding: 12px; font: inherit; border: 1px solid #ccd5dc; border-radius: 8px; background: white; }
+.assistant button { cursor: pointer; white-space: normal; }
+.assistant button:not(.run-button) { border: 1px solid #dfe7e0; border-radius: 8px; background: #f7f9f7; padding: 10px 14px; font-size: 13px; }
+.assistant button:disabled { cursor: default; opacity: .55; }
+.assistant dl > div { display: flex; flex-wrap: wrap; gap: 12px; margin: 8px 0; }
+.assistant dl, .assistant [aria-label="Result explanation"] { font-size: 14px; line-height: 1.7; }
+.assistant [aria-label="Result explanation"] p { margin-top: 12px; }
+.assistant .tag { white-space: normal; }
