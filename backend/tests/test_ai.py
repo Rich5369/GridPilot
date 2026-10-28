@@ -137,3 +137,68 @@ def test_render_rejects_mock_mode(monkeypatch):
         assert response.json()['detail']['code'] == 'ai_configuration'
         assert 'source' not in response.json()
     assert client.post('/api/optimize', json=SAMPLE).status_code == 200
+
+
+@pytest.mark.parametrize('status,exception_name,code', [
+    (400, 'BadRequestError', 'invalid_json_schema'),
+    (401, 'AuthenticationError', 'invalid_api_key'),
+    (402, 'APIStatusError', 'billing_not_configured'),
+    (403, 'PermissionDeniedError', 'permission_denied'),
+    (429, 'RateLimitError', 'rate_limit_exceeded'),
+    (500, 'InternalServerError', 'backend_unavailable'),
+])
+def test_provider_diagnostics_are_sanitized(provider, caplog, status, exception_name, code):
+    import openai
+    request = httpx.Request('POST', 'https://api.meta.ai/v1/chat/completions',
+                            headers={'Authorization': 'Bearer unit-test-placeholder'})
+    response = httpx.Response(status, request=request, headers={'x-request-id': 'req-test-123'})
+    body = {'code': code, 'type': 'invalid_request_error', 'param': 'response_format',
+            'message': 'sensitive prompt and response body unit-test-placeholder'}
+    provider[0].side_effect = getattr(openai, exception_name)(body['message'], response=response, body=body)
+    result = interpret()
+    assert result.status_code == (429 if status == 429 else 502)
+    assert result.json()['detail']['code'] == ('ai_rate_limited' if status == 429 else 'ai_provider_error')
+    record = next(record for record in caplog.records if record.name == 'backend.ai.service')
+    metadata = record.args
+    assert metadata['upstream_status'] == status
+    assert metadata['exception_type'] == exception_name
+    assert metadata['provider_code'] == code
+    assert metadata['request_id'] == 'req-test-123'
+    assert metadata['provider_param'] == 'response_format'
+    assert record.exc_info is None
+    for secret in ('unit-test-placeholder', 'sensitive prompt', 'Authorization', 'Keep peak power demand'):
+        assert secret not in caplog.text
+        assert secret not in result.text
+
+
+def test_provider_metadata_rejects_unsafe_fields(monkeypatch):
+    from backend.ai.service import provider_error_metadata
+    monkeypatch.setenv('MODEL_API_KEY', 'private-key')
+    exc = SimpleNamespace(status_code=400, code='private-key', request_id='req\nforged',
+                          body={'error': {'type': 'LLM_secret', 'param': {'body': 'secret'}}})
+    data = provider_error_metadata(exc)
+    assert data['provider_code'] is None
+    assert data['request_id'] is None
+    assert data['provider_type'] is None
+    assert data['provider_param'] is None
+
+
+@pytest.mark.parametrize('exception_name,status,code', [
+    ('APITimeoutError', 504, 'ai_timeout'),
+    ('APIConnectionError', 502, 'ai_provider_error'),
+])
+def test_transport_diagnostics_without_http_response(provider, caplog, exception_name, status, code):
+    import openai
+    request = httpx.Request('POST', 'https://api.meta.ai/v1/chat/completions',
+                            headers={'Authorization': 'Bearer unit-test-placeholder'})
+    provider[0].side_effect = getattr(openai, exception_name)(request=request)
+    result = interpret()
+    assert result.status_code == status
+    assert result.json()['detail']['code'] == code
+    record = next(record for record in caplog.records if record.name == 'backend.ai.service')
+    assert record.args['exception_type'] == exception_name
+    assert record.args['upstream_status'] is None
+    assert record.args['request_id'] is None
+    assert record.exc_info is None
+    assert 'unit-test-placeholder' not in caplog.text
+    assert 'Authorization' not in caplog.text
