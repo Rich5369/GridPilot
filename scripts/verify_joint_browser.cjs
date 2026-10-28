@@ -1,0 +1,48 @@
+// Run both local servers first. NODE_PATH=/tmp/gridpilot-browser/node_modules node scripts/verify_joint_browser.cjs
+const { chromium } = require('playwright')
+const assert = require('node:assert/strict')
+const fs = require('node:fs/promises')
+const { execFileSync } = require('node:child_process')
+;(async () => {
+  const browser = await chromium.launch({ headless: true })
+  try {
+    const page = await browser.newPage()
+    await page.goto('http://127.0.0.1:5173')
+    await page.getByText('Backend connected', { exact: true }).waitFor()
+    const select = page.locator('#scheduling-mode')
+    assert.equal(await select.inputValue(), 'ev_only')
+    const request = () => page.waitForResponse(r => r.url().includes('/api/optimize?') && r.request().method() === 'POST')
+    let pending = request()
+    await page.getByRole('button', { name: 'Run optimization', exact: true }).click()
+    const response = await pending
+    assert.equal(response.status(), 200)
+    const scenario = response.request().postDataJSON()
+    const mode = new URL(response.url()).searchParams.get('scheduling_mode')
+    const result = await response.json()
+    const direct = JSON.parse(execFileSync('backend/.venv/bin/python', ['-c', 'import sys; from backend.models.contracts import Scenario; from backend.optimizer.interface import optimize_scenario; print(optimize_scenario(Scenario.model_validate_json(sys.stdin.read())).model_dump_json())'], { input: JSON.stringify(scenario), encoding: 'utf8' }))
+    assert.equal(mode, 'ev_only')
+    for (const field of ['optimized_electricity_cost_usd', 'optimized_peak_demand_kw']) assert(Math.abs(result[field] - direct[field]) < 1e-6)
+    await page.getByText('Displayed result mode: EV-only', { exact: true }).waitFor()
+    await select.selectOption('joint')
+    assert.equal(await page.getByText('Displayed result mode: EV-only', { exact: true }).count(), 0)
+    pending = request()
+    await page.getByRole('button', { name: 'Run optimization', exact: true }).click()
+    const joint = await pending
+    assert.equal(new URL(joint.url()).searchParams.get('scheduling_mode'), 'joint')
+    // Until shaJ46 publishes the adapter, this must be an explicit dependency error.
+    assert.equal(joint.status(), 503)
+    assert.equal((await joint.json()).detail.code, 'joint_adapter_unavailable')
+    await page.getByRole('navigation').getByRole('button', { name: 'What-if scenarios', exact: true }).click()
+    await page.getByRole('button', { name: 'Create alternative from current' }).click()
+    const captured = []
+    page.on('response', r => { if (r.url().includes('/api/optimize?')) captured.push(r) })
+    await page.getByRole('button', { name: 'Compare both scenarios' }).click()
+    await page.getByText('Between scenarios: alternative minus current', { exact: true }).waitFor()
+    assert.equal(captured.length, 2)
+    assert(captured.every(r => new URL(r.url()).searchParams.get('scheduling_mode') === 'joint'))
+    await select.selectOption('ev_only')
+    await page.getByText('Inputs changed. Outdated comparison results are hidden; compare again.', { exact: true }).waitFor()
+    await fs.writeFile('/tmp/gridpilot-joint-browser.json', JSON.stringify({ scenario, mode, result, direct, jointStatus: joint.status(), whatIfRequests: captured.map(r => ({ url: r.url(), scenario: r.request().postDataJSON() })) }, null, 2))
+    console.log('PASS: real browser/FastAPI/OR-Tools EV-only metrics; mode labels, invalidation, missing joint dependency, and What-if propagation. /tmp/gridpilot-joint-browser.json')
+  } finally { await browser.close() }
+})().catch(error => { console.error(error); process.exitCode = 1 })

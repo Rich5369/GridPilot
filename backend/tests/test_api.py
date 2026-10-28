@@ -131,6 +131,7 @@ def test_nonfinite_input_rejected():
         Scenario.model_validate(scenario)
 
 
+@pytest.mark.parametrize('mode', ['ev_only', 'joint'])
 @pytest.mark.parametrize('kind,primary,status,code', [
     ('unresolved', 'not_solved', 503, 'optimization_unresolved'),
     ('error', 'not_run', 503, 'solver_unavailable'),
@@ -138,7 +139,7 @@ def test_nonfinite_input_rejected():
     ('verification_failed', 'optimal', 500, 'verification_failed'),
     ('unexpected', 'not_run', 500, 'optimization_error'),
 ])
-def test_solver_failure_responses(monkeypatch, caplog, kind, primary, status, code):
+def test_solver_failure_responses(monkeypatch, caplog, kind, primary, status, code, mode):
     from backend.api import routes
     from backend.optimizer.solver import (
         SolveOutcome, OptimizationUnresolvedError, OptimizationSolverError,
@@ -151,11 +152,11 @@ def test_solver_failure_responses(monkeypatch, caplog, kind, primary, status, co
               'verification_failed': OptimizationVerificationError}
     error = errors[kind](outcome) if kind in errors else RuntimeError('private diagnostic')
 
-    def fail(scenario):
+    def fail(scenario, *, optimize_flexible=False):
         raise error
 
     monkeypatch.setattr(routes, 'optimize_scenario', fail)
-    response = client.post('/api/optimize', json=SAMPLE)
+    response = client.post(f'/api/optimize?scheduling_mode={mode}', json=SAMPLE)
     assert response.status_code == status
     assert response.json()['detail']['code'] == code
     assert 'private diagnostic' not in response.text
@@ -169,3 +170,29 @@ def test_actual_solver_unavailable(monkeypatch):
     response = client.post('/api/optimize', json=SAMPLE)
     assert response.status_code == 503
     assert response.json()['detail']['code'] == 'solver_unavailable'
+
+
+def test_mode_validation_and_default_compatibility():
+    omitted = client.post('/api/optimize', json=SAMPLE)
+    explicit = client.post('/api/optimize?scheduling_mode=ev_only', json=SAMPLE)
+    assert omitted.status_code == explicit.status_code == 200
+    for field in ('feasibility_status', 'optimized_electricity_cost_usd', 'optimized_peak_demand_kw'):
+        assert omitted.json()[field] == explicit.json()[field]
+    assert client.post('/api/optimize?scheduling_mode=invalid', json=SAMPLE).status_code == 422
+
+
+def test_joint_missing_adapter_is_explicit():
+    response = client.post('/api/optimize?scheduling_mode=joint', json=SAMPLE)
+    assert response.status_code == 503
+    assert response.json()['detail']['code'] == 'joint_adapter_unavailable'
+
+
+def test_joint_dispatch_to_extended_adapter(monkeypatch):
+    from backend.api import routes
+    calls = []
+    def extended(scenario, *, optimize_flexible=False):
+        calls.append(optimize_flexible)
+        return optimize_scenario(scenario)
+    monkeypatch.setattr(routes, 'optimize_scenario', extended)
+    assert client.post('/api/optimize?scheduling_mode=joint', json=SAMPLE).status_code == 200
+    assert calls == [True]

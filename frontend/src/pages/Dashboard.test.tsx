@@ -92,7 +92,7 @@ it('shows loading, prevents repeat submissions and recovers after failure', asyn
   fetchMock.mockImplementationOnce(() => new Promise((_resolve, reject) => { rejectRequest = reject }))
   const run = [...container.querySelectorAll('button')].find(b => b.textContent === 'Run optimization')!
   await act(async () => { run.click(); run.click() })
-  expect(fetchMock.mock.calls.filter(([url]) => String(url).endsWith('/api/optimize'))).toHaveLength(1)
+  expect(fetchMock.mock.calls.filter(([url]) => String(url).includes('/api/optimize?'))).toHaveLength(1)
   expect(run.disabled).toBe(true)
   expect(run.getAttribute('aria-busy')).toBe('true')
   expect(container.textContent).toContain('up to 45 seconds')
@@ -100,4 +100,26 @@ it('shows loading, prevents repeat submissions and recovers after failure', asyn
   expect(run.disabled).toBe(false)
   expect(container.textContent).toContain('timed out after 45 seconds')
   expect(container.textContent).toContain('No optimization result yet')
+})
+
+it('discards late results after a mode change and disables joint AI actions', async () => {
+  await act(async () => root.render(<Dashboard />))
+  let resolve!: (value: Response) => void
+  fetchMock.mockImplementationOnce(() => new Promise(r => { resolve = r }))
+  await click('Run optimization')
+  const select = container.querySelector<HTMLSelectElement>('#scheduling-mode')!
+  await act(async () => {
+    select.value = 'joint'
+    select.dispatchEvent(new Event('change', { bubbles: true }))
+  })
+  await act(async () => resolve(new Response(JSON.stringify({
+    feasibility_status: 'feasible', baseline_electricity_cost_usd: 20,
+    optimized_electricity_cost_usd: 18, baseline_peak_demand_kw: 3,
+    optimized_peak_demand_kw: 2, baseline_demand_kw: Array(24).fill(3),
+    optimized_demand_kw: Array(24).fill(2), constraint_violations: [],
+  }))))
+  expect(container.textContent).not.toContain('Backend result received')
+  expect(container.textContent).not.toContain('Displayed result mode')
+  await click('AI assistant')
+  expect(container.textContent).toContain('AI actions are disabled for joint scheduling')
 })

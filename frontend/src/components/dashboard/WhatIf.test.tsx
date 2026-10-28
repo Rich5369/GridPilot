@@ -4,6 +4,7 @@ import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, expect, it, vi } from 'vitest'
 import { WhatIf } from './WhatIf'
 import { defaultEditor } from '../../data/demoScenario'
+import type { SchedulingMode } from '../../services/api'
 import { optimizeScenario } from '../../services/api'
 vi.mock('../../services/api', async original => ({ ...await original<typeof import('../../services/api')>(), optimizeScenario: vi.fn() }))
 vi.mock('./Comparison', () => ({ Comparison: () => <div>Solver chart</div> }))
@@ -11,11 +12,12 @@ Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true })
 let root: Root
 let host: HTMLDivElement
 function Harness() {
+  const [mode, setMode] = useState<SchedulingMode>('ev_only')
   const [editor, setEditor] = useState(defaultEditor)
   const [alt, setAlt] = useState({ ...defaultEditor, limit: '15' })
   const [busy, setBusy] = useState(false)
   const lock = useRef(false)
-  return <><button onClick={() => setEditor({ ...editor, limit: '20' })}>Edit current</button><WhatIf editor={editor} onChange={setEditor} alternative={alt} setAlternative={setAlt} busy={busy} acquire={() => { if (lock.current) return false; lock.current = true; setBusy(true); return true }} release={() => { lock.current = false; setBusy(false) }} /></>
+  return <><button onClick={() => setMode('joint')}>Select joint</button><button onClick={() => setEditor({ ...editor, limit: '20' })}>Edit current</button><WhatIf mode={mode} editor={editor} onChange={setEditor} alternative={alt} setAlternative={setAlt} busy={busy} acquire={() => { if (lock.current) return false; lock.current = true; setBusy(true); return true }} release={() => { lock.current = false; setBusy(false) }} /></>
 }
 async function mount() { host = document.createElement('div'); document.body.append(host); root = createRoot(host); await act(async () => root.render(<Harness />)) }
 async function click(text: string) { await act(async () => [...host.querySelectorAll('button')].find(b => b.textContent === text)!.click()) }
@@ -77,4 +79,15 @@ it.each([
   expect(host.textContent).not.toContain('-0.00 kWh')
   expect(host.textContent).not.toContain('-0.00 kW')
   expect([currentResult, alternativeResult]).toEqual(originals)
+})
+
+
+it('uses joint mode for both snapshots and hides the old comparison on mode change', async () => {
+  const result = { feasibility_status: 'infeasible' as const, baseline_electricity_cost_usd: 1, baseline_peak_demand_kw: 1, baseline_demand_kw: Array(24).fill(1), optimized_electricity_cost_usd: null, optimized_peak_demand_kw: null, optimized_demand_kw: null, constraint_violations: ['Capacity'] }
+  vi.mocked(optimizeScenario).mockResolvedValue(result)
+  await mount(); await click('Compare both scenarios'); await click('Select joint')
+  expect(host.textContent).toContain('Outdated comparison results are hidden')
+  await click('Compare both scenarios')
+  expect(vi.mocked(optimizeScenario).mock.calls.slice(-2).map(call => call[1])).toEqual(['joint', 'joint'])
+  expect(host.textContent).toContain('Scheduling mode for both scenarios: EV + flexible equipment')
 })

@@ -20,7 +20,7 @@ it('posts the existing scenario contract and accepts a complete solver response'
   const fetch = vi.fn().mockResolvedValue(new Response(JSON.stringify(valid)))
   vi.stubGlobal('fetch', fetch)
   expect(await optimizeScenario(demoScenario)).toEqual(valid)
-  expect(fetch.mock.calls[0][0]).toBe('http://localhost:8000/api/optimize')
+  expect(fetch.mock.calls[0][0]).toBe('http://localhost:8000/api/optimize?scheduling_mode=ev_only')
   expect(JSON.parse(fetch.mock.calls[0][1].body)).toEqual(demoScenario)
 })
 it.each([501, 200])(
@@ -123,4 +123,12 @@ it('aborts a pending optimization when its configured deadline expires', async (
     timeout.mockRestore()
     vi.useRealTimers()
   }
+})
+
+it('submits joint mode explicitly without changing the scenario body', async () => {
+  const fetch = vi.fn().mockResolvedValue(new Response(JSON.stringify(valid)))
+  vi.stubGlobal('fetch', fetch)
+  await optimizeScenario(demoScenario, 'joint')
+  expect(fetch.mock.calls[0][0]).toContain('/api/optimize?scheduling_mode=joint')
+  expect(JSON.parse(fetch.mock.calls[0][1].body)).toEqual(demoScenario)
 })

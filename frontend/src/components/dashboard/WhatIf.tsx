@@ -2,7 +2,7 @@ import { useRef, useState } from 'react'
 import type { ScenarioEditor } from '../../types/dashboard'
 import type { OptimizationResult } from '../../types/api'
 import { money, toScenario, validateEditor, feasibilityWarnings } from '../../data/demoScenario'
-import { optimizeScenario, optimizationError, OPTIMIZATION_TIMEOUT_MS } from '../../services/api'
+import { optimizeScenario, optimizationError, OPTIMIZATION_TIMEOUT_MS, modeLabel, type SchedulingMode } from '../../services/api'
 import { Comparison } from './Comparison'
 
 const fields: [keyof ScenarioEditor, string, string][] = [
@@ -21,8 +21,8 @@ function formatDifference(value: number): string {
 }
 
 type Pair = { key: string; results: [OptimizationResult | null, OptimizationResult | null]; errors: string[] }
-export function WhatIf({ editor, onChange, alternative, setAlternative, busy, acquire, release }: {
-  editor: ScenarioEditor; onChange: (e: ScenarioEditor) => void
+export function WhatIf({ mode = 'ev_only', modeRevision = 0, editor, onChange, alternative, setAlternative, busy, acquire, release }: {
+  mode?: SchedulingMode; modeRevision?: number; editor: ScenarioEditor; onChange: (e: ScenarioEditor) => void
   alternative: ScenarioEditor | null; setAlternative: (e: ScenarioEditor) => void
   busy: boolean; acquire: () => boolean; release: () => void
 }) {
@@ -31,7 +31,7 @@ export function WhatIf({ editor, onChange, alternative, setAlternative, busy, ac
   const [pair, setPair] = useState<Pair | null>(null)
   const [progress, setProgress] = useState('')
   const pending = useRef(false)
-  const key = JSON.stringify([editor, alternative])
+  const key = JSON.stringify([editor, alternative, mode, modeRevision])
   const errors = alternative ? validateEditor(alternative) : {}
   const invalid = !alternative || Object.keys(errors).length > 0 || Object.keys(validateEditor(editor)).length > 0
   const fresh = pair?.key === key ? pair : null
@@ -47,7 +47,7 @@ export function WhatIf({ editor, onChange, alternative, setAlternative, busy, ac
     try {
       for (const index of [0, 1] as const) {
         setProgress(`Optimizing scenario ${index + 1} of 2…`)
-        try { next.results[index] = await optimizeScenario(snapshots[index]) }
+        try { next.results[index] = await optimizeScenario(snapshots[index], mode) }
         catch (error) {
           next.errors[index] = optimizationError(error)
           // A timed-out solve may still occupy the server. Do not queue another.
@@ -62,6 +62,7 @@ export function WhatIf({ editor, onChange, alternative, setAlternative, busy, ac
   }
   return <section className="panel what-if" aria-label="Business what-if comparison">
     <h2>Business what-if comparison</h2>
+    <p>Scheduling mode for both scenarios: {modeLabel(mode)}</p>
     <p>Compare the current configuration with one alternative. Each scenario has its own uncontrolled baseline. No AI credentials are needed.</p>
     <div className="ai-actions">
       <button onClick={create} disabled={busy}>{alternative ? 'Reset alternative from current' : 'Create alternative from current'}</button>

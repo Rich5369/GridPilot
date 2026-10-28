@@ -1,4 +1,6 @@
 import logging
+from inspect import signature
+from typing import Literal
 
 from fastapi import APIRouter, HTTPException
 
@@ -27,12 +29,23 @@ def health() -> HealthResponse:
     503: {"description": "Solver unavailable or optimization unresolved"},
     500: {"description": "Solver or independent verification failure"},
 })
-def optimize(scenario: Scenario) -> OptimizationResult:
-    """Run the existing verified EV optimizer in FastAPI's worker thread pool."""
+def optimize(scenario: Scenario, scheduling_mode: Literal["ev_only", "joint"] = "ev_only") -> OptimizationResult:
+    """Run the existing verified optimizer in FastAPI's worker thread pool."""
     try:
         # Validate here as well as at the HTTP boundary so invalid adapter output
         # follows the same sanitized failure path as other internal errors.
-        return OptimizationResult.model_validate(optimize_scenario(scenario))
+        if scheduling_mode == "joint":
+            # The engineering adapter extension is a separate dependency.
+            # Never silently substitute an EV-only solve for a joint request.
+            if "optimize_flexible" not in signature(optimize_scenario).parameters:
+                raise service_error(503, "joint_adapter_unavailable",
+                                    "Joint scheduling is unavailable until the engineering adapter is installed.")
+            result = optimize_scenario(scenario, optimize_flexible=True)
+        else:
+            result = optimize_scenario(scenario)
+        return OptimizationResult.model_validate(result)
+    except HTTPException:
+        raise
     except OptimizationUnresolvedError:
         logger.exception("Optimization unresolved")
         raise service_error(503, "optimization_unresolved", "The solver could not resolve this request. Try again later.") from None

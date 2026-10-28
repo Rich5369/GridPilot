@@ -90,10 +90,14 @@ export function isOptimizationResult(
     r.constraint_violations.length > 0
   )
 }
+export type SchedulingMode = 'ev_only' | 'joint'
+export const modeLabel = (mode: SchedulingMode) => mode === 'joint' ? 'EV + flexible equipment' : 'EV-only'
+
 export async function optimizeScenario(
   scenario: Scenario,
+  mode: SchedulingMode = 'ev_only',
 ): Promise<OptimizationResult> {
-  const body = await apiRequest<unknown>('/api/optimize', {
+  const body = await apiRequest<unknown>(`/api/optimize?scheduling_mode=${mode}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(scenario),
@@ -120,6 +124,8 @@ export function optimizationError(error: unknown): string {
       return 'Optimization is not implemented yet. No calculations were performed. Demo data remains available.'
     if (error.status === 422)
       return 'The backend rejected this scenario (HTTP 422). Review the configuration and API contract.'
+    if (error.status === 503 && (error.body as { detail?: { code?: string } })?.detail?.code === 'joint_adapter_unavailable')
+      return 'Joint scheduling is unavailable until the engineering adapter is installed. Select EV-only or retry after integration.'
     if (error.status === 503)
       return 'The optimization solver is unavailable or could not finish (HTTP 503). Feasibility was not determined. Try again later.'
     if (error.status === 500)

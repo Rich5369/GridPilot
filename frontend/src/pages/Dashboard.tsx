@@ -30,6 +30,8 @@ import {
   OPTIMIZATION_TIMEOUT_MS,
   optimizationError,
   optimizeScenario,
+  modeLabel,
+  type SchedulingMode,
 } from '../services/api'
 import type { ScenarioEditor } from '../types/dashboard'
 import type { Scenario, OptimizationResult } from '../types/api'
@@ -56,6 +58,10 @@ const views = [
   { id: 'assistant', label: 'AI assistant', icon: Sparkles },
 ] as const
 export function Dashboard() {
+  const [mode, setMode] = useState<SchedulingMode>('ev_only')
+  const modeVersion = useRef(0)
+  const [modeRevision, setModeRevision] = useState(0)
+  const [resultMode, setResultMode] = useState<SchedulingMode>('ev_only')
   const [billingInputs, setBillingInputs] = useState(defaultBillingInputs)
   const [appliedBilling, setAppliedBilling] = useState(defaultBillingInputs)
   const [view, setView] = useState<string>('overview')
@@ -74,17 +80,21 @@ export function Dashboard() {
     if (invalid || inFlight.current) return
     inFlight.current = true
     const snapshot = JSON.stringify(editor)
+    const version = modeVersion.current
+    const submittedMode = mode
     setBusy(true)
     setMessage('')
     try {
-      const response = await optimizeScenario(toScenario(editor))
+      const response = await optimizeScenario(toScenario(editor), submittedMode)
+      if (version !== modeVersion.current) return
+      setResultMode(submittedMode)
       setResult(response)
       setResultScenario(toScenario(JSON.parse(snapshot)))
       setSubmitted(snapshot)
       setView('comparison')
       setMessage('Backend result received for the submitted scenario.')
     } catch (error) {
-      setMessage(optimizationError(error))
+      if (version === modeVersion.current) setMessage(optimizationError(error))
     } finally {
       inFlight.current = false
       setBusy(false)
@@ -173,6 +183,20 @@ export function Dashboard() {
               {busy ? 'Requesting optimization…' : 'Run optimization'}
             </button>
           </div>
+          <div className="field">
+            <label htmlFor="scheduling-mode">Scheduling mode</label>
+            <select id="scheduling-mode" value={mode} onChange={event => {
+              modeVersion.current += 1
+              setModeRevision(modeVersion.current)
+              setMode(event.target.value as SchedulingMode)
+              setResult(null); setResultScenario(null); setMessage('Scheduling mode changed. Run again for new results.')
+            }}>
+              <option value="ev_only">EV-only</option>
+              <option value="joint">EV + flexible equipment</option>
+            </select>
+            <p>Joint mode shifts eligible flexible equipment within its allowed window while delivering the same required energy. Equipment is interruptible and continuously adjustable; this does not guarantee an uninterrupted machine cycle. Background and HVAC remain fixed.</p>
+          </div>
+          {result && <p>Displayed result mode: {modeLabel(resultMode)}</p>}
           <p id="optimization-help" className="action-help">
             {busy
               ? `Optimization is running. This request can take up to ${OPTIMIZATION_TIMEOUT_MS / 1000} seconds. Please wait.`
@@ -279,8 +303,9 @@ export function Dashboard() {
               />
             </Suspense>
           )}
-          {whatIfVisited && <div hidden={view !== 'whatif'}><Suspense fallback={<p role="status">Loading what-if comparison…</p>}><WhatIf editor={editor} onChange={setEditor} alternative={alternative} setAlternative={setAlternative} busy={busy} acquire={() => { if (inFlight.current) return false; inFlight.current = true; setBusy(true); return true }} release={() => { inFlight.current = false; setBusy(false) }} /></Suspense></div>}
-          {view === 'assistant' && <EnergyAssistant onCompareProposal={next => { setAlternative(next); setWhatIfVisited(true); setView('whatif') }} editor={editor} onChange={setEditor} resultScenario={resultScenario} />}
+          {whatIfVisited && <div hidden={view !== 'whatif'}><Suspense fallback={<p role="status">Loading what-if comparison…</p>}><WhatIf modeRevision={modeRevision} mode={mode} editor={editor} onChange={setEditor} alternative={alternative} setAlternative={setAlternative} busy={busy} acquire={() => { if (inFlight.current) return false; inFlight.current = true; setBusy(true); return true }} release={() => { inFlight.current = false; setBusy(false) }} /></Suspense></div>}
+          {view === 'assistant' && mode === 'joint' && <p role="status">AI actions are disabled for joint scheduling because AI explanations currently recompute EV-only results. Select EV-only to use the assistant.</p>}
+          {view === 'assistant' && mode === 'ev_only' && <EnergyAssistant onCompareProposal={next => { setAlternative(next); setWhatIfVisited(true); setView('whatif') }} editor={editor} onChange={setEditor} resultScenario={resultScenario} />}
           <footer>
             <span>GridPilot · Commercial energy intelligence</span>
             <span>
