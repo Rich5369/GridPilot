@@ -1,4 +1,6 @@
 import os
+import asyncio
+from contextlib import suppress
 from pathlib import Path
 from contextlib import asynccontextmanager
 
@@ -12,8 +14,13 @@ load_dotenv(Path(__file__).with_name(".env"))
 @asynccontextmanager
 async def lifespan(app):
     from backend.ai.startup_diagnostic import list_models_on_startup
-    await list_models_on_startup()
-    yield
+    task = asyncio.create_task(list_models_on_startup())
+    try:
+        yield
+    finally:
+        task.cancel()
+        with suppress(asyncio.CancelledError):
+            await task
 
 
 app = FastAPI(title="GridPilot API", version="0.1.0", lifespan=lifespan)
