@@ -14,6 +14,12 @@ const fields: [keyof ScenarioEditor, string, string][] = [
   ['deadline', 'EV completion deadline', '1'],
   ['peak', 'Peak electricity price (USD/kWh)', '0.01'],
 ]
+// Normalize after rounding so a displayed -0.01 retains its sign.
+function formatDifference(value: number): string {
+  const displayed = value.toFixed(2)
+  return displayed === '-0.00' ? '0.00' : displayed
+}
+
 type Pair = { key: string; results: [OptimizationResult | null, OptimizationResult | null]; errors: string[] }
 export function WhatIf({ editor, onChange, alternative, setAlternative, busy, acquire, release }: {
   editor: ScenarioEditor; onChange: (e: ScenarioEditor) => void
@@ -96,8 +102,8 @@ export function WhatIf({ editor, onChange, alternative, setAlternative, busy, ac
         <p>Each result uses its own submitted operating requirements and hourly prices. These differences are not energy savings. Positive values mean the alternative is higher. Daily energy charges exclude demand charges, taxes and fixed fees.</p>
         {fresh.results.every(r => r?.feasibility_status === 'feasible') ? <dl>
           <dt>Optimized energy charge difference (USD)</dt><dd>{money(fresh.results[1]!.optimized_electricity_cost_usd! - fresh.results[0]!.optimized_electricity_cost_usd!)}</dd>
-          <dt>Optimized peak demand difference</dt><dd>{(fresh.results[1]!.optimized_peak_demand_kw! - fresh.results[0]!.optimized_peak_demand_kw!).toFixed(2)} kW</dd>
-          <dt>Optimized consumption difference</dt><dd>{(fresh.results[1]!.optimized_demand_kw!.reduce((a,b) => a+b,0) - fresh.results[0]!.optimized_demand_kw!.reduce((a,b) => a+b,0)).toFixed(2)} kWh</dd>
+          <dt>Optimized peak demand difference</dt><dd>{formatDifference(fresh.results[1]!.optimized_peak_demand_kw! - fresh.results[0]!.optimized_peak_demand_kw!)} kW</dd>
+          <dt>Optimized consumption difference</dt><dd>{formatDifference(fresh.results[1]!.optimized_demand_kw!.reduce((a,b) => a+b,0) - fresh.results[0]!.optimized_demand_kw!.reduce((a,b) => a+b,0))} kWh</dd>
         </dl> : <p>Between-scenario differences are unavailable unless both scenarios have feasible solver results.</p>}
       </>}
     </>}
