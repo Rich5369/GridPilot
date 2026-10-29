@@ -176,8 +176,9 @@ if result.optimized is not None:
 Shared models, API routes and frontend types are unchanged. The existing shared
 result fields remain daily energy-only. The detailed result is EE-local pending
 team agreement; it adds solver metadata, status/failure details and comparisons.
-`POST /api/optimize` calls this EV-only adapter; it does not enable the optional
-joint mode described below. Older foundation documentation calling the engine or
+`POST /api/optimize` defaults to EV-only; `?scheduling_mode=joint` now enables
+joint scheduling through the extended adapter (see the adapter handoff below).
+Older foundation documentation calling the engine or
 route a stub is superseded by the implemented integration. For a feasible optimized shared result,
 `constraint_violations` is empty even when its uncontrolled baseline exceeded the
 cap; call `simulate_baseline` for baseline violations or use the detailed engine,
@@ -282,15 +283,16 @@ Optional flexible-equipment optimization is available in the detailed engine
 as described below. Overnight windows,
 charger assignment, losses, solar/storage/export, thermal/comfort optimization,
 real tariff billing intervals and live utility integration remain unsupported.
-The shared API remains EV-only; no API/frontend or AI change is needed to use
-the optional engineering mode locally.
+The shared API defaults to EV-only; the explicit joint option is covered in the
+adapter handoff below.
 
 ## Optional joint EV and flexible-equipment optimization
 
 Implemented on `feature/joint-flexible-load-optimization`, starting from main
 `8180e09aee27c452de9ef32f989243806dc3e3b1` (PR #11). A fresh fetch found no newer
-main revision. This is a local detailed-engine capability, not an enabled
-dashboard, What-if or AI feature.
+main revision at that milestone. Initially this was a local detailed-engine
+capability. The later shared-adapter handoff below records local HTTP verification;
+it does not establish deployed or browser acceptance.
 
 Enable it explicitly on the existing engine:
 
@@ -405,11 +407,136 @@ semantics. Both flagged and original unflagged CLI runs succeeded. This workspac
 used `/tmp/gridpilot-joint-venv` installed from `backend/requirements-lock.txt`;
 the full TestClient suite required execution outside the sandbox as before.
 
-Richard would need a separately agreed application mode selector, API mapping,
-frontend labeling and mode-aware AI explanations before exposing joint scheduling
-to dashboard users. He should preserve the current default and carry mode
-provenance through comparisons so an EV-only result is not described as joint.
-No frontend, AI, API route, HTTP schema or deployment setting changed here.
+PR #18 subsequently added the application mode selector, API dispatch, result
+labels and What-if mode provenance. AI remains disabled in joint mode because
+its existing explanation path recomputes EV-only results. The original joint
+engine milestone changed no frontend, AI, API route, HTTP schema or deployment
+setting; the adapter follow-up below completes its missing Python dependency.
+
+## Shared joint adapter: engineering handoff
+
+Branch `feature/joint-optimizer-adapter` starts from latest fetched main
+`87b9293efbfa15731e093316a6211fc2ccc936bc` (PR #22). On October 29, 2026,
+PRs #12/#18, open PRs and published remote branch adapters were checked: no
+extended adapter was present. The only runtime change is in
+`backend/optimizer/interface.py`:
+
+```python
+def optimize_scenario(
+    scenario: Scenario, *, optimize_flexible: bool = False,
+) -> OptimizationResult:
+    ...
+```
+
+It forwards the keyword to the existing `solve_ev_charging` core. Omitted/False
+remains EV-only; True enables its verified joint mode. Baseline simulation,
+shared Scenario/OptimizationResult schemas, energy-only cost fields, independent
+verification and typed exceptions are unchanged. The detailed tariff objective
+is not passed into the shared adapter. No solver, simulator, API route, frontend,
+Meta code, dependency or deployment configuration was modified.
+
+### Measured direct-adapter and local HTTP results
+
+All three existing `joint_demonstration_configs()` were exercised in both modes:
+
+| Fixture | Mode | Feasibility | Optimized kWh | Energy USD | Peak kW |
+| --- | --- | --- | ---: | ---: | ---: |
+| `joint_recovery` | EV-only | Infeasible | null | null | null |
+| `joint_recovery` | Joint | Feasible | 28 | 5.600000000 | 3 |
+| `joint_price_shift` | EV-only | Feasible | 26 | 7.900000000 | 3 |
+| `joint_price_shift` | Joint | Feasible | 26 | 7.300000100 | 2.999999667 |
+| `joint_infeasible` | EV-only | Infeasible | null | null | null |
+| `joint_infeasible` | Joint | Infeasible | null | null | null |
+
+Uncontrolled baselines are identical across modes: recovery 28 kWh/$5.60/5 kW,
+price shift 26 kWh/$7.90/3 kW, and shared shortage 29 kWh/$5.80/5 kW. The
+recovery/shortage baselines violate the cap. Joint recovery runs EV 2 kW in hour
+0 and equipment 2 kW in hour 1. Joint shortage reports 5 kWh required against
+4 kWh shared capacity; no optimized metrics or savings are fabricated.
+The existing objective allowance is $1e-7; cost comparisons allow $2e-7 and
+power/energy comparisons allow 1e-6 kW/kWh. Equivalent optimum schedules need
+not have identical arrays.
+
+### Verification executed
+
+- Initial targeted adapter/API run: 63 passed. After adding baseline numerical
+  assertions and solver-to-HTTP fault checks, the full backend suite: **226
+  passed, no skipped tests**, one existing Starlette/httpx TestClient deprecation
+  warning. The suite includes 30 new adapter/API cases, the existing 38 joint
+  optimizer cases, simulator, independent verification and application tests.
+- Real OR-Tools/adapter tests check default/False compatibility, all three joint
+  examples, unchanged baseline and fixed profiles, per-item energy/power/windows,
+  site cap and independently recomputed aggregate cost/energy/peak. Per-item
+  schedules are checked through the existing detailed engine because the shared
+  HTTP response exposes aggregates only.
+- Fault injection at solver/extraction boundaries verifies typed unresolved,
+  abnormal/invalid/unbounded/unavailable and verification errors through the real
+  adapter; HTTP remains sanitized 503/500 rather than infeasibility or zero cost.
+  A secondary timeout retains the independently verified primary result. Existing
+  mocked route-dispatch/error tests remain distinct from numerical acceptance.
+  The legacy missing-signature guard test now injects a legacy-signature adapter.
+- Existing `scripts/verify_joint_http.py`: exit 0; three joint numerical PASS
+  messages, omitted/explicit EV-only compatibility and unknown-mode HTTP 422.
+  Existing `scripts/verify_optimizer_http.py`: exit 0; all three legacy cases
+  matched direct optimizer metrics.
+- Six additional real HTTP/direct comparisons (three fixtures × two modes) all
+  passed feasibility, baseline, cost, energy, peak and null/reason checks, with
+  aggregate arithmetic independently recomputed from actual HTTP demand arrays.
+  FastAPI recognizes the extended signature with its existing route unchanged.
+- These are **local** results. Browser selector/What-if acceptance, exact submitted
+  dashboard scenarios, production deployment and hosted acceptance remain pending.
+
+Reproduce from repository root with the existing backend environment:
+
+```bash
+backend/.venv/bin/python -m pytest backend/tests/test_optimizer_adapter.py backend/tests/test_api.py -q
+backend/.venv/bin/python -m pytest backend/tests -q
+# Separate terminal; optional Meta diagnostics are not needed for optimization:
+MODEL_API_DIAGNOSTIC_ON_STARTUP=0 backend/.venv/bin/python -m uvicorn backend.main:app --host 127.0.0.1 --port 8000
+# With that real server running:
+backend/.venv/bin/python scripts/verify_joint_http.py
+backend/.venv/bin/python scripts/verify_optimizer_http.py
+```
+
+### Richard's review and application acceptance steps
+
+1. Review the focused adapter/test/doc diff and merge after backend checks pass;
+   the existing FastAPI route needs no runtime change. Its signature guard may
+   remain as a defensive compatibility check. Do not treat local verification as
+   deployment acceptance.
+2. On the merged revision, run the commands above. Require all three joint HTTP
+   demonstrations to pass with exit 0, including reasons/nulls for infeasibility.
+3. Start the existing Vite frontend (`npm --prefix frontend run dev -- --host
+   127.0.0.1`). Exercise EV-only and joint selectors with the real backend. Check
+   the submitted `scheduling_mode`, displayed result mode, numerical metrics and
+   invalidation after a mode/input change. Keep the current joint-mode AI guard.
+4. Compare current/alternative in What-if with joint selected. Confirm both
+   sequential requests use joint and their exact submitted snapshots; check
+   feasible/infeasible rendering, comparison direction, staleness and mode changes.
+   Run frontend tests/build as part of this application acceptance.
+5. Update `scripts/verify_joint_browser.cjs` before using it for joint acceptance:
+   it still asserts the historical 503 `joint_adapter_unavailable`. Replace that
+   dependency expectation with genuine joint success and comparisons to direct
+   `optimize_scenario(..., optimize_flexible=True)` calls. This EE PR intentionally
+   leaves browser tooling/application acceptance to the application owner.
+6. Capture the exact POST Scenario bodies, query modes and real responses from
+   browser Network tools for ordinary and both What-if submissions. Send those
+   JSON captures and displayed metrics back to shaJ46 for independent engineering
+   acceptance, including per-item checks through the existing detailed engine.
+   The tiny engineering fixtures differ from dashboard default fixed profiles.
+7. After that acceptance, deploy the accepted merged revision using the existing
+   Render/Vercel workflow; do not change production settings for this adapter.
+8. Verify the hosted selector, real joint optimization, What-if, failure display
+   and invalidation against the captured accepted scenarios. Record the deployed
+   revision and distinguish hosted evidence from these local results.
+
+No new modeling restrictions or engineering blockers were found. The existing
+interruptible/continuous equipment semantics, one abstract 24-hour day, one-hour
+intervals, exclusive same-day windows, fixed background/HVAC, grid-side EV energy,
+no startup/minimum-runtime or thermal-comfort model, and hourly-versus-billing-peak
+limitations remain. The prior PR #18 dependency report in
+`docs/joint-application-integration.md` is historical; this adapter removes that
+dependency locally, pending review/merge and application/hosted acceptance.
 
 ### EV milestone verification
 
