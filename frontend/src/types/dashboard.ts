@@ -38,8 +38,9 @@ export interface SimulationResult {
 }
 export type ScenarioField = keyof Omit<ScenarioEditor, 'demandProfile'>
 export interface DemandProfile {
-  mode: 'demo' | 'custom'
+  mode: 'demo' | 'custom' | 'sources'
   values: string[]
+  sources?: { category: string; values: string[] }[]
 }
 export interface ScenarioEditor {
   demandProfile?: DemandProfile

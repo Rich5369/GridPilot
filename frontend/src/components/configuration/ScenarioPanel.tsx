@@ -29,7 +29,7 @@ const groups: {
     ],
   },
   {
-    title: 'Workplace EV charging',
+    title: 'Vehicle charging (optional · use 0 chargers to disable)',
     fields: [
       ['chargers', 'Active chargers (0–2)'],
       ['chargerPower', 'Power per charger (kW)', '0.1'],
@@ -39,7 +39,7 @@ const groups: {
     ],
   },
   {
-    title: 'Flexible equipment',
+    title: 'Shiftable equipment (0 duration disables)',
     fields: [
       ['equipmentPower', 'Maximum power (kW)', '0.1'],
       ['duration', 'Full-power duration (hours)', '0.1'],

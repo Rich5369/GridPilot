@@ -99,7 +99,7 @@ export function WhatIf({ mode = 'ev_only', modeRevision = 0, editor, onChange, a
               <dt>Optimized total electricity consumption</dt><dd>{result.optimized_demand_kw === null ? 'Unavailable' : `${result.optimized_demand_kw.reduce((a, b) => a + b, 0).toFixed(2)} kWh`}</dd>
               <dt>Constraint violations reported by solver</dt><dd>{result.constraint_violations.length ? result.constraint_violations.join('; ') : 'None'}</dd>
             </dl>
-            <Comparison result={result} stale={false} />
+            <Comparison limit={Number((i === 0 ? editor : alternative).limit)} result={result} stale={false} />
           </>}
         </article>)}</div>
         <h3>Between scenarios: alternative minus current</h3>

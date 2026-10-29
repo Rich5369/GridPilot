@@ -1,21 +1,14 @@
-import {
-  CartesianGrid,
-  Legend,
-  Line,
-  LineChart,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from 'recharts'
+import { DemandChart } from '../DemandChart'
 import { GitCompareArrows } from 'lucide-react'
 import type { OptimizationResult } from '../../types/api'
 import { money } from '../../data/demoScenario'
 export function Comparison({
   result,
   stale,
+  limit,
 }: {
   result: OptimizationResult | null
+  limit?: number
   stale: boolean
 }) {
   return (
@@ -108,41 +101,9 @@ export function Comparison({
             Costs are in USD. Positive differences indicate reductions. Energy-only costs exclude
             fixed and demand charges.
           </p>
-          <div className="chart">
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart
-                data={result.baseline_demand_kw.map((baseline, h) => ({
-                  hour: `${String(h).padStart(2, '0')}:00`,
-                  baseline,
-                  optimized: result.optimized_demand_kw?.[h],
-                }))}
-              >
-                <CartesianGrid vertical={false} stroke="#e5ebe8" />
-                <XAxis dataKey="hour" interval={3} tick={{ fontSize: 11 }} />
-                <YAxis unit=" kW" width={65} tick={{ fontSize: 11 }} />
-                <Tooltip
-                  formatter={(v, name) => [`${Number(v).toFixed(2)} kW`, name]}
-                />
-                <Legend />
-                <Line
-                  dataKey="baseline"
-                  name="Baseline demand"
-                  stroke="#8996a5"
-                  dot={false}
-                  type="stepAfter"
-                  isAnimationActive={false}
-                />
-                <Line
-                  dataKey="optimized"
-                  name="Optimized demand"
-                  stroke="#0d9488"
-                  dot={false}
-                  type="stepAfter"
-                  isAnimationActive={false}
-                />
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
+          <DemandChart title="Baseline versus optimized demand" limit={limit}
+            total={{ key: result.optimized_demand_kw ? 'optimized' : 'baseline', label: result.optimized_demand_kw ? 'Optimized demand' : 'Baseline demand', values: result.optimized_demand_kw ?? result.baseline_demand_kw }}
+            baseline={result.optimized_demand_kw ? { key: 'baseline', label: 'Baseline demand', values: result.baseline_demand_kw } : undefined} />
           {result.constraint_violations.length > 0 && (
             <ul className="violations">
               {result.constraint_violations.map((v, i) => (
