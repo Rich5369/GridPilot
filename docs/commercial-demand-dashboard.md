@@ -107,3 +107,30 @@ PRs #20 and #21 are both merged and preserved. Joint scheduling still depends on
 The present result contract supports total-only optimized comparisons. Per-source
 optimized schedules would require an engineering-owned contract extension.
 No merge or deployment is performed.
+
+## Follow-up: blank plot after release
+
+A mobile-overflow rule in the original change applied `max-width: 100%` to
+`.recharts-wrapper`. Recharts puts that measured, fixed-width wrapper inside a
+zero-width, overflow-visible sizing element. The percentage constraint therefore
+collapsed the wrapper and plot to zero width. Its legend and SVG paths still
+existed, which let the original DOM-presence checks pass. This is a presentation
+bug; demo data and numerical calculations were intact.
+
+The fix removes the constraint from the plot wrapper and keeps it on the legend.
+At 1920px viewport width, the reproduced production chart SVG went from 0px to
+886px wide; the demand curve occupies 810px. The mobile viewport remains free of
+horizontal overflow. No React, data, API, optimizer or Meta integration code changes.
+
+The commercial browser suite now calls `scripts/chart-rendering.cjs` before
+capturing the overview, source breakdown, draft preview and backend comparison.
+It checks actual screen-space SVG and curve dimensions and axis ticks, rather than
+just mounted nodes. Restoring the original CSS makes that guard fail; removing it
+passes. The suite was run against `vite preview` serving the production bundle
+at 4176, with the unchanged backend at 8006 (CORS configured for 4176), including
+1440/768/390px viewports. The original custom-demand regression was also rerun
+against that production build. All after screenshots above are refreshed from
+the corrected production build.
+
+[Reproduced blank chart](screenshots/demand-chart-zero-width-before.png) ·
+[Corrected production chart](screenshots/demand-chart-zero-width-after.png).

@@ -3,6 +3,7 @@ const { chromium } = require('playwright')
 const assert = require('node:assert/strict')
 const fs = require('node:fs/promises')
 const { isEvOnlyOptimization } = require('./browser-api.cjs')
+const { assertChartRendered } = require('./chart-rendering.cjs')
 const near = (a, b) => assert(Math.abs(a - b) < 1e-6, `${a} != ${b}`)
 ;(async () => {
   const browser = await chromium.launch({ headless: true })
@@ -29,7 +30,7 @@ const near = (a, b) => assert(Math.abs(a - b) < 1e-6, `${a} != ${b}`)
           () => document.documentElement.scrollWidth <= innerWidth,
         ),
       )
-    await page.locator('.recharts-surface').first().waitFor()
+    await assertChartRendered(page)
     await page.screenshot({
       path: 'docs/screenshots/commercial-after-desktop.png',
       fullPage: true,
@@ -44,9 +45,8 @@ const near = (a, b) => assert(Math.abs(a - b) < 1e-6, `${a} != ${b}`)
       .waitFor()
     for (const width of [768, 390]) {
       await page.setViewportSize({ width, height: 1000 })
+      await assertChartRendered(page)
       await noOverflow()
-      await page.waitForTimeout(200)
-      await page.waitForTimeout(200)
       await page.screenshot({
         path: `docs/screenshots/commercial-total-${width}.png`,
         fullPage: true,
@@ -65,6 +65,7 @@ const near = (a, b) => assert(Math.abs(a - b) < 1e-6, `${a} != ${b}`)
     await box.focus()
     await page.keyboard.press('Space')
     assert(!(await box.isChecked()))
+    await assertChartRendered(page)
     await page.screenshot({
       path: 'docs/screenshots/commercial-after-breakdown.png',
       fullPage: true,
@@ -99,8 +100,8 @@ const near = (a, b) => assert(Math.abs(a - b) < 1e-6, `${a} != ${b}`)
     assert.equal(await page.locator('.hourly-table tbody tr').count(), 24)
     for (const width of [1440, 768, 390]) {
       await page.setViewportSize({ width, height: 1000 })
+      await assertChartRendered(page)
       await noOverflow()
-      await page.waitForTimeout(200)
       await page.screenshot({
         path: `docs/screenshots/commercial-sources-${width}.png`,
         fullPage: true,
@@ -152,6 +153,7 @@ const near = (a, b) => assert(Math.abs(a - b) < 1e-6, `${a} != ${b}`)
       .locator('.comparison')
       .getByText('Optimized demand', { exact: true })
       .waitFor()
+    await assertChartRendered(page)
     await page.screenshot({
       path: 'docs/screenshots/commercial-after-result.png',
       fullPage: true,
