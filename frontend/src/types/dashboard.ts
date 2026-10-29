@@ -36,7 +36,13 @@ export interface SimulationResult {
   energyCostUsd: number
   peakKw: number
 }
+export type ScenarioField = keyof Omit<ScenarioEditor, 'demandProfile'>
+export interface DemandProfile {
+  mode: 'demo' | 'custom'
+  values: string[]
+}
 export interface ScenarioEditor {
+  demandProfile?: DemandProfile
   opening: string
   closing: string
   limit: string

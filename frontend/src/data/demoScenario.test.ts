@@ -108,3 +108,30 @@ it('does not display negative zero for sub-cent solver differences', async () =>
   expect(money(-0.0000001)).toBe('$0.00')
   expect(money(-0.01)).toBe('-$0.01')
 })
+
+describe('custom fixed demand', () => {
+  const profile = Array.from({ length: 24 }, (_, hour) => String(hour / 4))
+  it('replaces combined demo loads exactly, without changing tariffs or equipment', () => {
+    const original = toScenario(defaultEditor)
+    const custom = toScenario({ ...defaultEditor, demandProfile: { mode: 'custom', values: profile } })
+    expect(custom).toEqual({ ...original, fixed_demand_kw: profile.map(Number) })
+    expect(custom.fixed_demand_kw[0]).toBe(0)
+    expect(custom.fixed_demand_kw[10]).toBe(2.5)
+    expect(profile[10]).toBe('2.5')
+    expect(toScenario({ ...defaultEditor, demandProfile: { mode: 'demo', values: profile } })).toEqual(original)
+  })
+  it.each(['', '-1', 'NaN', 'Infinity', '1e999'])('rejects invalid hourly input %s', value => {
+    const values = [...profile]; values[12] = value
+    const editor = { ...defaultEditor, demandProfile: { mode: 'custom' as const, values } }
+    expect(validateEditor(editor).demandProfile).toBeTruthy()
+    expect(() => toScenario(editor)).toThrow()
+  })
+  it.each([0, 23, 25])('rejects %i hourly values', length => {
+    expect(() => toScenario({ ...defaultEditor, demandProfile: { mode: 'custom', values: Array(length).fill('1') } })).toThrow()
+  })
+  it('uses custom values for fixed-load feasibility warnings', () => {
+    const editor = { ...defaultEditor, demandProfile: { mode: 'custom' as const, values: Array(24).fill('30') } }
+    expect(feasibilityWarnings(editor)).toEqual([expect.stringContaining('Fixed demand exceeds')])
+    expect(toScenario(editor).fixed_demand_kw).toEqual(Array(24).fill(30))
+  })
+})
