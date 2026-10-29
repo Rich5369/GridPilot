@@ -2,6 +2,7 @@
 
 Run with a local backend on port 8000. No AI credentials are used.
 """
+import argparse
 import sys
 from pathlib import Path
 
@@ -12,8 +13,15 @@ from backend.optimizer.__main__ import joint_demonstration_configs
 
 
 def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--base-url', default='http://127.0.0.1:8000',
+                        help='Backend origin (default: %(default)s)')
+    args = parser.parse_args()
+    if not __debug__:
+        parser.error('Run without -O or PYTHONOPTIMIZE: numerical checks require assertions')
+    print(f'Target: {args.base_url}/api/optimize', flush=True)
     missing = False
-    with httpx.Client(base_url='http://127.0.0.1:8000', timeout=45) as client:
+    with httpx.Client(base_url=args.base_url, timeout=45) as client:
         for name, config in joint_demonstration_configs().items():
             body = config.scenario.model_dump(mode='json')
             omitted = client.post('/api/optimize', json=body)

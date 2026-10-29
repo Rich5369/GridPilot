@@ -112,14 +112,15 @@ const near = (actual, expected) => assert(Math.abs(actual - expected) < 1e-6, `$
     assert.equal(await input(10).inputValue(), '11.5')
     await nav('What-if scenarios'); await click('Restore starting scenario'); await nav('Scenario configuration')
     assert.equal(await input(10).inputValue(), String(values[10]))
-    // Mode changes preserve the profile; missing joint adapter is explicit.
+    // Mode changes preserve the profile and execute real joint optimization.
     await page.locator('#scheduling-mode').selectOption('joint')
     assert.equal(await input(10).inputValue(), String(values[10]))
     const joint = await optimize(isJointOptimization)
-    assert.equal(joint.status(), 503)
-    assert.equal((await joint.json()).detail.code, 'joint_adapter_unavailable')
+    const jointCustom = await check(joint)
+    await page.getByText('Displayed result mode: EV + flexible equipment', { exact: true }).waitFor()
     assert.deepEqual(joint.request().postDataJSON().fixed_demand_kw, values)
     await page.locator('#scheduling-mode').selectOption('ev_only')
+    await nav('Scenario configuration')
     await fillHour(0, '30')
     const infeasible = await optimize()
     assert.equal(infeasible.status(), 200)
@@ -134,7 +135,7 @@ const near = (actual, expected) => assert(Math.abs(actual - expected) < 1e-6, `$
     const reset = await check(await optimize())
     assert.deepEqual(reset.scenario, original.scenario)
     assert.deepEqual(errors, [])
-    await fs.writeFile(`${output}/verified-results.json`, JSON.stringify({ original, custom, pair, infeasible: bad }, null, 2))
-    console.log('PASS: default behavior, keyboard profile selection/expansion, 24 exact values without double counting, validation, real baseline and optimized calculations, stale results, independent What-if payloads/apply/restore, joint propagation/dependency, infeasibility, reset, responsive layouts and no page errors.')
+    await fs.writeFile(`${output}/verified-results.json`, JSON.stringify({ original, custom, jointCustom, pair, infeasible: bad }, null, 2))
+    console.log('PASS: default behavior, keyboard profile selection/expansion, 24 exact values without double counting, validation, real baseline and optimized calculations, stale results, independent What-if payloads/apply/restore, real joint custom-profile optimization, infeasibility, reset, responsive layouts and no page errors.')
   } finally { await browser.close() }
 })().catch(error => { console.error(error); process.exitCode = 1 })
