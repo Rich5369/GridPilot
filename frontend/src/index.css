@@ -664,3 +664,11 @@ legend { font-size: 13px; font-weight: 650; padding: 0 8px; }
 .assistant dl, .assistant [aria-label="Result explanation"] { font-size: 14px; line-height: 1.7; }
 .assistant [aria-label="Result explanation"] p { margin-top: 12px; }
 .assistant .tag { white-space: normal; }
+
+/* What-if comparisons: two columns on desktop, stacked on smaller screens. */
+.what-if-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; margin: 20px 0; }
+.what-if-grid article { min-width: 0; }
+.what-if-grid .comparison-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.what-if-totals dd { margin: 4px 0 14px; font-weight: 600; }
+.what-if .ai-actions { flex-wrap: wrap; }
+@media (max-width: 900px) { .what-if-grid { grid-template-columns: minmax(0, 1fr); } }

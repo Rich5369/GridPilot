@@ -67,6 +67,8 @@ export function Dashboard() {
   const [view, setView] = useState<string>('overview')
   const [editor, setEditor] = useState({ ...defaultEditor })
   const [alternative, setAlternative] = useState<ScenarioEditor | null>(null)
+  // An AI handoff starts a new comparison and captures the current Restore snapshot.
+  const [whatIfSession, setWhatIfSession] = useState(0)
   const [whatIfVisited, setWhatIfVisited] = useState(false)
   const [result, setResult] = useState<OptimizationResult | null>(null)
   const [submitted, setSubmitted] = useState('')
@@ -303,9 +305,9 @@ export function Dashboard() {
               />
             </Suspense>
           )}
-          {whatIfVisited && <div hidden={view !== 'whatif'}><Suspense fallback={<p role="status">Loading what-if comparison…</p>}><WhatIf modeRevision={modeRevision} mode={mode} editor={editor} onChange={setEditor} alternative={alternative} setAlternative={setAlternative} busy={busy} acquire={() => { if (inFlight.current) return false; inFlight.current = true; setBusy(true); return true }} release={() => { inFlight.current = false; setBusy(false) }} /></Suspense></div>}
+          {whatIfVisited && <div hidden={view !== 'whatif'}><Suspense fallback={<p role="status">Loading what-if comparison…</p>}><WhatIf key={whatIfSession} modeRevision={modeRevision} mode={mode} editor={editor} onChange={setEditor} alternative={alternative} setAlternative={setAlternative} busy={busy} acquire={() => { if (inFlight.current) return false; inFlight.current = true; setBusy(true); return true }} release={() => { inFlight.current = false; setBusy(false) }} /></Suspense></div>}
           {view === 'assistant' && mode === 'joint' && <p role="status">AI actions are disabled for joint scheduling because AI explanations currently recompute EV-only results. Select EV-only to use the assistant.</p>}
-          {view === 'assistant' && mode === 'ev_only' && <EnergyAssistant onCompareProposal={next => { setAlternative(next); setWhatIfVisited(true); setView('whatif') }} editor={editor} onChange={setEditor} resultScenario={resultScenario} />}
+          {view === 'assistant' && mode === 'ev_only' && <EnergyAssistant onCompareProposal={next => { setWhatIfSession(session => session + 1); setAlternative(next); setWhatIfVisited(true); setView('whatif') }} editor={editor} onChange={setEditor} resultScenario={resultScenario} />}
           <footer>
             <span>GridPilot · Commercial energy intelligence</span>
             <span>
