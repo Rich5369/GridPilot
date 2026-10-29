@@ -3,6 +3,7 @@ import { act } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 import { Dashboard } from './Dashboard'
+import { defaultEditor, toScenario } from '../data/demoScenario'
 vi.mock('../components/EnergyChart', () => ({
   EnergyChart: () => <div>24-hour chart</div>,
 }))
@@ -122,4 +123,49 @@ it('discards late results after a mode change and disables joint AI actions', as
   expect(container.textContent).not.toContain('Displayed result mode')
   await click('AI assistant')
   expect(container.textContent).toContain('AI actions are disabled for joint scheduling')
+})
+
+it.each([false, true])('restores the AI handoff snapshot and isolates old responses (pending comparison: %s)', async pendingComparison => {
+  await act(async () => root.render(<Dashboard />))
+  await click('What-if scenarios')
+  await act(async () => { await import('../components/dashboard/WhatIf') })
+  await click('Create alternative from current')
+  await input('alternative-limit', '10')
+  let finishOldComparison!: (response: Response) => void
+  if (pendingComparison) {
+    fetchMock.mockImplementationOnce(() => new Promise(resolve => { finishOldComparison = resolve }))
+    await click('Compare both scenarios')
+  }
+  await click('Scenario configuration')
+  await input('limit', '20')
+  await click('AI assistant')
+  fetchMock.mockResolvedValueOnce(new Response(JSON.stringify({
+    source: 'mock', status: 'proposed', message: 'Deterministic proposal',
+    changes: { building_max_demand_kw: 15 },
+    proposed_scenario: toScenario({ ...defaultEditor, limit: '15' }),
+  })))
+  await click('Keep peak power demand below 15 kW.')
+  await click('Review proposed changes')
+  await click('Compare as alternative')
+  expect(container.querySelector<HTMLInputElement>('#alternative-limit')!.value).toBe('15')
+  if (pendingComparison) {
+    const oldResult = {
+      feasibility_status: 'feasible', baseline_electricity_cost_usd: 20,
+      optimized_electricity_cost_usd: 18, baseline_peak_demand_kw: 3,
+      optimized_peak_demand_kw: 2, baseline_demand_kw: Array(24).fill(3),
+      optimized_demand_kw: Array(24).fill(2), constraint_violations: [],
+    }
+    fetchMock.mockResolvedValueOnce(new Response(JSON.stringify(oldResult)))
+    await act(async () => finishOldComparison(new Response(JSON.stringify(oldResult))))
+    expect(container.querySelector('[aria-label="Business what-if comparison"]')!.textContent).not.toContain('Backend result')
+    expect(container.textContent).not.toContain('Between scenarios: alternative minus current')
+  }
+  await click('Apply alternative to current')
+  await click('Scenario configuration')
+  expect(container.querySelector<HTMLInputElement>('#limit')!.value).toBe('15')
+  await click('What-if scenarios')
+  await click('Restore starting scenario')
+  await click('Scenario configuration')
+  expect(container.querySelector<HTMLInputElement>('#limit')!.value).toBe('20')
+  expect(container.querySelector<HTMLSelectElement>('#scheduling-mode')!.value).toBe('ev_only')
 })

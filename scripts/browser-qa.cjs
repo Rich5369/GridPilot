@@ -2,6 +2,7 @@
 // Install Playwright outside application dependencies and run both dev servers first.
 const { chromium } = require('playwright')
 const assert = require('node:assert/strict')
+const { isEvOnlyOptimization } = require('./browser-api.cjs')
 const fs = require('node:fs/promises')
 const output = process.env.GRIDPILOT_QA_OUTPUT || '/tmp/gridpilot-phase35-qa'
 ;(async () => {
@@ -23,7 +24,7 @@ const output = process.env.GRIDPILOT_QA_OUTPUT || '/tmp/gridpilot-phase35-qa'
   await page.getByRole('button', { name: 'Reset to Default Scenario' }).click()
   await page.locator('#limit').fill('20')
   await page.locator('#evEnergy').fill('18')
-  const responsePromise = page.waitForResponse(r => r.url().endsWith('/api/optimize') && r.request().method() === 'POST')
+  const responsePromise = page.waitForResponse(r => isEvOnlyOptimization(r) && r.request().method() === 'POST')
   await run().click()
   const response = await responsePromise
   assert.equal(response.status(), 200)
@@ -55,7 +56,7 @@ const output = process.env.GRIDPILOT_QA_OUTPUT || '/tmp/gridpilot-phase35-qa'
   await nav('Optimization')
   await comparison.getByText('Inputs have changed.', { exact: false }).waitFor()
   await nav('Scenario configuration')
-  const badResponse = page.waitForResponse(r => r.url().endsWith('/api/optimize'))
+  const badResponse = page.waitForResponse(r => isEvOnlyOptimization(r))
   await run().click()
   const bad = await (await badResponse).json()
   assert.equal(bad.feasibility_status, 'infeasible')
@@ -68,7 +69,7 @@ const output = process.env.GRIDPILOT_QA_OUTPUT || '/tmp/gridpilot-phase35-qa'
   await page.getByRole('button', { name: 'Reset to Default Scenario' }).click()
   // Hold a genuine backend response for six seconds to verify the former 5s boundary.
   let count = 0
-  await page.route('**/api/optimize', async route => {
+  await page.route(isEvOnlyOptimization, async route => {
     count++
     const real = await route.fetch()
     await new Promise(resolve => setTimeout(resolve, 6000))
@@ -83,27 +84,32 @@ const output = process.env.GRIDPILOT_QA_OUTPUT || '/tmp/gridpilot-phase35-qa'
   await run().waitFor({ timeout: 10000 })
   assert.equal(count, 1)
   await comparison.getByText('Feasible — reported by backend', { exact: false }).waitFor()
-  await page.unroute('**/api/optimize')
+  await page.unroute(isEvOnlyOptimization)
   // Fault injection only: successful/infeasible results above came from real GLOP.
   for (const status of [422, 503, 500]) {
-    await page.route('**/api/optimize', route => route.fulfill({ status, contentType: 'application/json', body: JSON.stringify({ detail: { code: 'test_failure' } }) }))
+    let intercepted = 0
+    await page.route(isEvOnlyOptimization, route => {
+      intercepted++
+      return route.fulfill({ status, contentType: 'application/json', body: JSON.stringify({ detail: { code: 'test_failure' } }) })
+    })
     await run().click()
     await page.getByRole('status').filter({ hasText: `HTTP ${status}` }).waitFor()
     assert(await run().isEnabled())
-    await page.unroute('**/api/optimize')
+    assert.equal(intercepted, 1)
+    await page.unroute(isEvOnlyOptimization)
   }
-  await page.route('**/api/optimize', route => route.abort())
+  await page.route(isEvOnlyOptimization, route => route.abort())
   await run().click()
   await page.getByRole('status').filter({ hasText: 'unavailable or timed out' }).waitFor()
-  await page.unroute('**/api/optimize')
+  await page.unroute(isEvOnlyOptimization)
   // Exercise the native browser AbortSignal timeout, with no fabricated response.
-  await page.route('**/api/optimize', () => {})
+  await page.route(isEvOnlyOptimization, () => {})
   await run().click()
   await page.getByRole('status').filter({ hasText: 'timed out after 45 seconds' }).waitFor({ timeout: 50000 })
   assert(await run().isEnabled())
   await page.screenshot({ path: `${output}/timeout.png`, fullPage: true })
-  await page.unroute('**/api/optimize')
-  const recoveryResponse = page.waitForResponse(r => r.url().endsWith('/api/optimize') && r.status() === 200)
+  await page.unroute(isEvOnlyOptimization)
+  const recoveryResponse = page.waitForResponse(r => isEvOnlyOptimization(r) && r.status() === 200)
   await run().click()
   await recoveryResponse
   await page.getByRole('status').filter({ hasText: 'Backend result received' }).waitFor()

@@ -1,14 +1,15 @@
 // Local frontend :5173 and genuine optimizer :8000. No AI credentials required.
 const { chromium } = require('playwright')
 const assert = require('node:assert/strict')
+const { isEvOnlyOptimization, isJointOptimization } = require('./browser-api.cjs')
 ;(async () => {
   const browser = await chromium.launch({ headless: true })
   try {
     const page = await browser.newPage({ viewport: { width: 1440, height: 1000 } })
     const errors = [], submissions = [], responses = []
     page.on('pageerror', e => errors.push(e.message))
-    page.on('request', r => { if (r.url().endsWith('/api/optimize')) submissions.push(r.postDataJSON()) })
-    page.on('response', async r => { if (r.url().endsWith('/api/optimize') && r.status() === 200) responses.push(await r.json()) })
+    page.on('request', r => { if (isEvOnlyOptimization(r)) submissions.push(r.postDataJSON()) })
+    page.on('response', async r => { if (isEvOnlyOptimization(r) && r.status() === 200) responses.push(await r.json()) })
     await page.goto('http://127.0.0.1:5173')
     const click = name => page.getByRole('button', { name, exact: true }).click()
     const nav = name => page.getByRole('navigation').getByRole('button', { name, exact: true }).click()
@@ -29,6 +30,28 @@ const assert = require('node:assert/strict')
     for (let i=0; i<2; i++) {
       const article = page.locator('.what-if-grid article').nth(i)
       assert((await article.innerText()).includes(new Intl.NumberFormat('en-US',{ style:'currency',currency:'USD' }).format(responses[i].optimized_electricity_cost_usd)))
+    }
+    for (const width of [1440, 1024, 768, 390]) {
+      await page.setViewportSize({ width, height: 1000 })
+      await page.waitForTimeout(250)
+      assert(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), `Overflow at ${width}`)
+      const articles = await page.locator('.what-if-grid article').evaluateAll(nodes => nodes.map(node => {
+        const { x, y, width } = node.getBoundingClientRect()
+        return { x, y, width }
+      }))
+      assert.equal(articles.length, 2)
+      if (width > 900) {
+        assert.equal(articles[0].y, articles[1].y, `Side by side at ${width}`)
+        assert(articles[1].x > articles[0].x)
+      } else {
+        assert(articles[1].y > articles[0].y, `Stacked at ${width}`)
+        assert.equal(articles[0].x, articles[1].x)
+      }
+      const charts = await page.locator('.what-if-grid article .recharts-wrapper > .recharts-surface').evaluateAll(nodes => nodes.map(node => ({ width: node.getBoundingClientRect().width, height: node.getBoundingClientRect().height })))
+      assert.equal(charts.length, 2)
+      assert(charts.every(chart => chart.width > 0 && chart.height > 0), `Visible charts at ${width}`)
+      assert(await page.getByRole('button', { name: 'Compare both scenarios', exact: true }).isEnabled())
+      await page.screenshot({ path: `/tmp/gridpilot-whatif-${width}.png`, fullPage: true })
     }
     await page.setViewportSize({ width: 390, height: 844 })
     assert(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), 'Mobile overflow')
@@ -52,9 +75,9 @@ const assert = require('node:assert/strict')
     await page.locator('#alternative-deadline').fill('3')
     assert(await page.getByRole('button', { name: 'Compare both scenarios', exact: true }).isDisabled())
     await page.locator('#alternative-deadline').fill('18')
-    let active = 0, maxActive = 0
-    await page.route('**/api/optimize', async route => {
-      active++; maxActive = Math.max(maxActive, active)
+    let active = 0, maxActive = 0, intercepted = 0
+    await page.route(isEvOnlyOptimization, async route => {
+      intercepted++; active++; maxActive = Math.max(maxActive, active)
       await new Promise(resolve => setTimeout(resolve, 200))
       active--
       await route.fulfill({ status: 503, contentType: 'application/json', body: JSON.stringify({ detail: { code: 'solver_unavailable' } }) })
@@ -62,8 +85,18 @@ const assert = require('node:assert/strict')
     await click('Compare both scenarios')
     assert(await page.getByRole('button', { name: 'Compare both scenarios', exact: true }).isDisabled())
     await page.getByText('The optimization solver is unavailable or could not finish', { exact: false }).nth(1).waitFor()
+    assert.equal(intercepted, 2)
     assert.equal(maxActive, 1)
     assert.equal(await page.locator('.what-if-grid article .comparison').count(), 0)
+    await page.unroute(isEvOnlyOptimization)
+    await page.locator('#scheduling-mode').selectOption('joint')
+    const jointResponse = page.waitForResponse(isJointOptimization)
+    await click('Run optimization')
+    const joint = await jointResponse
+    assert.equal(joint.status(), 503)
+    assert.equal((await joint.json()).detail.code, 'joint_adapter_unavailable')
+    await page.getByRole('status').filter({ hasText: 'joint' }).waitFor()
+    assert.equal(submissions.length, 6, 'Joint request must not be counted as EV-only')
     assert.deepEqual(errors, [])
     console.log('PASS: genuine feasible pair, exact request configurations and returned costs, infeasible reasons/null values, stale invalidation, apply/restore, validation, sequential requests/loading/503, mobile overflow, no browser errors.')
   } finally { await browser.close() }
