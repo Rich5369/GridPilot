@@ -24,6 +24,7 @@ import {
   demoResult,
   money,
   profileSource,
+  fixedDemand,
   toScenario,
   validateEditor,
 } from '../data/demoScenario'
@@ -36,6 +37,9 @@ import {
 } from '../services/api'
 import type { ScenarioEditor } from '../types/dashboard'
 import type { Scenario, OptimizationResult } from '../types/api'
+const DemandChart = lazy(() =>
+  import('../components/DemandChart').then(module => ({ default: module.DemandChart })),
+)
 const EnergyChart = lazy(() =>
   import('../components/EnergyChart').then((module) => ({
     default: module.EnergyChart,
@@ -306,18 +310,39 @@ export function Dashboard() {
               <Suspense fallback={<p role="status">Loading comparison…</p>}>
                 <Comparison
                   result={result}
+                limit={resultScenario?.building_max_demand_kw}
                   stale={submitted !== JSON.stringify(editor)}
                 />
               </Suspense>
             </>
           )}
           {view === 'configuration' && (
-            <ScenarioPanel editor={editor} onChange={setEditor} />
+            <>
+              <ScenarioPanel editor={editor} onChange={setEditor} />
+              {!invalid && (
+                <Suspense fallback={<p role="status">Loading fixed demand chart…</p>}>
+                  <section className="panel">
+                    <h2>Fixed building demand preview</h2>
+                    <p>Draft inputs only · excludes vehicle charging and shiftable equipment schedules. Run optimization to see whole-building demand.</p>
+                    <DemandChart
+                      total={{ key: 'fixed-total', label: 'Fixed building demand', values: fixedDemand(editor) }}
+                      limit={Number(editor.limit)}
+                      sources={editor.demandProfile?.mode === 'sources'
+                        ? editor.demandProfile.sources?.map((source, i) => ({
+                            key: `source-${i}`, label: `${source.category} · fixed`, values: source.values.map(Number),
+                          }))
+                        : [{ key: 'combined', label: 'Combined / unallocated fixed demand', values: fixedDemand(editor) }]}
+                    />
+                  </section>
+                </Suspense>
+              )}
+            </>
           )}
           {view === 'comparison' && (
             <Suspense fallback={<p role="status">Loading comparison…</p>}>
               <Comparison
                 result={result}
+                limit={resultScenario?.building_max_demand_kw}
                 stale={submitted !== JSON.stringify(editor)}
               />
             </Suspense>

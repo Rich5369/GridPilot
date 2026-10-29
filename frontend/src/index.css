@@ -699,3 +699,13 @@ select:focus-visible { outline: 3px solid #0d9488; outline-offset: 3px; }
 .profile-hour-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin-top: 16px; }
 @media(max-width:1000px) { .profile-hour-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media(max-width:400px) { .profile-hour-grid { grid-template-columns: minmax(0, 1fr); } }
+
+.demand-chart-controls, .source-actions, .source-toggles { display: flex; flex-wrap: wrap; gap: 8px; margin: 16px 0; }
+.demand-chart-controls button[aria-pressed="true"] { background: #173f34; color: white; border-color: #173f34; }
+.source-toggles label { display: flex; align-items: center; gap: 6px; padding: 7px 10px; background: #f4f7f5; border-radius: 5px; font-size: 12px; }
+.source-toggles input { accent-color: #167264; }
+.source-actions button { text-align: left; }
+.chart-panel, .comparison, .panel { min-width: 0; }
+.hourly-table caption { text-align: left; padding: 12px 0; }
+.chart .recharts-wrapper, .chart .recharts-legend-wrapper { max-width: 100%; }
+.demand-profile a { text-decoration: underline; text-underline-offset: 2px; }

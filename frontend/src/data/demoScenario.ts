@@ -30,13 +30,29 @@ export const hvac = [
   0, 0, 0, 0, 0, 0, 1, 2, 4, 5, 5, 6, 6, 6, 6, 5, 5, 4, 2, 1, 0, 0, 0, 0,
 ]
 
+export const sourceCategories = [
+  'Heating, cooling and ventilation', 'Lighting', 'Refrigeration',
+  'Computers and electronics', 'Kitchen and water heating', 'Other building equipment',
+]
+
 export function fixedDemand(editor: ScenarioEditor): number[] {
+  if (editor.demandProfile?.mode === 'sources') return Array.from({ length: 24 }, (_, h) =>
+    (editor.demandProfile?.sources ?? []).reduce((sum, source) => sum + Number(source.values[h]), 0))
   return editor.demandProfile?.mode === 'custom'
     ? editor.demandProfile.values.map(Number)
     : background.map((v, h) => v + hvac[h])
 }
 
 export function demandProfileErrors(editor: ScenarioEditor): string[] {
+  if (editor.demandProfile?.mode === 'sources') {
+    const sources = editor.demandProfile.sources ?? []
+    if (!sources.length) return ['Add at least one fixed-demand source.']
+    if (new Set(sources.map(s => s.category)).size !== sources.length) return ['Use each category once.']
+    if (sources.some(s => !sourceCategories.includes(s.category))) return ['Choose a supported source category.']
+    const errors = sources.flatMap(source => demandProfileErrors({ ...editor, demandProfile: { mode: 'custom', values: source.values } }))
+    if (!fixedDemand(editor).every(Number.isFinite)) errors.push('Combined source demand must be finite.')
+    return errors
+  }
   if (editor.demandProfile?.mode !== 'custom') return []
   const values = editor.demandProfile.values
   if (values.length !== 24) return ['Enter exactly 24 hourly values.']
@@ -45,6 +61,7 @@ export function demandProfileErrors(editor: ScenarioEditor): string[] {
 }
 
 export function profileSource(editor: ScenarioEditor): string {
+  if (editor.demandProfile?.mode === 'sources') return 'User-configured named fixed-demand sources · manually entered, not verified meter data'
   return editor.demandProfile?.mode === 'custom'
     ? 'User-configured fixed demand · manually entered, not verified meter data'
     : 'Demonstration fixed demand · predetermined background + HVAC'
