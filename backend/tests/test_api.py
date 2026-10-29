@@ -181,7 +181,12 @@ def test_mode_validation_and_default_compatibility():
     assert client.post('/api/optimize?scheduling_mode=invalid', json=SAMPLE).status_code == 422
 
 
-def test_joint_missing_adapter_is_explicit():
+def test_joint_missing_adapter_is_explicit(monkeypatch):
+    from backend.api import routes
+    # Retain the compatibility guard regression using a legacy signature.
+    def legacy(scenario):
+        return optimize_scenario(scenario)
+    monkeypatch.setattr(routes, 'optimize_scenario', legacy)
     response = client.post('/api/optimize?scheduling_mode=joint', json=SAMPLE)
     assert response.status_code == 503
     assert response.json()['detail']['code'] == 'joint_adapter_unavailable'

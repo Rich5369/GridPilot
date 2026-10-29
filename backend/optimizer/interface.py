@@ -7,16 +7,18 @@ from backend.optimizer.solver import (
 from backend.simulator.interface import simulate_baseline
 
 
-def optimize_scenario(scenario: Scenario) -> OptimizationResult:
-    """Return verified EV optimization or proven infeasibility.
+def optimize_scenario(scenario: Scenario, *, optimize_flexible: bool = False) -> OptimizationResult:
+    """Return verified EV (optionally joint flexible-load) optimization or infeasibility.
 
+    Omitted/False keeps EV-only behavior; True uses the existing joint solver.
+    Both modes preserve the uncontrolled baseline and daily energy-only costs.
     Unresolved/error/verification failures raise typed exceptions, since the
     shared contract cannot represent those statuses. Baseline violations remain
     available from simulate_baseline; feasible optimized results have no violations.
     """
     scenario = Scenario.model_validate(scenario)
     baseline = simulate_baseline(scenario)
-    outcome = solve_ev_charging(scenario)
+    outcome = solve_ev_charging(scenario, optimize_flexible=optimize_flexible)
     if outcome.status not in ('optimal', 'feasible', 'infeasible'):
         error = {'unresolved': OptimizationUnresolvedError,
                  'verification_failed': OptimizationVerificationError}.get(
