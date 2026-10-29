@@ -690,3 +690,12 @@ select:focus-visible { outline: 3px solid #0d9488; outline-offset: 3px; }
 .comparison-metrics strong, .metric-value, td { font-variant-numeric: tabular-nums; }
 @media(max-width:760px) { .workflow { padding: 20px 16px; } .workflow ol { display: grid; } .workflow ol button { width: 100%; justify-content: flex-start; } .mode-control { display: flex; } }
 .action-help { margin: 0 0 20px; line-height: 1.7; text-align: left; }
+
+.demand-profile { margin: 24px 0; background: #f8faf8; }
+.demand-profile > p, .profile-hours > p, .profile-provenance { font-size: 12px; line-height: 1.8; margin: 10px 0; }
+.demand-profile select { max-width: 100%; padding: 10px; border: 1px solid #b8c9bd; border-radius: 6px; background: #fff; color: #203c34; font: inherit; font-size: 13px; }
+.profile-source { font-size: 12px; font-weight: 600; color: #375e49; }
+.profile-summary { padding: 12px; border: 1px solid #d5dfd7; border-radius: 6px; background: #fff; font-variant-numeric: tabular-nums; }
+.profile-hour-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin-top: 16px; }
+@media(max-width:1000px) { .profile-hour-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media(max-width:400px) { .profile-hour-grid { grid-template-columns: minmax(0, 1fr); } }

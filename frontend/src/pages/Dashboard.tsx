@@ -23,6 +23,7 @@ import {
   defaultEditor,
   demoResult,
   money,
+  profileSource,
   toScenario,
   validateEditor,
 } from '../data/demoScenario'
@@ -208,9 +209,13 @@ export function Dashboard() {
               <option value="ev_only">EV-only</option>
               <option value="joint">EV + flexible equipment</option>
             </select>
-            <p>{mode === 'ev_only' ? 'Moves EV charging within arrival and completion times. Equipment, background demand and HVAC stay fixed.' : 'Moves EV charging and eligible equipment within their allowed windows. Equipment can pause and vary power; uninterrupted machine cycles are not modeled. Background demand and HVAC stay fixed.'}</p>
+            <p>{mode === 'ev_only' ? 'Moves EV charging within arrival and completion times. Equipment and fixed building demand stay unchanged.' : 'Moves EV charging and eligible equipment within their allowed windows. Equipment can pause and vary power; uninterrupted machine cycles are not modeled. Fixed building demand stays unchanged.'}</p>
           </div>
-          {result && <p>Displayed result mode: {modeLabel(resultMode)}</p>}
+          <p className="profile-provenance">Draft inputs: {profileSource(editor)}. Tariffs and equipment use your scenario settings.</p>
+          {result && <>
+            <p>Displayed result mode: {modeLabel(resultMode)}</p>
+            <p className="profile-provenance">Optimizer-calculated result · Submitted inputs: {profileSource(JSON.parse(submitted))}</p>
+          </>}
           <p id="optimization-help" className="action-help">
             {busy
               ? `Optimization is running. This request can take up to ${OPTIMIZATION_TIMEOUT_MS / 1000} seconds. Please wait.`

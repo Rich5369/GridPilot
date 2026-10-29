@@ -194,3 +194,66 @@ it('guides configuration to results and scopes fictional data warnings to overvi
   await click('3. Compare alternatives')
   expect(container.querySelector('[aria-label="Business what-if comparison"]')).toBeTruthy()
 })
+
+async function selectProfile(value: string, prefix = 'current') {
+  const element = container.querySelector<HTMLSelectElement>(`#${prefix}-fixed-demand-mode`)!
+  await act(async () => {
+    element.value = value
+    element.dispatchEvent(new Event('change', { bubbles: true }))
+  })
+}
+
+it('submits custom demand, marks edited results stale, validates and restores the demo profile', async () => {
+  await act(async () => root.render(<Dashboard />))
+  await click('Scenario configuration')
+  await selectProfile('custom')
+  await input('current-fixed-demand-0', '0')
+  await input('current-fixed-demand-10', '12.75')
+  const expected = toScenario(defaultEditor).fixed_demand_kw
+  expected[0] = 0; expected[10] = 12.75
+  fetchMock.mockResolvedValueOnce(new Response(JSON.stringify({
+    feasibility_status: 'feasible', baseline_electricity_cost_usd: 20,
+    optimized_electricity_cost_usd: 18, baseline_peak_demand_kw: 3,
+    optimized_peak_demand_kw: 2, baseline_demand_kw: Array(24).fill(3),
+    optimized_demand_kw: Array(24).fill(2), constraint_violations: [],
+  })))
+  await click('Run optimization')
+  const call = fetchMock.mock.calls.find(([url]) => String(url).includes('/api/optimize?'))!
+  expect(JSON.parse(call[1].body)).toEqual({ ...toScenario(defaultEditor), fixed_demand_kw: expected })
+  expect(container.textContent).toContain('Optimizer-calculated result · Submitted inputs: User-configured')
+  await click('Scenario configuration')
+  await input('current-fixed-demand-1', '')
+  expect(container.querySelector('#current-fixed-demand-1')!.getAttribute('aria-invalid')).toBe('true')
+  expect([...container.querySelectorAll('button')].find(b => b.textContent === 'Run optimization')!.disabled).toBe(true)
+  expect(container.textContent).toContain('Inputs changed · Run optimization')
+  await input('current-fixed-demand-1', '2')
+  await selectProfile('demo')
+  expect(container.querySelector('#current-fixed-demand-0')).toBeNull()
+  await selectProfile('custom')
+  expect(container.querySelector<HTMLInputElement>('#current-fixed-demand-10')!.value).toBe('12.75')
+  await click('Reset to Default Scenario')
+  expect(container.querySelector<HTMLSelectElement>('#current-fixed-demand-mode')!.value).toBe('demo')
+})
+
+it('keeps hourly profile snapshots independent through What-if edit, apply and restore', async () => {
+  await act(async () => root.render(<Dashboard />))
+  await click('Scenario configuration')
+  await selectProfile('custom')
+  await input('current-fixed-demand-10', '10')
+  await click('What-if scenarios')
+  await click('Create alternative from current')
+  expect(container.querySelector<HTMLInputElement>('#alternative-fixed-demand-10')!.value).toBe('10')
+  await input('alternative-fixed-demand-10', '20')
+  await click('Scenario configuration')
+  expect(container.querySelector<HTMLInputElement>('#current-fixed-demand-10')!.value).toBe('10')
+  await input('current-fixed-demand-10', '12')
+  await click('What-if scenarios')
+  expect(container.querySelector<HTMLInputElement>('#alternative-fixed-demand-10')!.value).toBe('20')
+  await click('Apply alternative to current')
+  await click('Scenario configuration')
+  expect(container.querySelector<HTMLInputElement>('#current-fixed-demand-10')!.value).toBe('20')
+  await click('What-if scenarios')
+  await click('Restore starting scenario')
+  await click('Scenario configuration')
+  expect(container.querySelector<HTMLInputElement>('#current-fixed-demand-10')!.value).toBe('10')
+})

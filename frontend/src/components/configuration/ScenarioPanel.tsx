@@ -1,5 +1,6 @@
+import { DemandProfileEditor } from './DemandProfileEditor'
 import { RotateCcw, SlidersHorizontal } from 'lucide-react'
-import type { ScenarioEditor } from '../../types/dashboard'
+import type { ScenarioEditor, ScenarioField } from '../../types/dashboard'
 import {
   defaultEditor,
   feasibilityWarnings,
@@ -8,7 +9,7 @@ import {
 
 const groups: {
   title: string
-  fields: [keyof ScenarioEditor, string, string?][]
+  fields: [ScenarioField, string, string?][]
 }[] = [
   {
     title: 'Building',
@@ -81,6 +82,7 @@ export function ScenarioPanel({
         For example, 9–17 means 09:00 up to 17:00. Overnight windows are not supported.
         kW measures power; kWh measures energy used over time.
       </p>
+      <DemandProfileEditor editor={editor} onChange={onChange} />
       <div className="form-grid">
         {groups.map((group) => (
           <fieldset key={group.title}>
@@ -124,7 +126,7 @@ export function ScenarioPanel({
           {editor.duration || '—'} h at {editor.equipmentPower || '—'} kW
         </p>
         <p>
-          Background and HVAC remain the predetermined demo profile. Opening
+          Fixed demand follows the selected profile. Opening
           hours are metadata; editing them does not generate a new demand
           profile. Equipment duration is converted to required energy for the
           API’s interruptible-load model.

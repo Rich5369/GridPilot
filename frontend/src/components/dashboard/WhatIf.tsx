@@ -1,11 +1,12 @@
+import { DemandProfileEditor } from '../configuration/DemandProfileEditor'
 import { useRef, useState } from 'react'
-import type { ScenarioEditor } from '../../types/dashboard'
+import type { ScenarioEditor, ScenarioField } from '../../types/dashboard'
 import type { OptimizationResult } from '../../types/api'
-import { money, toScenario, validateEditor, feasibilityWarnings } from '../../data/demoScenario'
+import { money, profileSource, toScenario, validateEditor, feasibilityWarnings } from '../../data/demoScenario'
 import { optimizeScenario, optimizationError, OPTIMIZATION_TIMEOUT_MS, modeLabel, type SchedulingMode } from '../../services/api'
 import { Comparison } from './Comparison'
 
-const fields: [keyof ScenarioEditor, string, string][] = [
+const fields: [ScenarioField, string, string][] = [
   ['limit', 'Maximum building demand (kW)', '0.1'],
   ['chargers', 'Active chargers (0–2)', '1'],
   ['chargerPower', 'Power per charger (kW)', '0.1'],
@@ -76,6 +77,7 @@ export function WhatIf({ mode = 'ev_only', modeRevision = 0, editor, onChange, a
       <div className="what-if-grid">
         {names.map((name, i) => <div className="field" key={i}><label htmlFor={`scenario-name-${i}`}>{i === 0 ? 'Current scenario name' : 'Alternative scenario name'}</label><input id={`scenario-name-${i}`} value={name} maxLength={80} onChange={e => setNames(names.map((n, j) => j === i ? e.target.value : n))} /></div>)}
       </div>
+      <DemandProfileEditor editor={alternative} onChange={setAlternative} prefix="alternative" />
       <h3>Alternative operating parameters</h3>
       <p className="muted">Other inputs are copied from the configuration when the alternative is created. Edit current inputs in Scenario configuration.</p>
       <div className="form-grid">{fields.map(([field, label, step]) => <div className="field" key={field}>
@@ -91,6 +93,7 @@ export function WhatIf({ mode = 'ev_only', modeRevision = 0, editor, onChange, a
           <h3>{names[i] || `Scenario ${i + 1}`}</h3>
           {fresh.errors[i] && <p role="alert">{fresh.errors[i]}</p>}
           {result && <>
+            <p className="profile-source">Optimizer-calculated result · {profileSource(i === 0 ? editor : alternative)}</p>
             <dl className="what-if-totals">
               <dt>Optimized peak electrical demand</dt><dd>{result.optimized_peak_demand_kw === null ? 'Unavailable' : `${result.optimized_peak_demand_kw.toFixed(2)} kW`}</dd>
               <dt>Optimized total electricity consumption</dt><dd>{result.optimized_demand_kw === null ? 'Unavailable' : `${result.optimized_demand_kw.reduce((a, b) => a + b, 0).toFixed(2)} kWh`}</dd>

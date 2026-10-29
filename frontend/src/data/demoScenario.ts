@@ -3,6 +3,7 @@ import type {
   EquipmentPowerSchedule,
   HourlyConsumption,
   ScenarioEditor,
+  ScenarioField,
   SimulationResult,
 } from '../types/dashboard'
 
@@ -29,11 +30,31 @@ export const hvac = [
   0, 0, 0, 0, 0, 0, 1, 2, 4, 5, 5, 6, 6, 6, 6, 5, 5, 4, 2, 1, 0, 0, 0, 0,
 ]
 
+export function fixedDemand(editor: ScenarioEditor): number[] {
+  return editor.demandProfile?.mode === 'custom'
+    ? editor.demandProfile.values.map(Number)
+    : background.map((v, h) => v + hvac[h])
+}
+
+export function demandProfileErrors(editor: ScenarioEditor): string[] {
+  if (editor.demandProfile?.mode !== 'custom') return []
+  const values = editor.demandProfile.values
+  if (values.length !== 24) return ['Enter exactly 24 hourly values.']
+  return values.map(value => value.trim() === '' || !Number.isFinite(Number(value)) || Number(value) < 0
+    ? 'Enter a finite, nonnegative demand in kW.' : '')
+}
+
+export function profileSource(editor: ScenarioEditor): string {
+  return editor.demandProfile?.mode === 'custom'
+    ? 'User-configured fixed demand · manually entered, not verified meter data'
+    : 'Demonstration fixed demand · predetermined background + HVAC'
+}
+
 export function validateEditor(
   editor: ScenarioEditor,
 ): Partial<Record<keyof ScenarioEditor, string>> {
   const errors: Partial<Record<keyof ScenarioEditor, string>> = {}
-  for (const key of Object.keys(editor) as (keyof ScenarioEditor)[]) {
+  for (const key of Object.keys(defaultEditor) as ScenarioField[]) {
     if (
       editor[key].trim() === '' ||
       !Number.isFinite(Number(editor[key])) ||
@@ -64,6 +85,7 @@ export function validateEditor(
     errors.chargers = 'Choose 0, 1 or 2 chargers.'
   if (!Number.isFinite(Number(editor.duration) * Number(editor.equipmentPower)))
     errors.duration = 'Required equipment energy is too large.'
+  if (demandProfileErrors(editor).some(Boolean)) errors.demandProfile = 'Correct the hourly fixed-demand values.'
   return errors
 }
 
@@ -85,9 +107,9 @@ export function feasibilityWarnings(editor: ScenarioEditor): string[] {
     warnings.push(
       'Equipment duration exceeds its allowed window. Requirements are preserved for the solver to evaluate.',
     )
-  if (Math.max(...background.map((v, h) => v + hvac[h])) > Number(editor.limit))
+  if (Math.max(...fixedDemand(editor)) > Number(editor.limit))
     warnings.push(
-      'Predetermined background + HVAC demand exceeds the building limit. The future solver must report feasibility.',
+      'Fixed demand exceeds the building limit. The optimizer cannot reduce fixed demand; adjust the profile or site limit.',
     )
   return warnings
 }
@@ -95,11 +117,11 @@ export function feasibilityWarnings(editor: ScenarioEditor): string[] {
 export function toScenario(editor: ScenarioEditor): Scenario {
   if (Object.keys(validateEditor(editor)).length)
     throw new Error('Correct the configuration errors before submitting.')
-  const n = (key: keyof ScenarioEditor) => Number(editor[key])
+  const n = (key: ScenarioField) => Number(editor[key])
   return {
     operating_hours: { start_hour: n('opening'), end_hour: n('closing') },
     building_max_demand_kw: n('limit'),
-    fixed_demand_kw: background.map((v, h) => v + hvac[h]),
+    fixed_demand_kw: fixedDemand(editor),
     electricity_prices_usd_per_kwh: Array.from({ length: 24 }, (_, h) =>
       h >= n('peakStart') && h < n('peakEnd') ? n('peak') : n('offPeak'),
     ),
