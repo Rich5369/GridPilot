@@ -4,6 +4,7 @@ const { chromium } = require('playwright')
 const assert = require('node:assert/strict')
 const fs = require('node:fs/promises')
 const { isEvOnlyOptimization, isJointOptimization } = require('./browser-api.cjs')
+const { assertChartRendered } = require('./chart-rendering.cjs')
 const output = process.env.GRIDPILOT_QA_OUTPUT || '/tmp/gridpilot-demand-qa'
 const near = (actual, expected) => assert(Math.abs(actual - expected) < 1e-6, `${actual} != ${expected}`)
 ;(async () => {
@@ -74,6 +75,7 @@ const near = (actual, expected) => assert(Math.abs(actual - expected) < 1e-6, `$
     await fillHour(10, String(values[10]))
     for (const width of [1440, 768, 390]) {
       await page.setViewportSize({ width, height: 1000 })
+      await assertChartRendered(page)
       assert(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth))
       await page.evaluate(() => scrollTo(0, 0))
       await page.screenshot({ path: `${output}/custom-editor-${width}.png`, fullPage: true })
