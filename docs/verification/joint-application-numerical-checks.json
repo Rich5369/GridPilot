@@ -1,8 +1,8 @@
 {
   "status": "PASS",
-  "capturesSha256": "b353d915cdf0529c19fcb6b2d8b432f6d0918164df7fb754a55567c266458eff",
-  "testedFrontendCommit": "91a95e4b51bfdca57af7bba9645765f47bb4a68c",
-  "testedBackendCommit": "91a95e4b51bfdca57af7bba9645765f47bb4a68c",
+  "capturesSha256": "2995b942b629df79540149f4b9257b1e80354d8f90a144863af7393f96e52006",
+  "testedFrontendCommit": "6d21fae295eb52ddcfafa40d610e693473c90b05",
+  "testedBackendCommit": "6d21fae295eb52ddcfafa40d610e693473c90b05",
   "physicalToleranceKwKwh": 1e-06,
   "costToleranceUsd": 2e-07,
   "requests": [

@@ -1,11 +1,11 @@
 {
-  "testedFrontendCommit": "91a95e4b51bfdca57af7bba9645765f47bb4a68c",
-  "testedBackendCommit": "91a95e4b51bfdca57af7bba9645765f47bb4a68c",
+  "testedFrontendCommit": "6d21fae295eb52ddcfafa40d610e693473c90b05",
+  "testedBackendCommit": "6d21fae295eb52ddcfafa40d610e693473c90b05",
   "frontend": "http://127.0.0.1:5177",
   "backend": "http://127.0.0.1:8007",
   "build": "Vite production build; VITE_API_BASE_URL=http://127.0.0.1:8007",
   "responseMocking": false,
-  "startedAt": "2026-10-29T22:56:53.237Z",
+  "startedAt": "2026-10-29T23:15:11.445Z",
   "requests": [
     {
       "id": "demo-dashboard",
@@ -4341,6 +4341,6 @@
       }
     }
   },
-  "completedAt": "2026-10-29T22:57:05.455Z",
+  "completedAt": "2026-10-29T23:15:26.365Z",
   "status": "PASS"
 }
