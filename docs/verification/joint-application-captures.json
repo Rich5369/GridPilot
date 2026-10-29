@@ -1,0 +1,4346 @@
+{
+  "testedFrontendCommit": "91a95e4b51bfdca57af7bba9645765f47bb4a68c",
+  "testedBackendCommit": "91a95e4b51bfdca57af7bba9645765f47bb4a68c",
+  "frontend": "http://127.0.0.1:5177",
+  "backend": "http://127.0.0.1:8007",
+  "build": "Vite production build; VITE_API_BASE_URL=http://127.0.0.1:8007",
+  "responseMocking": false,
+  "startedAt": "2026-10-29T22:56:53.237Z",
+  "requests": [
+    {
+      "id": "demo-dashboard",
+      "url": "http://127.0.0.1:8007/api/optimize?scheduling_mode=joint",
+      "scheduling_mode": "joint",
+      "status": 200,
+      "editorSnapshot": {
+        "opening": "8",
+        "closing": "18",
+        "limit": "25",
+        "offPeak": "0.12",
+        "peak": "0.28",
+        "peakStart": "14",
+        "peakEnd": "20",
+        "chargers": "2",
+        "chargerPower": "7.2",
+        "evEnergy": "14.4",
+        "arrival": "9",
+        "deadline": "17",
+        "equipmentPower": "3",
+        "duration": "2",
+        "equipmentStart": "10",
+        "equipmentEnd": "16",
+        "demandProfile": {
+          "mode": "demo",
+          "values": []
+        }
+      },
+      "snapshotOrigin": "DOM controls at submission; alternative inherits non-editable fields from captured current editor",
+      "scenario": {
+        "operating_hours": {
+          "start_hour": 8,
+          "end_hour": 18
+        },
+        "building_max_demand_kw": 25,
+        "fixed_demand_kw": [
+          1.5,
+          1.5,
+          1.5,
+          1.5,
+          1.5,
+          1.5,
+          2.5,
+          3.5,
+          5.5,
+          6.5,
+          6.5,
+          7.5,
+          7.5,
+          7.5,
+          7.5,
+          6.5,
+          6.5,
+          5.5,
+          3.5,
+          2.5,
+          1.5,
+          1.5,
+          1.5,
+          1.5
+        ],
+        "electricity_prices_usd_per_kwh": [
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.28,
+          0.28,
+          0.28,
+          0.28,
+          0.28,
+          0.28,
+          0.12,
+          0.12,
+          0.12,
+          0.12
+        ],
+        "ev_requirements": [
+          {
+            "id": "office-ev-1",
+            "arrival_hour": 9,
+            "deadline_hour": 17,
+            "energy_required_kwh": 14.4,
+            "max_charging_power_kw": 7.2
+          },
+          {
+            "id": "office-ev-2",
+            "arrival_hour": 9,
+            "deadline_hour": 17,
+            "energy_required_kwh": 14.4,
+            "max_charging_power_kw": 7.2
+          }
+        ],
+        "flexible_equipment": [
+          {
+            "id": "office-equipment",
+            "available_hours": {
+              "start_hour": 10,
+              "end_hour": 16
+            },
+            "energy_required_kwh": 6,
+            "max_power_kw": 3
+          }
+        ]
+      },
+      "response": {
+        "feasibility_status": "feasible",
+        "baseline_electricity_cost_usd": 20.576,
+        "baseline_peak_demand_kw": 23.9,
+        "baseline_demand_kw": [
+          1.5,
+          1.5,
+          1.5,
+          1.5,
+          1.5,
+          1.5,
+          2.5,
+          3.5,
+          5.5,
+          20.9,
+          23.9,
+          10.5,
+          7.5,
+          7.5,
+          7.5,
+          6.5,
+          6.5,
+          5.5,
+          3.5,
+          2.5,
+          1.5,
+          1.5,
+          1.5,
+          1.5
+        ],
+        "optimized_electricity_cost_usd": 20.576000099999998,
+        "optimized_peak_demand_kw": 14.05999987500001,
+        "optimized_demand_kw": [
+          1.5,
+          1.5,
+          1.5,
+          1.5,
+          1.5,
+          1.5,
+          2.5,
+          3.5,
+          5.5,
+          14.059999875,
+          14.059999874999999,
+          14.059999874999999,
+          14.059999874999999,
+          14.05999987500001,
+          7.5,
+          6.5,
+          6.5000006249999895,
+          5.5,
+          3.5,
+          2.5,
+          1.5,
+          1.5,
+          1.5,
+          1.5
+        ],
+        "constraint_violations": []
+      },
+      "displayedBenefitMetrics": [
+        "$20.58",
+        "$20.58",
+        "$0.00",
+        "9.84 kW"
+      ],
+      "chartGeometry": {
+        "width": 1070,
+        "height": 320,
+        "visibleCurves": 3,
+        "ticks": 12
+      },
+      "displayedHourlyTable": [
+        [
+          "1.50",
+          "1.50"
+        ],
+        [
+          "1.50",
+          "1.50"
+        ],
+        [
+          "1.50",
+          "1.50"
+        ],
+        [
+          "1.50",
+          "1.50"
+        ],
+        [
+          "1.50",
+          "1.50"
+        ],
+        [
+          "1.50",
+          "1.50"
+        ],
+        [
+          "2.50",
+          "2.50"
+        ],
+        [
+          "3.50",
+          "3.50"
+        ],
+        [
+          "5.50",
+          "5.50"
+        ],
+        [
+          "20.90",
+          "14.06"
+        ],
+        [
+          "23.90",
+          "14.06"
+        ],
+        [
+          "10.50",
+          "14.06"
+        ],
+        [
+          "7.50",
+          "14.06"
+        ],
+        [
+          "7.50",
+          "14.06"
+        ],
+        [
+          "7.50",
+          "7.50"
+        ],
+        [
+          "6.50",
+          "6.50"
+        ],
+        [
+          "6.50",
+          "6.50"
+        ],
+        [
+          "5.50",
+          "5.50"
+        ],
+        [
+          "3.50",
+          "3.50"
+        ],
+        [
+          "2.50",
+          "2.50"
+        ],
+        [
+          "1.50",
+          "1.50"
+        ],
+        [
+          "1.50",
+          "1.50"
+        ],
+        [
+          "1.50",
+          "1.50"
+        ],
+        [
+          "1.50",
+          "1.50"
+        ]
+      ]
+    },
+    {
+      "id": "custom-dashboard",
+      "url": "http://127.0.0.1:8007/api/optimize?scheduling_mode=joint",
+      "scheduling_mode": "joint",
+      "status": 200,
+      "editorSnapshot": {
+        "opening": "8",
+        "closing": "18",
+        "limit": "25",
+        "offPeak": "0.12",
+        "peak": "0.28",
+        "peakStart": "14",
+        "peakEnd": "20",
+        "chargers": "2",
+        "chargerPower": "7.2",
+        "evEnergy": "14.4",
+        "arrival": "9",
+        "deadline": "17",
+        "equipmentPower": "3",
+        "duration": "2",
+        "equipmentStart": "10",
+        "equipmentEnd": "16",
+        "demandProfile": {
+          "mode": "custom",
+          "values": [
+            "2",
+            "2.25",
+            "2.5",
+            "2.75",
+            "3",
+            "3.25",
+            "3.5",
+            "3.75",
+            "4",
+            "4.25",
+            "4.5",
+            "4.75",
+            "5",
+            "5.25",
+            "5.5",
+            "5.75",
+            "6",
+            "6.25",
+            "6.5",
+            "6.75",
+            "7",
+            "7.25",
+            "7.5",
+            "7.75"
+          ]
+        }
+      },
+      "snapshotOrigin": "DOM controls at submission; alternative inherits non-editable fields from captured current editor",
+      "scenario": {
+        "operating_hours": {
+          "start_hour": 8,
+          "end_hour": 18
+        },
+        "building_max_demand_kw": 25,
+        "fixed_demand_kw": [
+          2,
+          2.25,
+          2.5,
+          2.75,
+          3,
+          3.25,
+          3.5,
+          3.75,
+          4,
+          4.25,
+          4.5,
+          4.75,
+          5,
+          5.25,
+          5.5,
+          5.75,
+          6,
+          6.25,
+          6.5,
+          6.75,
+          7,
+          7.25,
+          7.5,
+          7.75
+        ],
+        "electricity_prices_usd_per_kwh": [
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.28,
+          0.28,
+          0.28,
+          0.28,
+          0.28,
+          0.28,
+          0.12,
+          0.12,
+          0.12,
+          0.12
+        ],
+        "ev_requirements": [
+          {
+            "id": "office-ev-1",
+            "arrival_hour": 9,
+            "deadline_hour": 17,
+            "energy_required_kwh": 14.4,
+            "max_charging_power_kw": 7.2
+          },
+          {
+            "id": "office-ev-2",
+            "arrival_hour": 9,
+            "deadline_hour": 17,
+            "energy_required_kwh": 14.4,
+            "max_charging_power_kw": 7.2
+          }
+        ],
+        "flexible_equipment": [
+          {
+            "id": "office-equipment",
+            "available_hours": {
+              "start_hour": 10,
+              "end_hour": 16
+            },
+            "energy_required_kwh": 6,
+            "max_power_kw": 3
+          }
+        ]
+      },
+      "response": {
+        "feasibility_status": "feasible",
+        "baseline_electricity_cost_usd": 24.096,
+        "baseline_peak_demand_kw": 21.9,
+        "baseline_demand_kw": [
+          2,
+          2.25,
+          2.5,
+          2.75,
+          3,
+          3.25,
+          3.5,
+          3.75,
+          4,
+          18.65,
+          21.9,
+          7.75,
+          5,
+          5.25,
+          5.5,
+          5.75,
+          6,
+          6.25,
+          6.5,
+          6.75,
+          7,
+          7.25,
+          7.5,
+          7.75
+        ],
+        "optimized_electricity_cost_usd": 24.0960001,
+        "optimized_peak_demand_kw": 11.709999875000003,
+        "optimized_demand_kw": [
+          2,
+          2.25,
+          2.5,
+          2.75,
+          3,
+          3.25,
+          3.5,
+          3.75,
+          4,
+          11.709999875000001,
+          11.709999875,
+          11.709999875000003,
+          11.709999874999998,
+          11.709999875000001,
+          5.5,
+          5.75,
+          6.000000624999997,
+          6.25,
+          6.5,
+          6.75,
+          7,
+          7.25,
+          7.5,
+          7.75
+        ],
+        "constraint_violations": []
+      },
+      "displayedBenefitMetrics": [
+        "$24.10",
+        "$24.10",
+        "$0.00",
+        "10.19 kW"
+      ],
+      "chartGeometry": {
+        "width": 1070,
+        "height": 320,
+        "visibleCurves": 3,
+        "ticks": 12
+      },
+      "displayedHourlyTable": [
+        [
+          "2.00",
+          "2.00"
+        ],
+        [
+          "2.25",
+          "2.25"
+        ],
+        [
+          "2.50",
+          "2.50"
+        ],
+        [
+          "2.75",
+          "2.75"
+        ],
+        [
+          "3.00",
+          "3.00"
+        ],
+        [
+          "3.25",
+          "3.25"
+        ],
+        [
+          "3.50",
+          "3.50"
+        ],
+        [
+          "3.75",
+          "3.75"
+        ],
+        [
+          "4.00",
+          "4.00"
+        ],
+        [
+          "18.65",
+          "11.71"
+        ],
+        [
+          "21.90",
+          "11.71"
+        ],
+        [
+          "7.75",
+          "11.71"
+        ],
+        [
+          "5.00",
+          "11.71"
+        ],
+        [
+          "5.25",
+          "11.71"
+        ],
+        [
+          "5.50",
+          "5.50"
+        ],
+        [
+          "5.75",
+          "5.75"
+        ],
+        [
+          "6.00",
+          "6.00"
+        ],
+        [
+          "6.25",
+          "6.25"
+        ],
+        [
+          "6.50",
+          "6.50"
+        ],
+        [
+          "6.75",
+          "6.75"
+        ],
+        [
+          "7.00",
+          "7.00"
+        ],
+        [
+          "7.25",
+          "7.25"
+        ],
+        [
+          "7.50",
+          "7.50"
+        ],
+        [
+          "7.75",
+          "7.75"
+        ]
+      ]
+    },
+    {
+      "id": "sources-dashboard",
+      "url": "http://127.0.0.1:8007/api/optimize?scheduling_mode=joint",
+      "scheduling_mode": "joint",
+      "status": 200,
+      "editorSnapshot": {
+        "opening": "8",
+        "closing": "18",
+        "limit": "25",
+        "offPeak": "0.12",
+        "peak": "0.28",
+        "peakStart": "14",
+        "peakEnd": "20",
+        "chargers": "2",
+        "chargerPower": "7.2",
+        "evEnergy": "14.4",
+        "arrival": "15",
+        "deadline": "22",
+        "equipmentPower": "3",
+        "duration": "2",
+        "equipmentStart": "10",
+        "equipmentEnd": "16",
+        "demandProfile": {
+          "mode": "sources",
+          "values": [],
+          "sources": [
+            {
+              "category": "Lighting",
+              "values": [
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2"
+              ]
+            },
+            {
+              "category": "Refrigeration",
+              "values": [
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1"
+              ]
+            }
+          ]
+        }
+      },
+      "snapshotOrigin": "DOM controls at submission; alternative inherits non-editable fields from captured current editor",
+      "scenario": {
+        "operating_hours": {
+          "start_hour": 8,
+          "end_hour": 18
+        },
+        "building_max_demand_kw": 25,
+        "fixed_demand_kw": [
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3
+        ],
+        "electricity_prices_usd_per_kwh": [
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.28,
+          0.28,
+          0.28,
+          0.28,
+          0.28,
+          0.28,
+          0.12,
+          0.12,
+          0.12,
+          0.12
+        ],
+        "ev_requirements": [
+          {
+            "id": "office-ev-1",
+            "arrival_hour": 15,
+            "deadline_hour": 22,
+            "energy_required_kwh": 14.4,
+            "max_charging_power_kw": 7.2
+          },
+          {
+            "id": "office-ev-2",
+            "arrival_hour": 15,
+            "deadline_hour": 22,
+            "energy_required_kwh": 14.4,
+            "max_charging_power_kw": 7.2
+          }
+        ],
+        "flexible_equipment": [
+          {
+            "id": "office-equipment",
+            "available_hours": {
+              "start_hour": 10,
+              "end_hour": 16
+            },
+            "energy_required_kwh": 6,
+            "max_power_kw": 3
+          }
+        ]
+      },
+      "response": {
+        "feasibility_status": "feasible",
+        "baseline_electricity_cost_usd": 20.304,
+        "baseline_peak_demand_kw": 17.4,
+        "baseline_demand_kw": [
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          6,
+          6,
+          3,
+          3,
+          3,
+          17.4,
+          17.4,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3
+        ],
+        "optimized_electricity_cost_usd": 15.6960001,
+        "optimized_peak_demand_kw": 17.3999996875,
+        "optimized_demand_kw": [
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          6,
+          3,
+          6,
+          3,
+          3,
+          3,
+          3,
+          3.0000006249999984,
+          3,
+          17.3999996875,
+          17.3999996875,
+          3,
+          3
+        ],
+        "constraint_violations": []
+      },
+      "displayedBenefitMetrics": [
+        "$20.30",
+        "$15.70",
+        "$4.61",
+        "0.00 kW"
+      ],
+      "chartGeometry": {
+        "width": 1070,
+        "height": 320,
+        "visibleCurves": 3,
+        "ticks": 12
+      },
+      "displayedHourlyTable": [
+        [
+          "3.00",
+          "3.00"
+        ],
+        [
+          "3.00",
+          "3.00"
+        ],
+        [
+          "3.00",
+          "3.00"
+        ],
+        [
+          "3.00",
+          "3.00"
+        ],
+        [
+          "3.00",
+          "3.00"
+        ],
+        [
+          "3.00",
+          "3.00"
+        ],
+        [
+          "3.00",
+          "3.00"
+        ],
+        [
+          "3.00",
+          "3.00"
+        ],
+        [
+          "3.00",
+          "3.00"
+        ],
+        [
+          "3.00",
+          "3.00"
+        ],
+        [
+          "6.00",
+          "3.00"
+        ],
+        [
+          "6.00",
+          "6.00"
+        ],
+        [
+          "3.00",
+          "3.00"
+        ],
+        [
+          "3.00",
+          "6.00"
+        ],
+        [
+          "3.00",
+          "3.00"
+        ],
+        [
+          "17.40",
+          "3.00"
+        ],
+        [
+          "17.40",
+          "3.00"
+        ],
+        [
+          "3.00",
+          "3.00"
+        ],
+        [
+          "3.00",
+          "3.00"
+        ],
+        [
+          "3.00",
+          "3.00"
+        ],
+        [
+          "3.00",
+          "17.40"
+        ],
+        [
+          "3.00",
+          "17.40"
+        ],
+        [
+          "3.00",
+          "3.00"
+        ],
+        [
+          "3.00",
+          "3.00"
+        ]
+      ]
+    },
+    {
+      "id": "tight-cap-pair-current",
+      "url": "http://127.0.0.1:8007/api/optimize?scheduling_mode=joint",
+      "scheduling_mode": "joint",
+      "status": 200,
+      "editorSnapshot": {
+        "opening": "8",
+        "closing": "18",
+        "limit": "25",
+        "offPeak": "0.12",
+        "peak": "0.28",
+        "peakStart": "14",
+        "peakEnd": "20",
+        "chargers": "2",
+        "chargerPower": "7.2",
+        "evEnergy": "14.4",
+        "arrival": "15",
+        "deadline": "22",
+        "equipmentPower": "3",
+        "duration": "2",
+        "equipmentStart": "10",
+        "equipmentEnd": "16",
+        "demandProfile": {
+          "mode": "sources",
+          "values": [],
+          "sources": [
+            {
+              "category": "Lighting",
+              "values": [
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2"
+              ]
+            },
+            {
+              "category": "Refrigeration",
+              "values": [
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1"
+              ]
+            }
+          ]
+        }
+      },
+      "snapshotOrigin": "DOM controls at submission; alternative inherits non-editable fields from captured current editor",
+      "scenario": {
+        "operating_hours": {
+          "start_hour": 8,
+          "end_hour": 18
+        },
+        "building_max_demand_kw": 25,
+        "fixed_demand_kw": [
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3
+        ],
+        "electricity_prices_usd_per_kwh": [
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.28,
+          0.28,
+          0.28,
+          0.28,
+          0.28,
+          0.28,
+          0.12,
+          0.12,
+          0.12,
+          0.12
+        ],
+        "ev_requirements": [
+          {
+            "id": "office-ev-1",
+            "arrival_hour": 15,
+            "deadline_hour": 22,
+            "energy_required_kwh": 14.4,
+            "max_charging_power_kw": 7.2
+          },
+          {
+            "id": "office-ev-2",
+            "arrival_hour": 15,
+            "deadline_hour": 22,
+            "energy_required_kwh": 14.4,
+            "max_charging_power_kw": 7.2
+          }
+        ],
+        "flexible_equipment": [
+          {
+            "id": "office-equipment",
+            "available_hours": {
+              "start_hour": 10,
+              "end_hour": 16
+            },
+            "energy_required_kwh": 6,
+            "max_power_kw": 3
+          }
+        ]
+      },
+      "response": {
+        "feasibility_status": "feasible",
+        "baseline_electricity_cost_usd": 20.304,
+        "baseline_peak_demand_kw": 17.4,
+        "baseline_demand_kw": [
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          6,
+          6,
+          3,
+          3,
+          3,
+          17.4,
+          17.4,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3
+        ],
+        "optimized_electricity_cost_usd": 15.6960001,
+        "optimized_peak_demand_kw": 17.3999996875,
+        "optimized_demand_kw": [
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          6,
+          3,
+          6,
+          3,
+          3,
+          3,
+          3,
+          3.0000006249999984,
+          3,
+          17.3999996875,
+          17.3999996875,
+          3,
+          3
+        ],
+        "constraint_violations": []
+      },
+      "displayedBenefitMetrics": [
+        "$20.30",
+        "$15.70",
+        "$4.61",
+        "0.00 kW"
+      ],
+      "chartGeometry": {
+        "width": 499,
+        "height": 320,
+        "visibleCurves": 3,
+        "ticks": 12
+      },
+      "displayedHourlyTable": [
+        [
+          "3.00",
+          "3.00"
+        ],
+        [
+          "3.00",
+          "3.00"
+        ],
+        [
+          "3.00",
+          "3.00"
+        ],
+        [
+          "3.00",
+          "3.00"
+        ],
+        [
+          "3.00",
+          "3.00"
+        ],
+        [
+          "3.00",
+          "3.00"
+        ],
+        [
+          "3.00",
+          "3.00"
+        ],
+        [
+          "3.00",
+          "3.00"
+        ],
+        [
+          "3.00",
+          "3.00"
+        ],
+        [
+          "3.00",
+          "3.00"
+        ],
+        [
+          "6.00",
+          "3.00"
+        ],
+        [
+          "6.00",
+          "6.00"
+        ],
+        [
+          "3.00",
+          "3.00"
+        ],
+        [
+          "3.00",
+          "6.00"
+        ],
+        [
+          "3.00",
+          "3.00"
+        ],
+        [
+          "17.40",
+          "3.00"
+        ],
+        [
+          "17.40",
+          "3.00"
+        ],
+        [
+          "3.00",
+          "3.00"
+        ],
+        [
+          "3.00",
+          "3.00"
+        ],
+        [
+          "3.00",
+          "3.00"
+        ],
+        [
+          "3.00",
+          "17.40"
+        ],
+        [
+          "3.00",
+          "17.40"
+        ],
+        [
+          "3.00",
+          "3.00"
+        ],
+        [
+          "3.00",
+          "3.00"
+        ]
+      ]
+    },
+    {
+      "id": "tight-cap-pair-alternative",
+      "url": "http://127.0.0.1:8007/api/optimize?scheduling_mode=joint",
+      "scheduling_mode": "joint",
+      "status": 200,
+      "editorSnapshot": {
+        "opening": "8",
+        "closing": "18",
+        "limit": "15",
+        "offPeak": "0.12",
+        "peak": "0.28",
+        "peakStart": "14",
+        "peakEnd": "20",
+        "chargers": "2",
+        "chargerPower": "7.2",
+        "evEnergy": "14.4",
+        "arrival": "15",
+        "deadline": "22",
+        "equipmentPower": "3",
+        "duration": "2",
+        "equipmentStart": "10",
+        "equipmentEnd": "16",
+        "demandProfile": {
+          "mode": "sources",
+          "values": [],
+          "sources": [
+            {
+              "category": "Lighting",
+              "values": [
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2"
+              ]
+            },
+            {
+              "category": "Refrigeration",
+              "values": [
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1"
+              ]
+            }
+          ]
+        }
+      },
+      "snapshotOrigin": "DOM controls at submission; alternative inherits non-editable fields from captured current editor",
+      "scenario": {
+        "operating_hours": {
+          "start_hour": 8,
+          "end_hour": 18
+        },
+        "building_max_demand_kw": 15,
+        "fixed_demand_kw": [
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3
+        ],
+        "electricity_prices_usd_per_kwh": [
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.28,
+          0.28,
+          0.28,
+          0.28,
+          0.28,
+          0.28,
+          0.12,
+          0.12,
+          0.12,
+          0.12
+        ],
+        "ev_requirements": [
+          {
+            "id": "office-ev-1",
+            "arrival_hour": 15,
+            "deadline_hour": 22,
+            "energy_required_kwh": 14.4,
+            "max_charging_power_kw": 7.2
+          },
+          {
+            "id": "office-ev-2",
+            "arrival_hour": 15,
+            "deadline_hour": 22,
+            "energy_required_kwh": 14.4,
+            "max_charging_power_kw": 7.2
+          }
+        ],
+        "flexible_equipment": [
+          {
+            "id": "office-equipment",
+            "available_hours": {
+              "start_hour": 10,
+              "end_hour": 16
+            },
+            "energy_required_kwh": 6,
+            "max_power_kw": 3
+          }
+        ]
+      },
+      "response": {
+        "feasibility_status": "feasible",
+        "baseline_electricity_cost_usd": 20.304,
+        "baseline_peak_demand_kw": 17.4,
+        "baseline_demand_kw": [
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          6,
+          6,
+          3,
+          3,
+          3,
+          17.4,
+          17.4,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3
+        ],
+        "optimized_electricity_cost_usd": 16.464000100000003,
+        "optimized_peak_demand_kw": 14.999999687499992,
+        "optimized_demand_kw": [
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          6,
+          3,
+          6,
+          3,
+          3,
+          7.800000625000015,
+          3,
+          3,
+          3,
+          14.999999687499992,
+          14.999999687499992,
+          3,
+          3
+        ],
+        "constraint_violations": []
+      },
+      "displayedBenefitMetrics": [
+        "$20.30",
+        "$16.46",
+        "$3.84",
+        "2.40 kW"
+      ],
+      "chartGeometry": {
+        "width": 499,
+        "height": 320,
+        "visibleCurves": 3,
+        "ticks": 12
+      },
+      "displayedHourlyTable": [
+        [
+          "3.00",
+          "3.00"
+        ],
+        [
+          "3.00",
+          "3.00"
+        ],
+        [
+          "3.00",
+          "3.00"
+        ],
+        [
+          "3.00",
+          "3.00"
+        ],
+        [
+          "3.00",
+          "3.00"
+        ],
+        [
+          "3.00",
+          "3.00"
+        ],
+        [
+          "3.00",
+          "3.00"
+        ],
+        [
+          "3.00",
+          "3.00"
+        ],
+        [
+          "3.00",
+          "3.00"
+        ],
+        [
+          "3.00",
+          "3.00"
+        ],
+        [
+          "6.00",
+          "3.00"
+        ],
+        [
+          "6.00",
+          "6.00"
+        ],
+        [
+          "3.00",
+          "3.00"
+        ],
+        [
+          "3.00",
+          "6.00"
+        ],
+        [
+          "3.00",
+          "3.00"
+        ],
+        [
+          "17.40",
+          "3.00"
+        ],
+        [
+          "17.40",
+          "7.80"
+        ],
+        [
+          "3.00",
+          "3.00"
+        ],
+        [
+          "3.00",
+          "3.00"
+        ],
+        [
+          "3.00",
+          "3.00"
+        ],
+        [
+          "3.00",
+          "15.00"
+        ],
+        [
+          "3.00",
+          "15.00"
+        ],
+        [
+          "3.00",
+          "3.00"
+        ],
+        [
+          "3.00",
+          "3.00"
+        ]
+      ]
+    },
+    {
+      "id": "restored-pair-current",
+      "url": "http://127.0.0.1:8007/api/optimize?scheduling_mode=joint",
+      "scheduling_mode": "joint",
+      "status": 200,
+      "editorSnapshot": {
+        "opening": "8",
+        "closing": "18",
+        "limit": "25",
+        "offPeak": "0.12",
+        "peak": "0.28",
+        "peakStart": "14",
+        "peakEnd": "20",
+        "chargers": "2",
+        "chargerPower": "7.2",
+        "evEnergy": "14.4",
+        "arrival": "15",
+        "deadline": "22",
+        "equipmentPower": "3",
+        "duration": "2",
+        "equipmentStart": "10",
+        "equipmentEnd": "16",
+        "demandProfile": {
+          "mode": "sources",
+          "values": [],
+          "sources": [
+            {
+              "category": "Lighting",
+              "values": [
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2"
+              ]
+            },
+            {
+              "category": "Refrigeration",
+              "values": [
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1"
+              ]
+            }
+          ]
+        }
+      },
+      "snapshotOrigin": "DOM controls at submission; alternative inherits non-editable fields from captured current editor",
+      "scenario": {
+        "operating_hours": {
+          "start_hour": 8,
+          "end_hour": 18
+        },
+        "building_max_demand_kw": 25,
+        "fixed_demand_kw": [
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3
+        ],
+        "electricity_prices_usd_per_kwh": [
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.28,
+          0.28,
+          0.28,
+          0.28,
+          0.28,
+          0.28,
+          0.12,
+          0.12,
+          0.12,
+          0.12
+        ],
+        "ev_requirements": [
+          {
+            "id": "office-ev-1",
+            "arrival_hour": 15,
+            "deadline_hour": 22,
+            "energy_required_kwh": 14.4,
+            "max_charging_power_kw": 7.2
+          },
+          {
+            "id": "office-ev-2",
+            "arrival_hour": 15,
+            "deadline_hour": 22,
+            "energy_required_kwh": 14.4,
+            "max_charging_power_kw": 7.2
+          }
+        ],
+        "flexible_equipment": [
+          {
+            "id": "office-equipment",
+            "available_hours": {
+              "start_hour": 10,
+              "end_hour": 16
+            },
+            "energy_required_kwh": 6,
+            "max_power_kw": 3
+          }
+        ]
+      },
+      "response": {
+        "feasibility_status": "feasible",
+        "baseline_electricity_cost_usd": 20.304,
+        "baseline_peak_demand_kw": 17.4,
+        "baseline_demand_kw": [
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          6,
+          6,
+          3,
+          3,
+          3,
+          17.4,
+          17.4,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3
+        ],
+        "optimized_electricity_cost_usd": 15.6960001,
+        "optimized_peak_demand_kw": 17.3999996875,
+        "optimized_demand_kw": [
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          6,
+          3,
+          6,
+          3,
+          3,
+          3,
+          3,
+          3.0000006249999984,
+          3,
+          17.3999996875,
+          17.3999996875,
+          3,
+          3
+        ],
+        "constraint_violations": []
+      },
+      "displayedBenefitMetrics": [
+        "$20.30",
+        "$15.70",
+        "$4.61",
+        "0.00 kW"
+      ],
+      "chartGeometry": {
+        "width": 499,
+        "height": 320,
+        "visibleCurves": 3,
+        "ticks": 12
+      },
+      "displayedHourlyTable": [
+        [
+          "3.00",
+          "3.00"
+        ],
+        [
+          "3.00",
+          "3.00"
+        ],
+        [
+          "3.00",
+          "3.00"
+        ],
+        [
+          "3.00",
+          "3.00"
+        ],
+        [
+          "3.00",
+          "3.00"
+        ],
+        [
+          "3.00",
+          "3.00"
+        ],
+        [
+          "3.00",
+          "3.00"
+        ],
+        [
+          "3.00",
+          "3.00"
+        ],
+        [
+          "3.00",
+          "3.00"
+        ],
+        [
+          "3.00",
+          "3.00"
+        ],
+        [
+          "6.00",
+          "3.00"
+        ],
+        [
+          "6.00",
+          "6.00"
+        ],
+        [
+          "3.00",
+          "3.00"
+        ],
+        [
+          "3.00",
+          "6.00"
+        ],
+        [
+          "3.00",
+          "3.00"
+        ],
+        [
+          "17.40",
+          "3.00"
+        ],
+        [
+          "17.40",
+          "3.00"
+        ],
+        [
+          "3.00",
+          "3.00"
+        ],
+        [
+          "3.00",
+          "3.00"
+        ],
+        [
+          "3.00",
+          "3.00"
+        ],
+        [
+          "3.00",
+          "17.40"
+        ],
+        [
+          "3.00",
+          "17.40"
+        ],
+        [
+          "3.00",
+          "3.00"
+        ],
+        [
+          "3.00",
+          "3.00"
+        ]
+      ]
+    },
+    {
+      "id": "restored-pair-alternative",
+      "url": "http://127.0.0.1:8007/api/optimize?scheduling_mode=joint",
+      "scheduling_mode": "joint",
+      "status": 200,
+      "editorSnapshot": {
+        "opening": "8",
+        "closing": "18",
+        "limit": "15",
+        "offPeak": "0.12",
+        "peak": "0.28",
+        "peakStart": "14",
+        "peakEnd": "20",
+        "chargers": "2",
+        "chargerPower": "7.2",
+        "evEnergy": "14.4",
+        "arrival": "15",
+        "deadline": "22",
+        "equipmentPower": "3",
+        "duration": "2",
+        "equipmentStart": "10",
+        "equipmentEnd": "16",
+        "demandProfile": {
+          "mode": "sources",
+          "values": [],
+          "sources": [
+            {
+              "category": "Lighting",
+              "values": [
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2"
+              ]
+            },
+            {
+              "category": "Refrigeration",
+              "values": [
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1"
+              ]
+            }
+          ]
+        }
+      },
+      "snapshotOrigin": "DOM controls at submission; alternative inherits non-editable fields from captured current editor",
+      "scenario": {
+        "operating_hours": {
+          "start_hour": 8,
+          "end_hour": 18
+        },
+        "building_max_demand_kw": 15,
+        "fixed_demand_kw": [
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3
+        ],
+        "electricity_prices_usd_per_kwh": [
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.28,
+          0.28,
+          0.28,
+          0.28,
+          0.28,
+          0.28,
+          0.12,
+          0.12,
+          0.12,
+          0.12
+        ],
+        "ev_requirements": [
+          {
+            "id": "office-ev-1",
+            "arrival_hour": 15,
+            "deadline_hour": 22,
+            "energy_required_kwh": 14.4,
+            "max_charging_power_kw": 7.2
+          },
+          {
+            "id": "office-ev-2",
+            "arrival_hour": 15,
+            "deadline_hour": 22,
+            "energy_required_kwh": 14.4,
+            "max_charging_power_kw": 7.2
+          }
+        ],
+        "flexible_equipment": [
+          {
+            "id": "office-equipment",
+            "available_hours": {
+              "start_hour": 10,
+              "end_hour": 16
+            },
+            "energy_required_kwh": 6,
+            "max_power_kw": 3
+          }
+        ]
+      },
+      "response": {
+        "feasibility_status": "feasible",
+        "baseline_electricity_cost_usd": 20.304,
+        "baseline_peak_demand_kw": 17.4,
+        "baseline_demand_kw": [
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          6,
+          6,
+          3,
+          3,
+          3,
+          17.4,
+          17.4,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3
+        ],
+        "optimized_electricity_cost_usd": 16.464000100000003,
+        "optimized_peak_demand_kw": 14.999999687499992,
+        "optimized_demand_kw": [
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          6,
+          3,
+          6,
+          3,
+          3,
+          7.800000625000015,
+          3,
+          3,
+          3,
+          14.999999687499992,
+          14.999999687499992,
+          3,
+          3
+        ],
+        "constraint_violations": []
+      },
+      "displayedBenefitMetrics": [
+        "$20.30",
+        "$16.46",
+        "$3.84",
+        "2.40 kW"
+      ],
+      "chartGeometry": {
+        "width": 499,
+        "height": 320,
+        "visibleCurves": 3,
+        "ticks": 12
+      },
+      "displayedHourlyTable": [
+        [
+          "3.00",
+          "3.00"
+        ],
+        [
+          "3.00",
+          "3.00"
+        ],
+        [
+          "3.00",
+          "3.00"
+        ],
+        [
+          "3.00",
+          "3.00"
+        ],
+        [
+          "3.00",
+          "3.00"
+        ],
+        [
+          "3.00",
+          "3.00"
+        ],
+        [
+          "3.00",
+          "3.00"
+        ],
+        [
+          "3.00",
+          "3.00"
+        ],
+        [
+          "3.00",
+          "3.00"
+        ],
+        [
+          "3.00",
+          "3.00"
+        ],
+        [
+          "6.00",
+          "3.00"
+        ],
+        [
+          "6.00",
+          "6.00"
+        ],
+        [
+          "3.00",
+          "3.00"
+        ],
+        [
+          "3.00",
+          "6.00"
+        ],
+        [
+          "3.00",
+          "3.00"
+        ],
+        [
+          "17.40",
+          "3.00"
+        ],
+        [
+          "17.40",
+          "7.80"
+        ],
+        [
+          "3.00",
+          "3.00"
+        ],
+        [
+          "3.00",
+          "3.00"
+        ],
+        [
+          "3.00",
+          "3.00"
+        ],
+        [
+          "3.00",
+          "15.00"
+        ],
+        [
+          "3.00",
+          "15.00"
+        ],
+        [
+          "3.00",
+          "3.00"
+        ],
+        [
+          "3.00",
+          "3.00"
+        ]
+      ]
+    },
+    {
+      "id": "infeasible-pair-current",
+      "url": "http://127.0.0.1:8007/api/optimize?scheduling_mode=joint",
+      "scheduling_mode": "joint",
+      "status": 200,
+      "editorSnapshot": {
+        "opening": "8",
+        "closing": "18",
+        "limit": "25",
+        "offPeak": "0.12",
+        "peak": "0.28",
+        "peakStart": "14",
+        "peakEnd": "20",
+        "chargers": "2",
+        "chargerPower": "7.2",
+        "evEnergy": "14.4",
+        "arrival": "15",
+        "deadline": "22",
+        "equipmentPower": "3",
+        "duration": "2",
+        "equipmentStart": "10",
+        "equipmentEnd": "16",
+        "demandProfile": {
+          "mode": "sources",
+          "values": [],
+          "sources": [
+            {
+              "category": "Lighting",
+              "values": [
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2"
+              ]
+            },
+            {
+              "category": "Refrigeration",
+              "values": [
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1"
+              ]
+            }
+          ]
+        }
+      },
+      "snapshotOrigin": "DOM controls at submission; alternative inherits non-editable fields from captured current editor",
+      "scenario": {
+        "operating_hours": {
+          "start_hour": 8,
+          "end_hour": 18
+        },
+        "building_max_demand_kw": 25,
+        "fixed_demand_kw": [
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3
+        ],
+        "electricity_prices_usd_per_kwh": [
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.28,
+          0.28,
+          0.28,
+          0.28,
+          0.28,
+          0.28,
+          0.12,
+          0.12,
+          0.12,
+          0.12
+        ],
+        "ev_requirements": [
+          {
+            "id": "office-ev-1",
+            "arrival_hour": 15,
+            "deadline_hour": 22,
+            "energy_required_kwh": 14.4,
+            "max_charging_power_kw": 7.2
+          },
+          {
+            "id": "office-ev-2",
+            "arrival_hour": 15,
+            "deadline_hour": 22,
+            "energy_required_kwh": 14.4,
+            "max_charging_power_kw": 7.2
+          }
+        ],
+        "flexible_equipment": [
+          {
+            "id": "office-equipment",
+            "available_hours": {
+              "start_hour": 10,
+              "end_hour": 16
+            },
+            "energy_required_kwh": 6,
+            "max_power_kw": 3
+          }
+        ]
+      },
+      "response": {
+        "feasibility_status": "feasible",
+        "baseline_electricity_cost_usd": 20.304,
+        "baseline_peak_demand_kw": 17.4,
+        "baseline_demand_kw": [
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          6,
+          6,
+          3,
+          3,
+          3,
+          17.4,
+          17.4,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3
+        ],
+        "optimized_electricity_cost_usd": 15.6960001,
+        "optimized_peak_demand_kw": 17.3999996875,
+        "optimized_demand_kw": [
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          6,
+          3,
+          6,
+          3,
+          3,
+          3,
+          3,
+          3.0000006249999984,
+          3,
+          17.3999996875,
+          17.3999996875,
+          3,
+          3
+        ],
+        "constraint_violations": []
+      },
+      "displayedBenefitMetrics": [
+        "$20.30",
+        "$15.70",
+        "$4.61",
+        "0.00 kW"
+      ],
+      "chartGeometry": {
+        "width": 499,
+        "height": 320,
+        "visibleCurves": 3,
+        "ticks": 12
+      },
+      "displayedHourlyTable": [
+        [
+          "3.00",
+          "3.00"
+        ],
+        [
+          "3.00",
+          "3.00"
+        ],
+        [
+          "3.00",
+          "3.00"
+        ],
+        [
+          "3.00",
+          "3.00"
+        ],
+        [
+          "3.00",
+          "3.00"
+        ],
+        [
+          "3.00",
+          "3.00"
+        ],
+        [
+          "3.00",
+          "3.00"
+        ],
+        [
+          "3.00",
+          "3.00"
+        ],
+        [
+          "3.00",
+          "3.00"
+        ],
+        [
+          "3.00",
+          "3.00"
+        ],
+        [
+          "6.00",
+          "3.00"
+        ],
+        [
+          "6.00",
+          "6.00"
+        ],
+        [
+          "3.00",
+          "3.00"
+        ],
+        [
+          "3.00",
+          "6.00"
+        ],
+        [
+          "3.00",
+          "3.00"
+        ],
+        [
+          "17.40",
+          "3.00"
+        ],
+        [
+          "17.40",
+          "3.00"
+        ],
+        [
+          "3.00",
+          "3.00"
+        ],
+        [
+          "3.00",
+          "3.00"
+        ],
+        [
+          "3.00",
+          "3.00"
+        ],
+        [
+          "3.00",
+          "17.40"
+        ],
+        [
+          "3.00",
+          "17.40"
+        ],
+        [
+          "3.00",
+          "3.00"
+        ],
+        [
+          "3.00",
+          "3.00"
+        ]
+      ]
+    },
+    {
+      "id": "infeasible-pair-alternative",
+      "url": "http://127.0.0.1:8007/api/optimize?scheduling_mode=joint",
+      "scheduling_mode": "joint",
+      "status": 200,
+      "editorSnapshot": {
+        "opening": "8",
+        "closing": "18",
+        "limit": "2",
+        "offPeak": "0.12",
+        "peak": "0.28",
+        "peakStart": "14",
+        "peakEnd": "20",
+        "chargers": "2",
+        "chargerPower": "7.2",
+        "evEnergy": "14.4",
+        "arrival": "15",
+        "deadline": "22",
+        "equipmentPower": "3",
+        "duration": "2",
+        "equipmentStart": "10",
+        "equipmentEnd": "16",
+        "demandProfile": {
+          "mode": "sources",
+          "values": [],
+          "sources": [
+            {
+              "category": "Lighting",
+              "values": [
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2"
+              ]
+            },
+            {
+              "category": "Refrigeration",
+              "values": [
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1"
+              ]
+            }
+          ]
+        }
+      },
+      "snapshotOrigin": "DOM controls at submission; alternative inherits non-editable fields from captured current editor",
+      "scenario": {
+        "operating_hours": {
+          "start_hour": 8,
+          "end_hour": 18
+        },
+        "building_max_demand_kw": 2,
+        "fixed_demand_kw": [
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3
+        ],
+        "electricity_prices_usd_per_kwh": [
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.28,
+          0.28,
+          0.28,
+          0.28,
+          0.28,
+          0.28,
+          0.12,
+          0.12,
+          0.12,
+          0.12
+        ],
+        "ev_requirements": [
+          {
+            "id": "office-ev-1",
+            "arrival_hour": 15,
+            "deadline_hour": 22,
+            "energy_required_kwh": 14.4,
+            "max_charging_power_kw": 7.2
+          },
+          {
+            "id": "office-ev-2",
+            "arrival_hour": 15,
+            "deadline_hour": 22,
+            "energy_required_kwh": 14.4,
+            "max_charging_power_kw": 7.2
+          }
+        ],
+        "flexible_equipment": [
+          {
+            "id": "office-equipment",
+            "available_hours": {
+              "start_hour": 10,
+              "end_hour": 16
+            },
+            "energy_required_kwh": 6,
+            "max_power_kw": 3
+          }
+        ]
+      },
+      "response": {
+        "feasibility_status": "infeasible",
+        "baseline_electricity_cost_usd": 20.304,
+        "baseline_peak_demand_kw": 17.4,
+        "baseline_demand_kw": [
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          6,
+          6,
+          3,
+          3,
+          3,
+          17.4,
+          17.4,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3
+        ],
+        "optimized_electricity_cost_usd": null,
+        "optimized_peak_demand_kw": null,
+        "optimized_demand_kw": null,
+        "constraint_violations": [
+          "Hour 0: immutable background/HVAC demand (3 kW) exceeds site cap (2 kW)",
+          "Hour 1: immutable background/HVAC demand (3 kW) exceeds site cap (2 kW)",
+          "Hour 2: immutable background/HVAC demand (3 kW) exceeds site cap (2 kW)",
+          "Hour 3: immutable background/HVAC demand (3 kW) exceeds site cap (2 kW)",
+          "Hour 4: immutable background/HVAC demand (3 kW) exceeds site cap (2 kW)",
+          "Hour 5: immutable background/HVAC demand (3 kW) exceeds site cap (2 kW)",
+          "Hour 6: immutable background/HVAC demand (3 kW) exceeds site cap (2 kW)",
+          "Hour 7: immutable background/HVAC demand (3 kW) exceeds site cap (2 kW)",
+          "Hour 8: immutable background/HVAC demand (3 kW) exceeds site cap (2 kW)",
+          "Hour 9: immutable background/HVAC demand (3 kW) exceeds site cap (2 kW)",
+          "Hour 10: immutable background/HVAC demand (3 kW) exceeds site cap (2 kW)",
+          "Hour 11: immutable background/HVAC demand (3 kW) exceeds site cap (2 kW)",
+          "Hour 12: immutable background/HVAC demand (3 kW) exceeds site cap (2 kW)",
+          "Hour 13: immutable background/HVAC demand (3 kW) exceeds site cap (2 kW)",
+          "Hour 14: immutable background/HVAC demand (3 kW) exceeds site cap (2 kW)",
+          "Hour 15: immutable background/HVAC demand (3 kW) exceeds site cap (2 kW)",
+          "Hour 16: immutable background/HVAC demand (3 kW) exceeds site cap (2 kW)",
+          "Hour 17: immutable background/HVAC demand (3 kW) exceeds site cap (2 kW)",
+          "Hour 18: immutable background/HVAC demand (3 kW) exceeds site cap (2 kW)",
+          "Hour 19: immutable background/HVAC demand (3 kW) exceeds site cap (2 kW)",
+          "Hour 20: immutable background/HVAC demand (3 kW) exceeds site cap (2 kW)",
+          "Hour 21: immutable background/HVAC demand (3 kW) exceeds site cap (2 kW)",
+          "Hour 22: immutable background/HVAC demand (3 kW) exceeds site cap (2 kW)",
+          "Hour 23: immutable background/HVAC demand (3 kW) exceeds site cap (2 kW)",
+          "Window [0, 16): EVs and flexible equipment require 6 kWh but shared capacity is at most 0 kWh",
+          "Window [0, 22): EVs and flexible equipment require 34.8 kWh but shared capacity is at most 0 kWh",
+          "Window [0, 24): EVs and flexible equipment require 34.8 kWh but shared capacity is at most 0 kWh",
+          "Window [10, 16): EVs and flexible equipment require 6 kWh but shared capacity is at most 0 kWh",
+          "Window [10, 22): EVs and flexible equipment require 34.8 kWh but shared capacity is at most 0 kWh",
+          "Window [10, 24): EVs and flexible equipment require 34.8 kWh but shared capacity is at most 0 kWh",
+          "Window [15, 22): EVs and flexible equipment require 28.8 kWh but shared capacity is at most 0 kWh",
+          "Window [15, 24): EVs and flexible equipment require 28.8 kWh but shared capacity is at most 0 kWh",
+          "Infeasible under the immutable background/HVAC schedules."
+        ]
+      },
+      "displayedBenefitMetrics": [
+        "$20.30",
+        "Unavailable",
+        "Unavailable",
+        "Unavailable"
+      ],
+      "chartGeometry": {
+        "width": 499,
+        "height": 320,
+        "visibleCurves": 2,
+        "ticks": 12
+      },
+      "displayedHourlyTable": [
+        [
+          "3.00"
+        ],
+        [
+          "3.00"
+        ],
+        [
+          "3.00"
+        ],
+        [
+          "3.00"
+        ],
+        [
+          "3.00"
+        ],
+        [
+          "3.00"
+        ],
+        [
+          "3.00"
+        ],
+        [
+          "3.00"
+        ],
+        [
+          "3.00"
+        ],
+        [
+          "3.00"
+        ],
+        [
+          "6.00"
+        ],
+        [
+          "6.00"
+        ],
+        [
+          "3.00"
+        ],
+        [
+          "3.00"
+        ],
+        [
+          "3.00"
+        ],
+        [
+          "17.40"
+        ],
+        [
+          "17.40"
+        ],
+        [
+          "3.00"
+        ],
+        [
+          "3.00"
+        ],
+        [
+          "3.00"
+        ],
+        [
+          "3.00"
+        ],
+        [
+          "3.00"
+        ],
+        [
+          "3.00"
+        ],
+        [
+          "3.00"
+        ]
+      ]
+    },
+    {
+      "id": "mobile-pair-current",
+      "url": "http://127.0.0.1:8007/api/optimize?scheduling_mode=joint",
+      "scheduling_mode": "joint",
+      "status": 200,
+      "editorSnapshot": {
+        "opening": "8",
+        "closing": "18",
+        "limit": "25",
+        "offPeak": "0.12",
+        "peak": "0.28",
+        "peakStart": "14",
+        "peakEnd": "20",
+        "chargers": "2",
+        "chargerPower": "7.2",
+        "evEnergy": "14.4",
+        "arrival": "15",
+        "deadline": "22",
+        "equipmentPower": "3",
+        "duration": "2",
+        "equipmentStart": "10",
+        "equipmentEnd": "16",
+        "demandProfile": {
+          "mode": "sources",
+          "values": [],
+          "sources": [
+            {
+              "category": "Lighting",
+              "values": [
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2"
+              ]
+            },
+            {
+              "category": "Refrigeration",
+              "values": [
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1"
+              ]
+            }
+          ]
+        }
+      },
+      "snapshotOrigin": "DOM controls at submission; alternative inherits non-editable fields from captured current editor",
+      "scenario": {
+        "operating_hours": {
+          "start_hour": 8,
+          "end_hour": 18
+        },
+        "building_max_demand_kw": 25,
+        "fixed_demand_kw": [
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3
+        ],
+        "electricity_prices_usd_per_kwh": [
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.28,
+          0.28,
+          0.28,
+          0.28,
+          0.28,
+          0.28,
+          0.12,
+          0.12,
+          0.12,
+          0.12
+        ],
+        "ev_requirements": [
+          {
+            "id": "office-ev-1",
+            "arrival_hour": 15,
+            "deadline_hour": 22,
+            "energy_required_kwh": 14.4,
+            "max_charging_power_kw": 7.2
+          },
+          {
+            "id": "office-ev-2",
+            "arrival_hour": 15,
+            "deadline_hour": 22,
+            "energy_required_kwh": 14.4,
+            "max_charging_power_kw": 7.2
+          }
+        ],
+        "flexible_equipment": [
+          {
+            "id": "office-equipment",
+            "available_hours": {
+              "start_hour": 10,
+              "end_hour": 16
+            },
+            "energy_required_kwh": 6,
+            "max_power_kw": 3
+          }
+        ]
+      },
+      "response": {
+        "feasibility_status": "feasible",
+        "baseline_electricity_cost_usd": 20.304,
+        "baseline_peak_demand_kw": 17.4,
+        "baseline_demand_kw": [
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          6,
+          6,
+          3,
+          3,
+          3,
+          17.4,
+          17.4,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3
+        ],
+        "optimized_electricity_cost_usd": 15.6960001,
+        "optimized_peak_demand_kw": 17.3999996875,
+        "optimized_demand_kw": [
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          6,
+          3,
+          6,
+          3,
+          3,
+          3,
+          3,
+          3.0000006249999984,
+          3,
+          17.3999996875,
+          17.3999996875,
+          3,
+          3
+        ],
+        "constraint_violations": []
+      },
+      "displayedBenefitMetrics": [
+        "$20.30",
+        "$15.70",
+        "$4.61",
+        "0.00 kW"
+      ],
+      "chartGeometry": {
+        "width": 314,
+        "height": 310,
+        "visibleCurves": 3,
+        "ticks": 9
+      },
+      "displayedHourlyTable": [
+        [
+          "3.00",
+          "3.00"
+        ],
+        [
+          "3.00",
+          "3.00"
+        ],
+        [
+          "3.00",
+          "3.00"
+        ],
+        [
+          "3.00",
+          "3.00"
+        ],
+        [
+          "3.00",
+          "3.00"
+        ],
+        [
+          "3.00",
+          "3.00"
+        ],
+        [
+          "3.00",
+          "3.00"
+        ],
+        [
+          "3.00",
+          "3.00"
+        ],
+        [
+          "3.00",
+          "3.00"
+        ],
+        [
+          "3.00",
+          "3.00"
+        ],
+        [
+          "6.00",
+          "3.00"
+        ],
+        [
+          "6.00",
+          "6.00"
+        ],
+        [
+          "3.00",
+          "3.00"
+        ],
+        [
+          "3.00",
+          "6.00"
+        ],
+        [
+          "3.00",
+          "3.00"
+        ],
+        [
+          "17.40",
+          "3.00"
+        ],
+        [
+          "17.40",
+          "3.00"
+        ],
+        [
+          "3.00",
+          "3.00"
+        ],
+        [
+          "3.00",
+          "3.00"
+        ],
+        [
+          "3.00",
+          "3.00"
+        ],
+        [
+          "3.00",
+          "17.40"
+        ],
+        [
+          "3.00",
+          "17.40"
+        ],
+        [
+          "3.00",
+          "3.00"
+        ],
+        [
+          "3.00",
+          "3.00"
+        ]
+      ]
+    },
+    {
+      "id": "mobile-pair-alternative",
+      "url": "http://127.0.0.1:8007/api/optimize?scheduling_mode=joint",
+      "scheduling_mode": "joint",
+      "status": 200,
+      "editorSnapshot": {
+        "opening": "8",
+        "closing": "18",
+        "limit": "15",
+        "offPeak": "0.12",
+        "peak": "0.28",
+        "peakStart": "14",
+        "peakEnd": "20",
+        "chargers": "2",
+        "chargerPower": "7.2",
+        "evEnergy": "14.4",
+        "arrival": "15",
+        "deadline": "22",
+        "equipmentPower": "3",
+        "duration": "2",
+        "equipmentStart": "10",
+        "equipmentEnd": "16",
+        "demandProfile": {
+          "mode": "sources",
+          "values": [],
+          "sources": [
+            {
+              "category": "Lighting",
+              "values": [
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2"
+              ]
+            },
+            {
+              "category": "Refrigeration",
+              "values": [
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1"
+              ]
+            }
+          ]
+        }
+      },
+      "snapshotOrigin": "DOM controls at submission; alternative inherits non-editable fields from captured current editor",
+      "scenario": {
+        "operating_hours": {
+          "start_hour": 8,
+          "end_hour": 18
+        },
+        "building_max_demand_kw": 15,
+        "fixed_demand_kw": [
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3
+        ],
+        "electricity_prices_usd_per_kwh": [
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.28,
+          0.28,
+          0.28,
+          0.28,
+          0.28,
+          0.28,
+          0.12,
+          0.12,
+          0.12,
+          0.12
+        ],
+        "ev_requirements": [
+          {
+            "id": "office-ev-1",
+            "arrival_hour": 15,
+            "deadline_hour": 22,
+            "energy_required_kwh": 14.4,
+            "max_charging_power_kw": 7.2
+          },
+          {
+            "id": "office-ev-2",
+            "arrival_hour": 15,
+            "deadline_hour": 22,
+            "energy_required_kwh": 14.4,
+            "max_charging_power_kw": 7.2
+          }
+        ],
+        "flexible_equipment": [
+          {
+            "id": "office-equipment",
+            "available_hours": {
+              "start_hour": 10,
+              "end_hour": 16
+            },
+            "energy_required_kwh": 6,
+            "max_power_kw": 3
+          }
+        ]
+      },
+      "response": {
+        "feasibility_status": "feasible",
+        "baseline_electricity_cost_usd": 20.304,
+        "baseline_peak_demand_kw": 17.4,
+        "baseline_demand_kw": [
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          6,
+          6,
+          3,
+          3,
+          3,
+          17.4,
+          17.4,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3
+        ],
+        "optimized_electricity_cost_usd": 16.464000100000003,
+        "optimized_peak_demand_kw": 14.999999687499992,
+        "optimized_demand_kw": [
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          6,
+          3,
+          6,
+          3,
+          3,
+          7.800000625000015,
+          3,
+          3,
+          3,
+          14.999999687499992,
+          14.999999687499992,
+          3,
+          3
+        ],
+        "constraint_violations": []
+      },
+      "displayedBenefitMetrics": [
+        "$20.30",
+        "$16.46",
+        "$3.84",
+        "2.40 kW"
+      ],
+      "chartGeometry": {
+        "width": 314,
+        "height": 310,
+        "visibleCurves": 3,
+        "ticks": 9
+      },
+      "displayedHourlyTable": [
+        [
+          "3.00",
+          "3.00"
+        ],
+        [
+          "3.00",
+          "3.00"
+        ],
+        [
+          "3.00",
+          "3.00"
+        ],
+        [
+          "3.00",
+          "3.00"
+        ],
+        [
+          "3.00",
+          "3.00"
+        ],
+        [
+          "3.00",
+          "3.00"
+        ],
+        [
+          "3.00",
+          "3.00"
+        ],
+        [
+          "3.00",
+          "3.00"
+        ],
+        [
+          "3.00",
+          "3.00"
+        ],
+        [
+          "3.00",
+          "3.00"
+        ],
+        [
+          "6.00",
+          "3.00"
+        ],
+        [
+          "6.00",
+          "6.00"
+        ],
+        [
+          "3.00",
+          "3.00"
+        ],
+        [
+          "3.00",
+          "6.00"
+        ],
+        [
+          "3.00",
+          "3.00"
+        ],
+        [
+          "17.40",
+          "3.00"
+        ],
+        [
+          "17.40",
+          "7.80"
+        ],
+        [
+          "3.00",
+          "3.00"
+        ],
+        [
+          "3.00",
+          "3.00"
+        ],
+        [
+          "3.00",
+          "3.00"
+        ],
+        [
+          "3.00",
+          "15.00"
+        ],
+        [
+          "3.00",
+          "15.00"
+        ],
+        [
+          "3.00",
+          "3.00"
+        ],
+        [
+          "3.00",
+          "3.00"
+        ]
+      ]
+    },
+    {
+      "id": "infeasible-dashboard",
+      "url": "http://127.0.0.1:8007/api/optimize?scheduling_mode=joint",
+      "scheduling_mode": "joint",
+      "status": 200,
+      "editorSnapshot": {
+        "opening": "8",
+        "closing": "18",
+        "limit": "2",
+        "offPeak": "0.12",
+        "peak": "0.28",
+        "peakStart": "14",
+        "peakEnd": "20",
+        "chargers": "2",
+        "chargerPower": "7.2",
+        "evEnergy": "14.4",
+        "arrival": "15",
+        "deadline": "22",
+        "equipmentPower": "3",
+        "duration": "2",
+        "equipmentStart": "10",
+        "equipmentEnd": "16",
+        "demandProfile": {
+          "mode": "sources",
+          "values": [],
+          "sources": [
+            {
+              "category": "Lighting",
+              "values": [
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2"
+              ]
+            },
+            {
+              "category": "Refrigeration",
+              "values": [
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1",
+                "1"
+              ]
+            }
+          ]
+        }
+      },
+      "snapshotOrigin": "DOM controls at submission; alternative inherits non-editable fields from captured current editor",
+      "scenario": {
+        "operating_hours": {
+          "start_hour": 8,
+          "end_hour": 18
+        },
+        "building_max_demand_kw": 2,
+        "fixed_demand_kw": [
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3
+        ],
+        "electricity_prices_usd_per_kwh": [
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.28,
+          0.28,
+          0.28,
+          0.28,
+          0.28,
+          0.28,
+          0.12,
+          0.12,
+          0.12,
+          0.12
+        ],
+        "ev_requirements": [
+          {
+            "id": "office-ev-1",
+            "arrival_hour": 15,
+            "deadline_hour": 22,
+            "energy_required_kwh": 14.4,
+            "max_charging_power_kw": 7.2
+          },
+          {
+            "id": "office-ev-2",
+            "arrival_hour": 15,
+            "deadline_hour": 22,
+            "energy_required_kwh": 14.4,
+            "max_charging_power_kw": 7.2
+          }
+        ],
+        "flexible_equipment": [
+          {
+            "id": "office-equipment",
+            "available_hours": {
+              "start_hour": 10,
+              "end_hour": 16
+            },
+            "energy_required_kwh": 6,
+            "max_power_kw": 3
+          }
+        ]
+      },
+      "response": {
+        "feasibility_status": "infeasible",
+        "baseline_electricity_cost_usd": 20.304,
+        "baseline_peak_demand_kw": 17.4,
+        "baseline_demand_kw": [
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          6,
+          6,
+          3,
+          3,
+          3,
+          17.4,
+          17.4,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3
+        ],
+        "optimized_electricity_cost_usd": null,
+        "optimized_peak_demand_kw": null,
+        "optimized_demand_kw": null,
+        "constraint_violations": [
+          "Hour 0: immutable background/HVAC demand (3 kW) exceeds site cap (2 kW)",
+          "Hour 1: immutable background/HVAC demand (3 kW) exceeds site cap (2 kW)",
+          "Hour 2: immutable background/HVAC demand (3 kW) exceeds site cap (2 kW)",
+          "Hour 3: immutable background/HVAC demand (3 kW) exceeds site cap (2 kW)",
+          "Hour 4: immutable background/HVAC demand (3 kW) exceeds site cap (2 kW)",
+          "Hour 5: immutable background/HVAC demand (3 kW) exceeds site cap (2 kW)",
+          "Hour 6: immutable background/HVAC demand (3 kW) exceeds site cap (2 kW)",
+          "Hour 7: immutable background/HVAC demand (3 kW) exceeds site cap (2 kW)",
+          "Hour 8: immutable background/HVAC demand (3 kW) exceeds site cap (2 kW)",
+          "Hour 9: immutable background/HVAC demand (3 kW) exceeds site cap (2 kW)",
+          "Hour 10: immutable background/HVAC demand (3 kW) exceeds site cap (2 kW)",
+          "Hour 11: immutable background/HVAC demand (3 kW) exceeds site cap (2 kW)",
+          "Hour 12: immutable background/HVAC demand (3 kW) exceeds site cap (2 kW)",
+          "Hour 13: immutable background/HVAC demand (3 kW) exceeds site cap (2 kW)",
+          "Hour 14: immutable background/HVAC demand (3 kW) exceeds site cap (2 kW)",
+          "Hour 15: immutable background/HVAC demand (3 kW) exceeds site cap (2 kW)",
+          "Hour 16: immutable background/HVAC demand (3 kW) exceeds site cap (2 kW)",
+          "Hour 17: immutable background/HVAC demand (3 kW) exceeds site cap (2 kW)",
+          "Hour 18: immutable background/HVAC demand (3 kW) exceeds site cap (2 kW)",
+          "Hour 19: immutable background/HVAC demand (3 kW) exceeds site cap (2 kW)",
+          "Hour 20: immutable background/HVAC demand (3 kW) exceeds site cap (2 kW)",
+          "Hour 21: immutable background/HVAC demand (3 kW) exceeds site cap (2 kW)",
+          "Hour 22: immutable background/HVAC demand (3 kW) exceeds site cap (2 kW)",
+          "Hour 23: immutable background/HVAC demand (3 kW) exceeds site cap (2 kW)",
+          "Window [0, 16): EVs and flexible equipment require 6 kWh but shared capacity is at most 0 kWh",
+          "Window [0, 22): EVs and flexible equipment require 34.8 kWh but shared capacity is at most 0 kWh",
+          "Window [0, 24): EVs and flexible equipment require 34.8 kWh but shared capacity is at most 0 kWh",
+          "Window [10, 16): EVs and flexible equipment require 6 kWh but shared capacity is at most 0 kWh",
+          "Window [10, 22): EVs and flexible equipment require 34.8 kWh but shared capacity is at most 0 kWh",
+          "Window [10, 24): EVs and flexible equipment require 34.8 kWh but shared capacity is at most 0 kWh",
+          "Window [15, 22): EVs and flexible equipment require 28.8 kWh but shared capacity is at most 0 kWh",
+          "Window [15, 24): EVs and flexible equipment require 28.8 kWh but shared capacity is at most 0 kWh",
+          "Infeasible under the immutable background/HVAC schedules."
+        ]
+      },
+      "displayedBenefitMetrics": [
+        "$20.30",
+        "Unavailable",
+        "Unavailable",
+        "Unavailable"
+      ],
+      "chartGeometry": {
+        "width": 316,
+        "height": 310,
+        "visibleCurves": 2,
+        "ticks": 9
+      },
+      "displayedHourlyTable": [
+        [
+          "3.00"
+        ],
+        [
+          "3.00"
+        ],
+        [
+          "3.00"
+        ],
+        [
+          "3.00"
+        ],
+        [
+          "3.00"
+        ],
+        [
+          "3.00"
+        ],
+        [
+          "3.00"
+        ],
+        [
+          "3.00"
+        ],
+        [
+          "3.00"
+        ],
+        [
+          "3.00"
+        ],
+        [
+          "6.00"
+        ],
+        [
+          "6.00"
+        ],
+        [
+          "3.00"
+        ],
+        [
+          "3.00"
+        ],
+        [
+          "3.00"
+        ],
+        [
+          "17.40"
+        ],
+        [
+          "17.40"
+        ],
+        [
+          "3.00"
+        ],
+        [
+          "3.00"
+        ],
+        [
+          "3.00"
+        ],
+        [
+          "3.00"
+        ],
+        [
+          "3.00"
+        ],
+        [
+          "3.00"
+        ],
+        [
+          "3.00"
+        ]
+      ]
+    }
+  ],
+  "pairs": [
+    {
+      "id": "tight-cap-pair",
+      "current": "tight-cap-pair-current",
+      "alternative": "tight-cap-pair-alternative",
+      "displayedAlternativeMinusCurrent": [
+        "$0.77",
+        "-2.40 kW",
+        "0.00 kWh"
+      ]
+    },
+    {
+      "id": "restored-pair",
+      "current": "restored-pair-current",
+      "alternative": "restored-pair-alternative",
+      "displayedAlternativeMinusCurrent": [
+        "$0.77",
+        "-2.40 kW",
+        "0.00 kWh"
+      ]
+    },
+    {
+      "id": "infeasible-pair",
+      "current": "infeasible-pair-current",
+      "alternative": "infeasible-pair-alternative",
+      "displayedAlternativeMinusCurrent": []
+    },
+    {
+      "id": "mobile-pair",
+      "current": "mobile-pair-current",
+      "alternative": "mobile-pair-alternative",
+      "displayedAlternativeMinusCurrent": [
+        "$0.77",
+        "-2.40 kW",
+        "0.00 kWh"
+      ]
+    }
+  ],
+  "checks": [
+    "Dashboard input edit marks old result stale",
+    "What-if input edit hides prior results",
+    "Apply/Restore preserves named profiles, other inputs and joint mode",
+    "Mode change clears dashboard and hides What-if; switching back does not revive prior comparison",
+    "Mobile viewport submits two genuine joint What-if requests and renders comparison"
+  ],
+  "screenshots": [
+    "docs/screenshots/joint-ee-demo-result-1440.png",
+    "docs/screenshots/joint-ee-demo-result-390.png",
+    "docs/screenshots/joint-ee-custom-result-1440.png",
+    "docs/screenshots/joint-ee-custom-result-390.png",
+    "docs/screenshots/joint-ee-sources-result-1440.png",
+    "docs/screenshots/joint-ee-sources-result-390.png",
+    "docs/screenshots/joint-ee-whatif-feasible-1440.png",
+    "docs/screenshots/joint-ee-whatif-feasible-390.png",
+    "docs/screenshots/joint-ee-whatif-infeasible-1440.png",
+    "docs/screenshots/joint-ee-whatif-infeasible-390.png",
+    "docs/screenshots/joint-ee-dashboard-infeasible-1440.png",
+    "docs/screenshots/joint-ee-dashboard-infeasible-390.png"
+  ],
+  "errors": [],
+  "productSourceDiffAtRun": "",
+  "buildAssets": {
+    "Comparison-C_cmVsgH.js": "a256f40f0f00128de760869b975d111936ebb2280d038b57c88b7aeacb2b23ad",
+    "DemandChart-B8PkNcUl.js": "2256a0a5d9bdd548ea93d9dbbeaf09f617edeb2b23b621755a6bb2ac82619331",
+    "EnergyChart-fB6_vOtb.js": "fc9d0fedd7892b6d7ca3850ded787dbdbb6a48b018a098a8269b07e627edfd0f",
+    "WhatIf-Ci1DWwsq.js": "6815cc8ff0f680d239b907db49d4265828eca65c459978bf6d073ca717a21ed3",
+    "index-2lquH0Vb.js": "7d201dc5d052230ce068d844c3653c5150ad81fa933d999821cd03c9b30e5c1a",
+    "index-DzEzz9Av.css": "3d9737d1763d578f48ad7f4987861d39673b23facced376da64e992d6d2ea9a3",
+    "jsx-runtime-CWACBe9S.js": "78208e360f31f1e0e629074cbe99619d61984ebffc92596a49066b8da4c9c612"
+  },
+  "applyRestore": {
+    "original": {
+      "opening": "8",
+      "closing": "18",
+      "limit": "25",
+      "offPeak": "0.12",
+      "peak": "0.28",
+      "peakStart": "14",
+      "peakEnd": "20",
+      "chargers": "2",
+      "chargerPower": "7.2",
+      "evEnergy": "14.4",
+      "arrival": "15",
+      "deadline": "22",
+      "equipmentPower": "3",
+      "duration": "2",
+      "equipmentStart": "10",
+      "equipmentEnd": "16",
+      "demandProfile": {
+        "mode": "sources",
+        "values": [],
+        "sources": [
+          {
+            "category": "Lighting",
+            "values": [
+              "2",
+              "2",
+              "2",
+              "2",
+              "2",
+              "2",
+              "2",
+              "2",
+              "2",
+              "2",
+              "2",
+              "2",
+              "2",
+              "2",
+              "2",
+              "2",
+              "2",
+              "2",
+              "2",
+              "2",
+              "2",
+              "2",
+              "2",
+              "2"
+            ]
+          },
+          {
+            "category": "Refrigeration",
+            "values": [
+              "1",
+              "1",
+              "1",
+              "1",
+              "1",
+              "1",
+              "1",
+              "1",
+              "1",
+              "1",
+              "1",
+              "1",
+              "1",
+              "1",
+              "1",
+              "1",
+              "1",
+              "1",
+              "1",
+              "1",
+              "1",
+              "1",
+              "1",
+              "1"
+            ]
+          }
+        ]
+      }
+    },
+    "applied": {
+      "opening": "8",
+      "closing": "18",
+      "limit": "15",
+      "offPeak": "0.12",
+      "peak": "0.28",
+      "peakStart": "14",
+      "peakEnd": "20",
+      "chargers": "2",
+      "chargerPower": "7.2",
+      "evEnergy": "14.4",
+      "arrival": "15",
+      "deadline": "22",
+      "equipmentPower": "3",
+      "duration": "2",
+      "equipmentStart": "10",
+      "equipmentEnd": "16",
+      "demandProfile": {
+        "mode": "sources",
+        "values": [],
+        "sources": [
+          {
+            "category": "Lighting",
+            "values": [
+              "2",
+              "2",
+              "2",
+              "2",
+              "2",
+              "2",
+              "2",
+              "2",
+              "2",
+              "2",
+              "2",
+              "2",
+              "2",
+              "2",
+              "2",
+              "2",
+              "2",
+              "2",
+              "2",
+              "2",
+              "2",
+              "2",
+              "2",
+              "2"
+            ]
+          },
+          {
+            "category": "Refrigeration",
+            "values": [
+              "1",
+              "1",
+              "1",
+              "1",
+              "1",
+              "1",
+              "1",
+              "1",
+              "1",
+              "1",
+              "1",
+              "1",
+              "1",
+              "1",
+              "1",
+              "1",
+              "1",
+              "1",
+              "1",
+              "1",
+              "1",
+              "1",
+              "1",
+              "1"
+            ]
+          }
+        ]
+      }
+    },
+    "restored": {
+      "opening": "8",
+      "closing": "18",
+      "limit": "25",
+      "offPeak": "0.12",
+      "peak": "0.28",
+      "peakStart": "14",
+      "peakEnd": "20",
+      "chargers": "2",
+      "chargerPower": "7.2",
+      "evEnergy": "14.4",
+      "arrival": "15",
+      "deadline": "22",
+      "equipmentPower": "3",
+      "duration": "2",
+      "equipmentStart": "10",
+      "equipmentEnd": "16",
+      "demandProfile": {
+        "mode": "sources",
+        "values": [],
+        "sources": [
+          {
+            "category": "Lighting",
+            "values": [
+              "2",
+              "2",
+              "2",
+              "2",
+              "2",
+              "2",
+              "2",
+              "2",
+              "2",
+              "2",
+              "2",
+              "2",
+              "2",
+              "2",
+              "2",
+              "2",
+              "2",
+              "2",
+              "2",
+              "2",
+              "2",
+              "2",
+              "2",
+              "2"
+            ]
+          },
+          {
+            "category": "Refrigeration",
+            "values": [
+              "1",
+              "1",
+              "1",
+              "1",
+              "1",
+              "1",
+              "1",
+              "1",
+              "1",
+              "1",
+              "1",
+              "1",
+              "1",
+              "1",
+              "1",
+              "1",
+              "1",
+              "1",
+              "1",
+              "1",
+              "1",
+              "1",
+              "1",
+              "1"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "completedAt": "2026-10-29T22:57:05.455Z",
+  "status": "PASS"
+}
