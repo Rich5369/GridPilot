@@ -1,7 +1,8 @@
 # Commercial electricity demand dashboard
 
-This feature is stacked on PR #21 (`feature/custom-demand-profile`, commit 5b06c1d).
-PR #20 is merged (c716bec) and is an ancestor. PR #21 was open when work began.
+This feature preserves PR #21 (`feature/custom-demand-profile`, commit 5b06c1d).
+PR #20 is merged (c716bec) and is an ancestor. PR #21 was open when work began
+and merged during implementation (57b6f9c). The review PR targets main.
 No optimizer, joint adapter, backend contract, or Meta integration files are changed.
 
 ## Categories and representation
@@ -102,8 +103,7 @@ VITE_API_BASE_URL=http://127.0.0.1:8006 GRIDPILOT_LIVE_API=1 npm --prefix fronte
 
 ## Dependencies and scope
 
-Merge PR #21 first, then retarget this stacked PR to main if necessary. Joint
-scheduling still depends on shaJ46's adapter and reports `joint_adapter_unavailable`.
+PRs #20 and #21 are both merged and preserved. Joint scheduling still depends on shaJ46's adapter and reports `joint_adapter_unavailable`.
 The present result contract supports total-only optimized comparisons. Per-source
 optimized schedules would require an engineering-owned contract extension.
 No merge or deployment is performed.
