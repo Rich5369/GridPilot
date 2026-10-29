@@ -169,3 +169,28 @@ it.each([false, true])('restores the AI handoff snapshot and isolates old respon
   expect(container.querySelector<HTMLInputElement>('#limit')!.value).toBe('20')
   expect(container.querySelector<HTMLSelectElement>('#scheduling-mode')!.value).toBe('ev_only')
 })
+
+it('guides configuration to results and scopes fictional data warnings to overview', async () => {
+  await act(async () => root.render(<Dashboard />))
+  expect(container.querySelector('[aria-label="Energy planning workflow"]')).toBeTruthy()
+  expect(container.querySelector('.demo-banner')).toBeTruthy()
+  await click('1. Configure scenario')
+  expect(container.querySelector('#limit')).toBeTruthy()
+  expect(container.querySelector('.demo-banner')).toBeNull()
+  await input('evEnergy', '18')
+  fetchMock.mockResolvedValueOnce(new Response(JSON.stringify({
+    feasibility_status: 'feasible', baseline_electricity_cost_usd: 20,
+    optimized_electricity_cost_usd: 18, baseline_peak_demand_kw: 3,
+    optimized_peak_demand_kw: 2, baseline_demand_kw: Array(24).fill(3),
+    optimized_demand_kw: Array(24).fill(2), constraint_violations: [],
+  })))
+  await click('Run optimization')
+  expect(container.textContent).toContain('Result available · EV-only · feasible')
+  const request = fetchMock.mock.calls.find(([url]) => String(url).includes('/api/optimize?'))!
+  expect(JSON.parse(request[1].body).ev_requirements[0].energy_required_kwh).toBe(18)
+  await click('1. Configure scenario')
+  await input('evEnergy', '19')
+  expect(container.textContent).toContain('Inputs changed · Run optimization to update your results')
+  await click('3. Compare alternatives')
+  expect(container.querySelector('[aria-label="Business what-if comparison"]')).toBeTruthy()
+})
