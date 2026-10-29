@@ -34,8 +34,8 @@ export function Comparison({
           <GitCompareArrows size={32} />
           <h3>No optimization result yet</h3>
           <p>
-            Connect a functional FastAPI optimizer and submit a scenario to
-            compare demand, daily energy costs and constraint satisfaction.
+            Choose Scenario configuration to review your inputs, then select Run optimization.
+            Your baseline and optimized demand will appear here.
           </p>
           <div className="empty-metrics">
             <span>
@@ -53,9 +53,9 @@ export function Comparison({
       ) : (
         <>
           {stale && (
-            <p className="warning">
+            <p className="warning" role="status">
               Inputs have changed. Results belong to the previously submitted
-              scenario.
+              scenario. Run optimization again before using these results for the current inputs.
             </p>
           )}
           <p
@@ -102,6 +102,9 @@ export function Comparison({
             </span>
           </div>
           <p className="muted">
+            {result.feasibility_status === 'feasible'
+              ? 'The returned schedule meets the modeled energy requirements, availability windows and site power limit. This is a planning estimate, not a utility bill forecast. '
+              : 'No schedule meets all modeled constraints. Review the reasons below, then adjust the power limit, energy requirements or availability windows. '}
             Costs are in USD. Positive differences indicate reductions. Energy-only costs exclude
             fixed and demand charges.
           </p>

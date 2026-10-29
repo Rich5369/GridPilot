@@ -104,6 +104,7 @@ export function Dashboard() {
   }
   return (
     <div className="app-shell">
+      <a className="skip-link" href="#overview">Skip to main content</a>
       <aside className="sidebar">
         <a
           className="brand"
@@ -165,7 +166,7 @@ export function Dashboard() {
           </span>
           <BackendStatus />
         </header>
-        <main id="overview">
+        <main id="overview" tabIndex={-1}>
           <div className="page-heading">
             <div>
               <p className="eyebrow">YOUR ENERGY, IN FOCUS</p>
@@ -185,7 +186,18 @@ export function Dashboard() {
               {busy ? 'Requesting optimization…' : 'Run optimization'}
             </button>
           </div>
-          <div className="field">
+          <section className="workflow" aria-label="Energy planning workflow">
+            <p className="eyebrow">PLAN YOUR DAY</p>
+            <h2>Shift energy use. Understand the tradeoffs.</h2>
+            <p>Configure one day of demand, run the optimizer, then compare energy costs and peak power.</p>
+            <ol>
+              <li><button className="secondary" onClick={() => setView('configuration')} aria-current={view === 'configuration' ? 'step' : undefined}>1. Configure scenario</button></li>
+              <li><button className="secondary" onClick={() => setView('comparison')} aria-current={view === 'comparison' ? 'step' : undefined}>2. Review results</button></li>
+              <li><button className="secondary" onClick={() => { setWhatIfVisited(true); setView('whatif') }}>3. Compare alternatives</button></li>
+            </ol>
+            <p className="workflow-status" role="status">{busy ? 'Calculating your submitted scenario…' : !result ? 'Ready to configure · No backend result yet' : submitted !== JSON.stringify(editor) ? 'Inputs changed · Run optimization to update your results' : `Result available · ${modeLabel(resultMode)} · ${result.feasibility_status}`}</p>
+          </section>
+          <div className="mode-control field">
             <label htmlFor="scheduling-mode">Scheduling mode</label>
             <select id="scheduling-mode" value={mode} onChange={event => {
               modeVersion.current += 1
@@ -196,7 +208,7 @@ export function Dashboard() {
               <option value="ev_only">EV-only</option>
               <option value="joint">EV + flexible equipment</option>
             </select>
-            <p>Joint mode shifts eligible flexible equipment within its allowed window while delivering the same required energy. Equipment is interruptible and continuously adjustable; this does not guarantee an uninterrupted machine cycle. Background and HVAC remain fixed.</p>
+            <p>{mode === 'ev_only' ? 'Moves EV charging within arrival and completion times. Equipment, background demand and HVAC stay fixed.' : 'Moves EV charging and eligible equipment within their allowed windows. Equipment can pause and vary power; uninterrupted machine cycles are not modeled. Background demand and HVAC stay fixed.'}</p>
           </div>
           {result && <p>Displayed result mode: {modeLabel(resultMode)}</p>}
           <p id="optimization-help" className="action-help">
@@ -204,14 +216,14 @@ export function Dashboard() {
               ? `Optimization is running. This request can take up to ${OPTIMIZATION_TIMEOUT_MS / 1000} seconds. Please wait.`
               : invalid
                 ? 'Correct the scenario validation errors before submitting.'
-                : 'Submits current inputs to FastAPI. A healthy connection does not guarantee solver availability.'}
+                : 'Runs the current scenario on the backend. Results estimate one day of energy charges, excluding fixed and demand charges.'}
           </p>
           {message && (
             <div className="request-message" role="status">
               {message}
             </div>
           )}
-          <div className="demo-banner">
+          {view === 'overview' && <div className="demo-banner">
             <FlaskConical size={20} />
             <p>
               <strong>Demo Data.</strong> Overview charts and metrics use a
@@ -220,8 +232,8 @@ export function Dashboard() {
               under Optimization.
             </p>
             <span className="tag">DEMO DATA</span>
-          </div>
-          {draftChanged && (
+          </div>}
+          {view === 'overview' && draftChanged && (
             <div className="draft-banner">
               Draft inputs differ from the displayed demo. Charts and costs
               retain the original fixture; editing inputs does not run a

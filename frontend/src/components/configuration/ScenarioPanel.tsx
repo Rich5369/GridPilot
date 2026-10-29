@@ -15,7 +15,7 @@ const groups: {
     fields: [
       ['opening', 'Opening hour'],
       ['closing', 'Closing hour'],
-      ['limit', 'Demand limit (kW)'],
+      ['limit', 'Site power limit (kW)'],
     ],
   },
   {
@@ -78,7 +78,8 @@ export function ScenarioPanel({
       </div>
       <p className="muted">
         One building-local day. Hours use 0–24; end times are exclusive.
-        Overnight windows are not supported by the current API.
+        For example, 9–17 means 09:00 up to 17:00. Overnight windows are not supported.
+        kW measures power; kWh measures energy used over time.
       </p>
       <div className="form-grid">
         {groups.map((group) => (
@@ -89,6 +90,7 @@ export function ScenarioPanel({
                 <label htmlFor={key}>{label}</label>
                 <input
                   id={key}
+                  name={key}
                   type="number"
                   min={
                     ['limit', 'chargerPower', 'equipmentPower'].includes(key)
