@@ -4,6 +4,7 @@ from typing import Literal
 
 from fastapi import APIRouter, HTTPException
 
+from backend.eia.retail import RetailPrices, service as retail_price_service
 from backend.models.contracts import HealthResponse, OptimizationResult, Scenario
 from backend.optimizer.interface import optimize_scenario
 from backend.optimizer.solver import (
@@ -66,3 +67,9 @@ def optimize(scenario: Scenario, scheduling_mode: Literal["ev_only", "joint"] = 
     except Exception:
         logger.exception("Unexpected optimization failure")
         raise service_error(500, "optimization_error", "Optimization failed. No result was returned.") from None
+
+
+@router.get('/retail-prices', response_model=RetailPrices)
+async def retail_prices():
+    """Monthly state commercial retail averages, separate from scenario tariffs."""
+    return await retail_price_service.get()
