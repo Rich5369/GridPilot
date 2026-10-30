@@ -69,3 +69,19 @@ it('retains baseline evidence without inventing an infeasible optimized profile'
   expect(profiles.difference).toBeNull()
   expect(profiles.headroom).toBeNull()
 })
+it('preserves flat $20.58 costs, zero difference and overlapping series', () => {
+  const flatScenario = { ...scenario, electricity_prices_usd_per_kwh: Array(24).fill(0.1715) }
+  const flatResult = { ...result,
+    baseline_demand_kw: Array(24).fill(5), optimized_demand_kw: Array(24).fill(5),
+    baseline_electricity_cost_usd: 20.58, optimized_electricity_cost_usd: 20.58,
+    baseline_peak_demand_kw: 5, optimized_peak_demand_kw: 5,
+  }
+  const before = JSON.stringify({ flatScenario, flatResult })
+  const profiles = hourlyAnalytics(flatResult, flatScenario)
+  expect(profiles.baseline).toEqual(Array(24).fill(0.8575))
+  expect(profiles.optimized).toEqual(profiles.baseline)
+  expect(profiles.difference).toEqual(Array(24).fill(0))
+  expect(profiles.headroom).toEqual(Array(24).fill(5))
+  expect(profiles.optimized!.reduce((a, b) => a + b, 0)).toBeCloseTo(20.58)
+  expect(JSON.stringify({ flatScenario, flatResult })).toBe(before)
+})

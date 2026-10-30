@@ -34,6 +34,7 @@ export function AnalyticsTooltip({
       <p>
         {hourInterval(label)} <span>1-hour interval</span>
       </p>
+      <small>Original hourly value · connections are visual interpolation</small>
       {entries.map((entry) => (
         <div key={entry.dataKey}>
           <span>
