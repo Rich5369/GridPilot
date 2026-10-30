@@ -135,6 +135,7 @@ class OperatingPlan(Contract):
 
 class OptimizationResult(Contract):
     """Verified feasible or proven infeasible result returned by the HTTP API."""
+    result_id: str | None = Field(default=None, max_length=64)
     feasibility_status: Literal["feasible", "infeasible"]
     baseline_electricity_cost_usd: float = Field(allow_inf_nan=False)
     baseline_peak_demand_kw: NonNegative

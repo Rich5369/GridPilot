@@ -24,6 +24,8 @@ class InterpretResponse(Proposal):
 
 class ExplainRequest(Contract):
     scenario: Scenario
+    result_id: str | None = Field(default=None, max_length=64)
+    scheduling_mode: Literal['ev_only', 'joint'] = 'ev_only'
 
 class ExplanationSelection(Contract):
     points: list[Literal['outcome', 'cost', 'peak', 'constraints', 'method']] = Field(min_length=1, max_length=5)

@@ -4,7 +4,6 @@ from backend.ai.models import (
     InterpretResponse, Proposal,
 )
 from backend.ai.service import generate, fail
-from backend.api.routes import optimize
 from backend.ai.proposals import validate_proposal
 
 router = APIRouter(prefix='/api/ai')
@@ -21,10 +20,13 @@ Preserve everything else. Never change energy requirements, equipment, operating
 
 @router.post('/explain', response_model=ExplainResponse)
 def explain(body: ExplainRequest):
-    # Recompute using the existing verified engine; never trust client-supplied results.
+    # Never run a new solve to explain an earlier execution.
     from backend.ai.service import mode
     mode()
-    result = optimize(body.scenario)
+    from backend.ai.snapshots import lookup
+    result = lookup(body.scenario, body.scheduling_mode, body.result_id) if body.result_id else None
+    if result is None:
+        raise fail(409, 'ai_result_unavailable', 'The exact optimization result is no longer retained here. Run optimization explicitly and select its new result to explain it.')
     facts = {
         'outcome': f'The modeled scenario is {result.feasibility_status}.',
         'cost': f'Baseline daily energy charges: USD {result.baseline_electricity_cost_usd:.4f}.',
@@ -35,9 +37,10 @@ def explain(body: ExplainRequest):
     if result.feasibility_status == 'feasible':
         facts['cost'] += f' Optimized: USD {result.optimized_electricity_cost_usd:.4f}. Modeled daily difference: USD {result.baseline_electricity_cost_usd - result.optimized_electricity_cost_usd:.4f}.'
         facts['peak'] += f' Optimized: {result.optimized_peak_demand_kw:.4f} kW.'
+    facts['method'] = ('The optimizer schedules eligible EV loads' + (' and flexible equipment' if body.scheduling_mode == 'joint' else '') + ' within configured same-day windows. Fixed demand is unchanged; no monthly bill forecast is calculated.')
     selection, source = generate(ExplanationSelection, 'Select relevant fact keys for a business explanation. Include outcome and constraints. Return only keys; do not create claims or numbers.', {'scenario': body.scenario.model_dump(), 'verified_facts': facts})
     keys = list(dict.fromkeys(['outcome', *selection.points, 'constraints']))
-    return ExplainResponse(source=source, explanation=[facts[key] for key in keys], limitations='Single abstract day; hourly averages, continuous interruptible charging and 100% charging efficiency. Energy-only charges exclude demand charges, taxes and fees. No monthly bill savings guarantee; no individual equipment schedule is exposed.')
+    return ExplainResponse(source=source, explanation=[facts[key] for key in keys], limitations='Single abstract day; hourly averages, continuous interruptible charging and 100% charging efficiency. Energy-only charges exclude demand charges, taxes and fees. No monthly bill savings guarantee; device plans, when retained, describe only configured equipment.')
 
 
 from backend.ai.advisor import converse

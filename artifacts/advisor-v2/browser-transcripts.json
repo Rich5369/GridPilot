@@ -1,0 +1,244 @@
+[
+  {
+    "source": "injected browser fixture; NOT genuine Meta",
+    "request": "What information do you need from me?",
+    "response": {
+      "source": "mock",
+      "category": "clarification_required",
+      "message": "Charging flexibility may offer a useful starting point. Your bill reduction goal needs measured consumption and a tariff breakdown before we can assess it.",
+      "follow_up_questions": [
+        "Do you have interval electricity consumption data? It helps distinguish steady demand from charging peaks.",
+        "Does your bill include demand charges? That determines whether peak power affects your total bill."
+      ],
+      "facts": [
+        "Verified submitted ev_only result: baseline daily energy charges USD 20.5760; optimized daily energy charges USD 20.5760. This demo scenario is separate from your warehouse background."
+      ],
+      "profile": {
+        "business_type": "warehouse",
+        "employee_count": 30,
+        "operating_hours": "7 AM to 7 PM",
+        "electricity_cost_and_period": "$6,000 per month",
+        "equipment": "four electric forklifts and delivery trucks",
+        "goals": "reduce electricity expenses by 50%"
+      },
+      "changes": {},
+      "proposed_scenario": null
+    }
+  },
+  {
+    "source": "injected browser fixture; NOT genuine Meta",
+    "request": "Keep the entire building below 15 kW.",
+    "response": {
+      "source": "mock",
+      "category": "scenario_proposal",
+      "message": "Review this site-cap proposal before comparing.",
+      "follow_up_questions": [],
+      "facts": [],
+      "profile": {
+        "business_type": "warehouse",
+        "employee_count": 30,
+        "operating_hours": "7 AM to 7 PM",
+        "electricity_cost_and_period": "$6,000 per month",
+        "equipment": "four electric forklifts and delivery trucks",
+        "goals": "reduce electricity expenses by 50%"
+      },
+      "changes": {
+        "building_max_demand_kw": 15
+      },
+      "proposed_scenario": {
+        "operating_hours": {
+          "start_hour": 8,
+          "end_hour": 18
+        },
+        "building_max_demand_kw": 15,
+        "fixed_demand_kw": [
+          1.5,
+          1.5,
+          1.5,
+          1.5,
+          1.5,
+          1.5,
+          2.5,
+          3.5,
+          5.5,
+          6.5,
+          6.5,
+          7.5,
+          7.5,
+          7.5,
+          7.5,
+          6.5,
+          6.5,
+          5.5,
+          3.5,
+          2.5,
+          1.5,
+          1.5,
+          1.5,
+          1.5
+        ],
+        "electricity_prices_usd_per_kwh": [
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.28,
+          0.28,
+          0.28,
+          0.28,
+          0.28,
+          0.28,
+          0.12,
+          0.12,
+          0.12,
+          0.12
+        ],
+        "ev_requirements": [
+          {
+            "id": "office-ev-1",
+            "arrival_hour": 9,
+            "deadline_hour": 17,
+            "energy_required_kwh": 14.4,
+            "max_charging_power_kw": 7.2
+          },
+          {
+            "id": "office-ev-2",
+            "arrival_hour": 9,
+            "deadline_hour": 17,
+            "energy_required_kwh": 14.4,
+            "max_charging_power_kw": 7.2
+          }
+        ],
+        "flexible_equipment": [
+          {
+            "id": "office-equipment",
+            "available_hours": {
+              "start_hour": 10,
+              "end_hour": 16
+            },
+            "energy_required_kwh": 6,
+            "max_power_kw": 3
+          }
+        ]
+      }
+    }
+  },
+  {
+    "source": "injected browser fixture; NOT genuine Meta",
+    "request": "Keep the entire building below 15 kW.",
+    "response": {
+      "source": "mock",
+      "category": "scenario_proposal",
+      "message": "Review this site-cap proposal before comparing.",
+      "follow_up_questions": [],
+      "facts": [],
+      "profile": {
+        "business_type": "warehouse",
+        "employee_count": 30,
+        "operating_hours": "7 AM to 7 PM",
+        "electricity_cost_and_period": "$6,000 per month",
+        "equipment": "four electric forklifts and delivery trucks",
+        "goals": "reduce electricity expenses by 50%"
+      },
+      "changes": {
+        "building_max_demand_kw": 15
+      },
+      "proposed_scenario": {
+        "operating_hours": {
+          "start_hour": 8,
+          "end_hour": 18
+        },
+        "building_max_demand_kw": 15,
+        "fixed_demand_kw": [
+          1.5,
+          1.5,
+          1.5,
+          1.5,
+          1.5,
+          1.5,
+          2.5,
+          3.5,
+          5.5,
+          6.5,
+          6.5,
+          7.5,
+          7.5,
+          7.5,
+          7.5,
+          6.5,
+          6.5,
+          5.5,
+          3.5,
+          2.5,
+          1.5,
+          1.5,
+          1.5,
+          1.5
+        ],
+        "electricity_prices_usd_per_kwh": [
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.28,
+          0.28,
+          0.28,
+          0.28,
+          0.28,
+          0.28,
+          0.12,
+          0.12,
+          0.12,
+          0.12
+        ],
+        "ev_requirements": [
+          {
+            "id": "office-ev-1",
+            "arrival_hour": 9,
+            "deadline_hour": 17,
+            "energy_required_kwh": 14.4,
+            "max_charging_power_kw": 7.2
+          },
+          {
+            "id": "office-ev-2",
+            "arrival_hour": 9,
+            "deadline_hour": 17,
+            "energy_required_kwh": 14.4,
+            "max_charging_power_kw": 7.2
+          }
+        ],
+        "flexible_equipment": [
+          {
+            "id": "office-equipment",
+            "available_hours": {
+              "start_hour": 10,
+              "end_hour": 16
+            },
+            "energy_required_kwh": 6,
+            "max_power_kw": 3
+          }
+        ]
+      }
+    }
+  }
+]

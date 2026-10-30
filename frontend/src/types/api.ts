@@ -46,6 +46,7 @@ export interface OperatingPlan {
   device_schedules: DeviceSchedule[]
 }
 export interface OptimizationResult {
+  result_id?: string | null
   operating_plan?: OperatingPlan | null
   feasibility_status: 'feasible' | 'infeasible'
   baseline_electricity_cost_usd: number

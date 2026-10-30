@@ -10,7 +10,7 @@ from backend.models.contracts import Scenario
 
 def main():
     scenario = Scenario.model_validate_json(Path('sample_data/scenario.demo.json').read_text())
-    optimize(scenario)
+    result = optimize(scenario)
     requests = [
         'I operate an office with 10 employees working 9 AM to 5 PM. My electricity bill is USD 2000 monthly. We have two EVs that charge overnight and want to reduce costs without disrupting operations.',
         'What are my modeled daily costs?',
@@ -20,7 +20,7 @@ def main():
     history, profile, evidence = [], {}, []
     for request in requests:
         try:
-            response = converse(ConversationRequest(request=request, scenario=scenario, history=history[-12:], profile=profile))
+            response = converse(ConversationRequest(request=request, scenario=scenario, result_id=result.result_id, history=history[-12:], profile=profile))
             evidence.append({'request': request, 'response': response.model_dump()})
             print(json.dumps({'source': response.source, 'category': response.category, 'message': response.message}))
             profile = response.profile.model_dump()

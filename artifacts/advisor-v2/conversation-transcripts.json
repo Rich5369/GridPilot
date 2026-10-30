@@ -1,0 +1,520 @@
+[
+  {
+    "source": "injected qualitative prose; real server evidence and solver; NOT live Meta",
+    "request": "I operate a warehouse with 30 employees working from 7 AM to 7 PM. My electricity bill is about $6,000 per month. We have four electric forklifts and charge delivery trucks. I want to cut our electricity expenses by 50%.",
+    "response": {
+      "category": "clarification_required",
+      "source": "mock",
+      "message": "Charging flexibility may offer a useful starting point. Your bill reduction goal needs measured consumption and a tariff breakdown before we can assess it.",
+      "facts": [],
+      "profile": {
+        "business_type": "warehouse",
+        "employee_count": 30,
+        "operating_hours": "7 AM to 7 PM",
+        "electricity_cost_and_period": "$6,000 per month",
+        "consumption_and_units": null,
+        "equipment": "four electric forklifts and charge delivery trucks",
+        "goals": "cut our electricity expenses by 50%",
+        "restrictions": null
+      },
+      "changes": {
+        "building_max_demand_kw": null,
+        "all_ev_deadline_hour": null,
+        "peak_price_increase_percent": null
+      },
+      "proposed_scenario": null,
+      "follow_up_questions": [
+        "Do you have interval electricity consumption data? It helps distinguish steady demand from charging peaks.",
+        "Does your bill include demand charges? That determines whether peak power affects your total bill."
+      ],
+      "missing_information": [
+        "consumption_and_units",
+        "restrictions"
+      ]
+    }
+  },
+  {
+    "source": "injected qualitative prose; real server evidence and solver; NOT live Meta",
+    "request": "Interval consumption is unknown. Forklifts can charge after work. Would overnight charging help?",
+    "response": {
+      "category": "answer",
+      "source": "mock",
+      "message": "Cheaper tariff periods and charging flexibility could create an opportunity. The current same-day model cannot represent a window crossing midnight. Your equipment must be represented by supported scheduling inputs before it can be tested.",
+      "facts": [],
+      "profile": {
+        "business_type": "warehouse",
+        "employee_count": 30,
+        "operating_hours": "7 AM to 7 PM",
+        "electricity_cost_and_period": "$6,000 per month",
+        "consumption_and_units": null,
+        "equipment": "four electric forklifts and charge delivery trucks",
+        "goals": "cut our electricity expenses by 50%",
+        "restrictions": null
+      },
+      "changes": {
+        "building_max_demand_kw": null,
+        "all_ev_deadline_hour": null,
+        "peak_price_increase_percent": null
+      },
+      "proposed_scenario": null,
+      "follow_up_questions": [
+        "How much energy does each vehicle require, and when must it be ready? These requirements define what scheduling can test."
+      ],
+      "missing_information": [
+        "consumption_and_units",
+        "restrictions"
+      ]
+    }
+  },
+  {
+    "source": "injected qualitative prose; real server evidence and solver; NOT live Meta",
+    "request": "Why did optimization reduce my daily cost?",
+    "response": {
+      "category": "answer",
+      "source": "mock",
+      "message": "The retained result shows eligible charging moving within configured windows against submitted prices. The business background has not changed the submitted engineering inputs.",
+      "facts": [
+        "Verified submitted ev_only result: baseline daily energy charges USD 102.7200; optimized daily energy charges: USD 98.4000. Modeled daily energy-charge difference USD 4.3200; this is not a monthly bill forecast. Hourly price \u00d7 demand cross-check: baseline USD 102.7200; optimized USD 98.4000. Fixed demand and required device energy are unchanged; the scheduling mode determines which eligible loads can shift.",
+        "Verified same-execution device schedules: ev demo-ev-1: optimized; required 24.0 kWh; allowed [9, 17); maximum 7.2 kW; optimized hourly power (hour, kW): [(12, 4.799999899999996), (13, 4.799999899999994), (14, 4.799999899999994), (15, 4.799999899999994), (16, 4.799999899999994)]",
+        "Deterministic baseline hourly energy-charge ranking (hour, USD): [(9, 8.16), (10, 8.16), (11, 8.16)]; baseline site-cap headroom 72.8 kW. Ranking is aggregate, not an individual-device attribution."
+      ],
+      "profile": {
+        "business_type": "warehouse",
+        "employee_count": 30,
+        "operating_hours": "7 AM to 7 PM",
+        "electricity_cost_and_period": "$6,000 per month",
+        "consumption_and_units": null,
+        "equipment": "four electric forklifts and charge delivery trucks",
+        "goals": "cut our electricity expenses by 50%",
+        "restrictions": null
+      },
+      "changes": {
+        "building_max_demand_kw": null,
+        "all_ev_deadline_hour": null,
+        "peak_price_increase_percent": null
+      },
+      "proposed_scenario": null,
+      "follow_up_questions": [],
+      "missing_information": [
+        "consumption_and_units",
+        "restrictions"
+      ]
+    }
+  },
+  {
+    "source": "injected qualitative prose; real server evidence and solver; NOT live Meta",
+    "request": "Why can't GridPilot schedule all my equipment?",
+    "response": {
+      "category": "answer",
+      "source": "mock",
+      "message": "The retained solver reasons describe the conflict. Review those constraints before relaxing operational requirements.",
+      "facts": [
+        "Submitted site cap: 0.1 kW. EV windows and energy requirements: [{'id': 'demo-ev-1', 'arrival_hour': 9, 'deadline_hour': 17, 'energy_required_kwh': 24.0, 'max_charging_power_kw': 7.2}] Verified solver outcome: infeasible. Reasons: ['Hour 0: fixed demand including held flexible loads (20 kW) exceeds site cap (0.1 kW)', 'Hour 1: fixed demand including held flexible loads (20 kW) exceeds site cap (0.1 kW)', 'Hour 2: fixed demand including held flexible loads (20 kW) exceeds site cap (0.1 kW)', 'Hour 3: fixed demand including held flexible loads (20 kW) exceeds site cap (0.1 kW)', 'Hour 4: fixed demand including held flexible loads (20 kW) exceeds site cap (0.1 kW)', 'Hour 5: fixed demand including held flexible loads (20 kW) exceeds site cap (0.1 kW)', 'Hour 6: fixed demand including held flexible loads (20 kW) exceeds site cap (0.1 kW)', 'Hour 7: fixed demand including held flexible loads (20 kW) exceeds site cap (0.1 kW)', 'Hour 8: fixed demand including held flexible loads (20 kW) exceeds site cap (0.1 kW)', 'Hour 9: fixed demand including held flexible loads (20 kW) exceeds site cap (0.1 kW)', 'Hour 10: fixed demand including held flexible loads (20 kW) exceeds site cap (0.1 kW)', 'Hour 11: fixed demand including held flexible loads (20 kW) exceeds site cap (0.1 kW)', 'Hour 12: fixed demand including held flexible loads (20 kW) exceeds site cap (0.1 kW)', 'Hour 13: fixed demand including held flexible loads (20 kW) exceeds site cap (0.1 kW)', 'Hour 14: fixed demand including held flexible loads (20 kW) exceeds site cap (0.1 kW)', 'Hour 15: fixed demand including held flexible loads (20 kW) exceeds site cap (0.1 kW)', 'Hour 16: fixed demand including held flexible loads (20 kW) exceeds site cap (0.1 kW)', 'Hour 17: fixed demand including held flexible loads (20 kW) exceeds site cap (0.1 kW)', 'Hour 18: fixed demand including held flexible loads (20 kW) exceeds site cap (0.1 kW)', 'Hour 19: fixed demand including held flexible loads (20 kW) exceeds site cap (0.1 kW)', 'Hour 20: fixed demand including held flexible loads (20 kW) exceeds site cap (0.1 kW)', 'Hour 21: fixed demand including held flexible loads (20 kW) exceeds site cap (0.1 kW)', 'Hour 22: fixed demand including held flexible loads (20 kW) exceeds site cap (0.1 kW)', 'Hour 23: fixed demand including held flexible loads (20 kW) exceeds site cap (0.1 kW)', 'Window [0, 17): EVs require 24 kWh but shared charging capacity is at most 0 kWh', 'Window [0, 24): EVs require 24 kWh but shared charging capacity is at most 0 kWh', 'Window [9, 17): EVs require 24 kWh but shared charging capacity is at most 0 kWh', 'Window [9, 24): EVs require 24 kWh but shared charging capacity is at most 0 kWh', 'Infeasible under the fixed background/HVAC/flexible schedules.']. Proof status: analytic_infeasibility; peak tiebreak: not_run; verification: unavailable; warnings: []."
+      ],
+      "profile": {
+        "business_type": "warehouse",
+        "employee_count": 30,
+        "operating_hours": "7 AM to 7 PM",
+        "electricity_cost_and_period": "$6,000 per month",
+        "consumption_and_units": null,
+        "equipment": "four electric forklifts and charge delivery trucks",
+        "goals": "cut our electricity expenses by 50%",
+        "restrictions": null
+      },
+      "changes": {
+        "building_max_demand_kw": null,
+        "all_ev_deadline_hour": null,
+        "peak_price_increase_percent": null
+      },
+      "proposed_scenario": null,
+      "follow_up_questions": [],
+      "missing_information": [
+        "consumption_and_units",
+        "restrictions"
+      ]
+    }
+  },
+  {
+    "source": "injected qualitative prose; real server evidence and solver; NOT live Meta",
+    "request": "Keep the entire site below 15 kW.",
+    "response": {
+      "category": "scenario_proposal",
+      "source": "mock",
+      "message": "Review this site-cap proposal before comparing it. Review before applying. Apply updates the draft; Compare prepares an alternative. Run the explicit optimization or comparison to calculate outcomes.",
+      "facts": [],
+      "profile": {
+        "business_type": "warehouse",
+        "employee_count": 30,
+        "operating_hours": "7 AM to 7 PM",
+        "electricity_cost_and_period": "$6,000 per month",
+        "consumption_and_units": null,
+        "equipment": "four electric forklifts and charge delivery trucks",
+        "goals": "cut our electricity expenses by 50%",
+        "restrictions": null
+      },
+      "changes": {
+        "building_max_demand_kw": 15.0,
+        "all_ev_deadline_hour": null,
+        "peak_price_increase_percent": null
+      },
+      "proposed_scenario": {
+        "operating_hours": {
+          "start_hour": 8,
+          "end_hour": 18
+        },
+        "fixed_demand_kw": [
+          20.0,
+          20.0,
+          20.0,
+          20.0,
+          20.0,
+          20.0,
+          20.0,
+          20.0,
+          20.0,
+          20.0,
+          20.0,
+          20.0,
+          20.0,
+          20.0,
+          20.0,
+          20.0,
+          20.0,
+          20.0,
+          20.0,
+          20.0,
+          20.0,
+          20.0,
+          20.0,
+          20.0
+        ],
+        "electricity_prices_usd_per_kwh": [
+          0.3,
+          0.3,
+          0.3,
+          0.3,
+          0.3,
+          0.3,
+          0.3,
+          0.3,
+          0.3,
+          0.3,
+          0.3,
+          0.3,
+          0.1,
+          0.1,
+          0.1,
+          0.1,
+          0.1,
+          0.1,
+          0.1,
+          0.1,
+          0.1,
+          0.1,
+          0.1,
+          0.1
+        ],
+        "building_max_demand_kw": 15.0,
+        "ev_requirements": [
+          {
+            "id": "demo-ev-1",
+            "arrival_hour": 9,
+            "deadline_hour": 17,
+            "energy_required_kwh": 24.0,
+            "max_charging_power_kw": 7.2
+          }
+        ],
+        "flexible_equipment": []
+      },
+      "follow_up_questions": [],
+      "missing_information": [
+        "consumption_and_units",
+        "restrictions"
+      ]
+    }
+  },
+  {
+    "source": "explicit test-harness approval followed by real optimizer",
+    "baseline": {
+      "result_id": "e2f0841e21ae4dc3af754d4267449ccd",
+      "feasibility_status": "feasible",
+      "baseline_electricity_cost_usd": 102.72,
+      "baseline_peak_demand_kw": 27.2,
+      "baseline_demand_kw": [
+        20.0,
+        20.0,
+        20.0,
+        20.0,
+        20.0,
+        20.0,
+        20.0,
+        20.0,
+        20.0,
+        27.2,
+        27.2,
+        27.2,
+        22.400000000000002,
+        20.0,
+        20.0,
+        20.0,
+        20.0,
+        20.0,
+        20.0,
+        20.0,
+        20.0,
+        20.0,
+        20.0,
+        20.0
+      ],
+      "optimized_electricity_cost_usd": 98.4000001,
+      "optimized_peak_demand_kw": 24.799999899999996,
+      "optimized_demand_kw": [
+        20.0,
+        20.0,
+        20.0,
+        20.0,
+        20.0,
+        20.0,
+        20.0,
+        20.0,
+        20.0,
+        20.0,
+        20.0,
+        20.000000500000006,
+        24.799999899999996,
+        24.799999899999996,
+        24.799999899999996,
+        24.799999899999996,
+        24.799999899999996,
+        20.0,
+        20.0,
+        20.0,
+        20.0,
+        20.0,
+        20.0,
+        20.0
+      ],
+      "constraint_violations": [],
+      "operating_plan": {
+        "scheduling_mode": "ev_only",
+        "solver_status": "optimal",
+        "primary_status": "optimal",
+        "peak_tiebreak_status": "optimal",
+        "primary_optimum_usd": 98.4,
+        "verification_status": "passed",
+        "warnings": [],
+        "baseline_constraint_violations": [],
+        "device_schedules": [
+          {
+            "device_id": "demo-ev-1",
+            "device_type": "ev",
+            "scheduling_role": "optimized",
+            "required_energy_kwh": 24.0,
+            "available_hours": {
+              "start_hour": 9,
+              "end_hour": 17
+            },
+            "max_power_kw": 7.2,
+            "baseline_power_kw": [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              7.2,
+              7.2,
+              7.2,
+              2.4000000000000012,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "baseline_delivered_energy_kwh": 24.0,
+            "optimized_power_kw": [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              5.000000062333503e-07,
+              4.799999899999996,
+              4.799999899999994,
+              4.799999899999994,
+              4.799999899999994,
+              4.799999899999994,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "optimized_delivered_energy_kwh": 23.99999999999998
+          }
+        ]
+      }
+    },
+    "alternative": {
+      "result_id": "fb196319046a4b5887ce443d0bd45dd1",
+      "feasibility_status": "infeasible",
+      "baseline_electricity_cost_usd": 102.72,
+      "baseline_peak_demand_kw": 27.2,
+      "baseline_demand_kw": [
+        20.0,
+        20.0,
+        20.0,
+        20.0,
+        20.0,
+        20.0,
+        20.0,
+        20.0,
+        20.0,
+        27.2,
+        27.2,
+        27.2,
+        22.400000000000002,
+        20.0,
+        20.0,
+        20.0,
+        20.0,
+        20.0,
+        20.0,
+        20.0,
+        20.0,
+        20.0,
+        20.0,
+        20.0
+      ],
+      "optimized_electricity_cost_usd": null,
+      "optimized_peak_demand_kw": null,
+      "optimized_demand_kw": null,
+      "constraint_violations": [
+        "Hour 0: fixed demand including held flexible loads (20 kW) exceeds site cap (15 kW)",
+        "Hour 1: fixed demand including held flexible loads (20 kW) exceeds site cap (15 kW)",
+        "Hour 2: fixed demand including held flexible loads (20 kW) exceeds site cap (15 kW)",
+        "Hour 3: fixed demand including held flexible loads (20 kW) exceeds site cap (15 kW)",
+        "Hour 4: fixed demand including held flexible loads (20 kW) exceeds site cap (15 kW)",
+        "Hour 5: fixed demand including held flexible loads (20 kW) exceeds site cap (15 kW)",
+        "Hour 6: fixed demand including held flexible loads (20 kW) exceeds site cap (15 kW)",
+        "Hour 7: fixed demand including held flexible loads (20 kW) exceeds site cap (15 kW)",
+        "Hour 8: fixed demand including held flexible loads (20 kW) exceeds site cap (15 kW)",
+        "Hour 9: fixed demand including held flexible loads (20 kW) exceeds site cap (15 kW)",
+        "Hour 10: fixed demand including held flexible loads (20 kW) exceeds site cap (15 kW)",
+        "Hour 11: fixed demand including held flexible loads (20 kW) exceeds site cap (15 kW)",
+        "Hour 12: fixed demand including held flexible loads (20 kW) exceeds site cap (15 kW)",
+        "Hour 13: fixed demand including held flexible loads (20 kW) exceeds site cap (15 kW)",
+        "Hour 14: fixed demand including held flexible loads (20 kW) exceeds site cap (15 kW)",
+        "Hour 15: fixed demand including held flexible loads (20 kW) exceeds site cap (15 kW)",
+        "Hour 16: fixed demand including held flexible loads (20 kW) exceeds site cap (15 kW)",
+        "Hour 17: fixed demand including held flexible loads (20 kW) exceeds site cap (15 kW)",
+        "Hour 18: fixed demand including held flexible loads (20 kW) exceeds site cap (15 kW)",
+        "Hour 19: fixed demand including held flexible loads (20 kW) exceeds site cap (15 kW)",
+        "Hour 20: fixed demand including held flexible loads (20 kW) exceeds site cap (15 kW)",
+        "Hour 21: fixed demand including held flexible loads (20 kW) exceeds site cap (15 kW)",
+        "Hour 22: fixed demand including held flexible loads (20 kW) exceeds site cap (15 kW)",
+        "Hour 23: fixed demand including held flexible loads (20 kW) exceeds site cap (15 kW)",
+        "Window [0, 17): EVs require 24 kWh but shared charging capacity is at most 0 kWh",
+        "Window [0, 24): EVs require 24 kWh but shared charging capacity is at most 0 kWh",
+        "Window [9, 17): EVs require 24 kWh but shared charging capacity is at most 0 kWh",
+        "Window [9, 24): EVs require 24 kWh but shared charging capacity is at most 0 kWh",
+        "Infeasible under the fixed background/HVAC/flexible schedules."
+      ],
+      "operating_plan": {
+        "scheduling_mode": "ev_only",
+        "solver_status": "infeasible",
+        "primary_status": "analytic_infeasibility",
+        "peak_tiebreak_status": "not_run",
+        "primary_optimum_usd": null,
+        "verification_status": "unavailable",
+        "warnings": [],
+        "baseline_constraint_violations": [
+          "Hour 0: demand 20 kW exceeds building limit 15 kW",
+          "Hour 1: demand 20 kW exceeds building limit 15 kW",
+          "Hour 2: demand 20 kW exceeds building limit 15 kW",
+          "Hour 3: demand 20 kW exceeds building limit 15 kW",
+          "Hour 4: demand 20 kW exceeds building limit 15 kW",
+          "Hour 5: demand 20 kW exceeds building limit 15 kW",
+          "Hour 6: demand 20 kW exceeds building limit 15 kW",
+          "Hour 7: demand 20 kW exceeds building limit 15 kW",
+          "Hour 8: demand 20 kW exceeds building limit 15 kW",
+          "Hour 9: demand 27.2 kW exceeds building limit 15 kW",
+          "Hour 10: demand 27.2 kW exceeds building limit 15 kW",
+          "Hour 11: demand 27.2 kW exceeds building limit 15 kW",
+          "Hour 12: demand 22.4 kW exceeds building limit 15 kW",
+          "Hour 13: demand 20 kW exceeds building limit 15 kW",
+          "Hour 14: demand 20 kW exceeds building limit 15 kW",
+          "Hour 15: demand 20 kW exceeds building limit 15 kW",
+          "Hour 16: demand 20 kW exceeds building limit 15 kW",
+          "Hour 17: demand 20 kW exceeds building limit 15 kW",
+          "Hour 18: demand 20 kW exceeds building limit 15 kW",
+          "Hour 19: demand 20 kW exceeds building limit 15 kW",
+          "Hour 20: demand 20 kW exceeds building limit 15 kW",
+          "Hour 21: demand 20 kW exceeds building limit 15 kW",
+          "Hour 22: demand 20 kW exceeds building limit 15 kW",
+          "Hour 23: demand 20 kW exceeds building limit 15 kW"
+        ],
+        "device_schedules": [
+          {
+            "device_id": "demo-ev-1",
+            "device_type": "ev",
+            "scheduling_role": "optimized",
+            "required_energy_kwh": 24.0,
+            "available_hours": {
+              "start_hour": 9,
+              "end_hour": 17
+            },
+            "max_power_kw": 7.2,
+            "baseline_power_kw": [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              7.2,
+              7.2,
+              7.2,
+              2.4000000000000012,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "baseline_delivered_energy_kwh": 24.0,
+            "optimized_power_kw": null,
+            "optimized_delivered_energy_kwh": null
+          }
+        ]
+      }
+    }
+  }
+]

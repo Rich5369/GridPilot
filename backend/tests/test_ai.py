@@ -85,7 +85,7 @@ def test_explanations_use_real_solver(provider, infeasible):
     if infeasible:
         scenario['building_max_demand_kw'] = 0.1
     result = client.post('/api/optimize', json=scenario).json()
-    response = client.post('/api/ai/explain', json={'scenario': scenario})
+    response = client.post('/api/ai/explain', json={'scenario': scenario, 'result_id': result['result_id']})
     assert response.status_code == 200
     text = ' '.join(response.json()['explanation'])
     assert result['feasibility_status'] in text
@@ -117,7 +117,8 @@ def test_malformed(provider, content):
 def test_mock_explicit(monkeypatch):
     monkeypatch.setenv('MODEL_API_MODE', 'mock')
     assert interpret().json()['source'] == 'mock'
-    assert client.post('/api/ai/explain', json={'scenario': SAMPLE}).json()['source'] == 'mock'
+    result = client.post('/api/optimize', json=SAMPLE).json()
+    assert client.post('/api/ai/explain', json={'scenario': SAMPLE, 'result_id': result['result_id']}).json()['source'] == 'mock'
 
 
 def test_default_mode_without_credentials(monkeypatch):
