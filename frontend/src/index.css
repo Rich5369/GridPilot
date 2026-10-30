@@ -858,3 +858,14 @@ button { transition: background-color 140ms ease, border-color 140ms ease; }
 .energy-insights { padding: 24px; margin-block: 24px; }
 .energy-insights h2 { font-size: 22px; font-weight: 650; }
 @media (max-width: 600px) { .energy-insights { padding: 20px 16px; } }
+
+.advisor details { padding: 1rem; border: 1px solid var(--border, #dce4ea); border-radius: 12px; margin-bottom: 1rem; }
+.advisor details label { display: block; margin-top: .65rem; }
+.advisor details input { display: block; width: 100%; padding: .6rem; box-sizing: border-box; }
+.advisor-history { display: grid; gap: .9rem; max-height: 32rem; overflow-y: auto; margin: 1rem 0; }
+.advisor-message { padding: 1rem 1.2rem; border-radius: 14px; background: #f0f6f7; color: #173d43; margin-right: 4%; }
+.advisor-message.user { background: #183e49; color: white; margin-left: 8%; margin-right: 0; }
+.advisor-message p { overflow-wrap: anywhere; line-height: 1.65; }
+.advisor-proposal { border: 1px solid #36897b; border-radius: 12px; padding: 1rem; margin-top: 1rem; }
+.advisor button:focus-visible, .advisor input:focus-visible, .advisor textarea:focus-visible, .advisor summary:focus-visible { outline: 3px solid #2784bd; outline-offset: 3px; }
+@media (max-width: 600px) { .advisor .section-heading { flex-wrap: wrap; } .advisor-message { margin-right: 0; } .advisor .ai-actions { flex-wrap: wrap; } }

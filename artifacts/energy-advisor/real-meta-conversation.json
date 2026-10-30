@@ -1,0 +1,252 @@
+[
+  {
+    "request": "I operate an office with 10 employees working 9 AM to 5 PM. My electricity bill is USD 2000 monthly. We have two EVs that charge overnight and want to reduce costs without disrupting operations.",
+    "response": {
+      "category": "answer",
+      "source": "meta",
+      "message": "From your submitted engineering scenario:",
+      "facts": [
+        "Business background is user supplied and separate from engineering inputs. Missing profile fields remain unknown.",
+        "The model covers one abstract day with hourly averages and energy-only charges. Monthly bills, demand charges, taxes, weather and equipment control outside configured solver contracts are not modeled. Aggregate demand cannot identify individual device schedules."
+      ],
+      "profile": {
+        "business_type": "office",
+        "employee_count": 10,
+        "operating_hours": "9 AM to 5 PM",
+        "electricity_cost_and_period": "USD 2000 monthly",
+        "consumption_and_units": null,
+        "equipment": "two EVs that charge overnight",
+        "goals": "reduce costs without disrupting operations",
+        "restrictions": "without disrupting operations"
+      },
+      "changes": {
+        "building_max_demand_kw": null,
+        "all_ev_deadline_hour": null,
+        "peak_price_increase_percent": null
+      },
+      "proposed_scenario": null
+    }
+  },
+  {
+    "request": "What are my modeled daily costs?",
+    "response": {
+      "category": "answer",
+      "source": "meta",
+      "message": "From your submitted engineering scenario:",
+      "facts": [
+        "Verified submitted ev_only result: baseline daily energy charges USD 80.6400; optimized daily energy charges: USD 80.6400. Modeled daily energy-charge difference USD -0.0000; this is not a monthly bill forecast.",
+        "The model covers one abstract day with hourly averages and energy-only charges. Monthly bills, demand charges, taxes, weather and equipment control outside configured solver contracts are not modeled. Aggregate demand cannot identify individual device schedules."
+      ],
+      "profile": {
+        "business_type": "office",
+        "employee_count": 10,
+        "operating_hours": "9 AM to 5 PM",
+        "electricity_cost_and_period": "USD 2000 monthly",
+        "consumption_and_units": null,
+        "equipment": "two EVs that charge overnight",
+        "goals": "reduce costs without disrupting operations",
+        "restrictions": "without disrupting operations"
+      },
+      "changes": {
+        "building_max_demand_kw": null,
+        "all_ev_deadline_hour": null,
+        "peak_price_increase_percent": null
+      },
+      "proposed_scenario": null
+    }
+  },
+  {
+    "request": "Can we keep total power below 15 kW?",
+    "response": {
+      "category": "scenario_proposal",
+      "source": "meta",
+      "message": "Review this proposal. Apply updates the draft; Compare opens the existing What-if workflow; run its explicit comparison to calculate outcomes.",
+      "facts": [
+        "Submitted site cap: 100.0 kW. EV windows and energy requirements: [{'id': 'demo-ev-1', 'arrival_hour': 9, 'deadline_hour': 17, 'energy_required_kwh': 24.0, 'max_charging_power_kw': 7.2}] Verified solver outcome: feasible. Reasons: [].",
+        "The model covers one abstract day with hourly averages and energy-only charges. Monthly bills, demand charges, taxes, weather and equipment control outside configured solver contracts are not modeled. Aggregate demand cannot identify individual device schedules.",
+        "Business background is user supplied and separate from engineering inputs. Missing profile fields remain unknown."
+      ],
+      "profile": {
+        "business_type": "office",
+        "employee_count": 10,
+        "operating_hours": "9 AM to 5 PM",
+        "electricity_cost_and_period": "USD 2000 monthly",
+        "consumption_and_units": null,
+        "equipment": "two EVs that charge overnight",
+        "goals": "reduce costs without disrupting operations",
+        "restrictions": "without disrupting operations"
+      },
+      "changes": {
+        "building_max_demand_kw": 15.0,
+        "all_ev_deadline_hour": null,
+        "peak_price_increase_percent": null
+      },
+      "proposed_scenario": {
+        "operating_hours": {
+          "start_hour": 8,
+          "end_hour": 18
+        },
+        "fixed_demand_kw": [
+          20.0,
+          20.0,
+          20.0,
+          20.0,
+          20.0,
+          20.0,
+          20.0,
+          20.0,
+          20.0,
+          20.0,
+          20.0,
+          20.0,
+          20.0,
+          20.0,
+          20.0,
+          20.0,
+          20.0,
+          20.0,
+          20.0,
+          20.0,
+          20.0,
+          20.0,
+          20.0,
+          20.0
+        ],
+        "electricity_prices_usd_per_kwh": [
+          0.16,
+          0.16,
+          0.16,
+          0.16,
+          0.16,
+          0.16,
+          0.16,
+          0.16,
+          0.16,
+          0.16,
+          0.16,
+          0.16,
+          0.16,
+          0.16,
+          0.16,
+          0.16,
+          0.16,
+          0.16,
+          0.16,
+          0.16,
+          0.16,
+          0.16,
+          0.16,
+          0.16
+        ],
+        "building_max_demand_kw": 15.0,
+        "ev_requirements": [
+          {
+            "id": "demo-ev-1",
+            "arrival_hour": 9,
+            "deadline_hour": 17,
+            "energy_required_kwh": 24.0,
+            "max_charging_power_kw": 7.2
+          }
+        ],
+        "flexible_equipment": []
+      }
+    }
+  },
+  {
+    "request": "15 kW for the entire building.",
+    "response": {
+      "category": "scenario_proposal",
+      "source": "meta",
+      "message": "Review this proposal. Apply updates the draft; Compare opens the existing What-if workflow; run its explicit comparison to calculate outcomes.",
+      "facts": [
+        "Submitted site cap: 100.0 kW. EV windows and energy requirements: [{'id': 'demo-ev-1', 'arrival_hour': 9, 'deadline_hour': 17, 'energy_required_kwh': 24.0, 'max_charging_power_kw': 7.2}] Verified solver outcome: feasible. Reasons: [].",
+        "The model covers one abstract day with hourly averages and energy-only charges. Monthly bills, demand charges, taxes, weather and equipment control outside configured solver contracts are not modeled. Aggregate demand cannot identify individual device schedules.",
+        "Business background is user supplied and separate from engineering inputs. Missing profile fields remain unknown."
+      ],
+      "profile": {
+        "business_type": "office",
+        "employee_count": 10,
+        "operating_hours": "9 AM to 5 PM",
+        "electricity_cost_and_period": "USD 2000 monthly",
+        "consumption_and_units": null,
+        "equipment": "two EVs that charge overnight",
+        "goals": "reduce costs without disrupting operations",
+        "restrictions": "without disrupting operations"
+      },
+      "changes": {
+        "building_max_demand_kw": 15.0,
+        "all_ev_deadline_hour": null,
+        "peak_price_increase_percent": null
+      },
+      "proposed_scenario": {
+        "operating_hours": {
+          "start_hour": 8,
+          "end_hour": 18
+        },
+        "fixed_demand_kw": [
+          20.0,
+          20.0,
+          20.0,
+          20.0,
+          20.0,
+          20.0,
+          20.0,
+          20.0,
+          20.0,
+          20.0,
+          20.0,
+          20.0,
+          20.0,
+          20.0,
+          20.0,
+          20.0,
+          20.0,
+          20.0,
+          20.0,
+          20.0,
+          20.0,
+          20.0,
+          20.0,
+          20.0
+        ],
+        "electricity_prices_usd_per_kwh": [
+          0.16,
+          0.16,
+          0.16,
+          0.16,
+          0.16,
+          0.16,
+          0.16,
+          0.16,
+          0.16,
+          0.16,
+          0.16,
+          0.16,
+          0.16,
+          0.16,
+          0.16,
+          0.16,
+          0.16,
+          0.16,
+          0.16,
+          0.16,
+          0.16,
+          0.16,
+          0.16,
+          0.16
+        ],
+        "building_max_demand_kw": 15.0,
+        "ev_requirements": [
+          {
+            "id": "demo-ev-1",
+            "arrival_hour": 9,
+            "deadline_hour": 17,
+            "energy_required_kwh": 24.0,
+            "max_charging_power_kw": 7.2
+          }
+        ],
+        "flexible_equipment": []
+      }
+    }
+  }
+]

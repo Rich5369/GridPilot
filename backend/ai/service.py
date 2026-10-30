@@ -65,9 +65,11 @@ def mode():
         raise fail(503, 'ai_unavailable', 'Meta AI is unavailable: backend credentials are not configured. Optimization remains available.')
     return value
 
-def generate(schema: type[T], instructions: str, payload: dict) -> tuple[T, str]:
+def generate(schema: type[T], instructions: str, payload: dict, *, completion_tokens: int = 1500, request_timeout: float = 25.0) -> tuple[T, str]:
     source = mode()
     if source == 'mock':
+        if schema.__name__ == 'Selection':
+            raise fail(503, 'ai_unavailable', 'Conversational Meta inference is unavailable in mock mode. Manual optimization remains available.')
         if schema is ExplanationSelection:
             return schema(points=['outcome', 'cost', 'peak', 'constraints', 'method']), 'mock'
         # Deliberately limited deterministic fixture, never passed off as Meta.
@@ -84,7 +86,8 @@ def generate(schema: type[T], instructions: str, payload: dict) -> tuple[T, str]
                 model=provider_model(),
                 messages=[{'role': 'system', 'content': instructions}, {'role': 'user', 'content': json.dumps(payload)}],
                 response_format=response_format(schema),
-                max_completion_tokens=1500,
+                max_completion_tokens=completion_tokens,
+                timeout=request_timeout,
             )
         choice = response.choices[0]
         if choice.finish_reason != 'stop' or choice.message.refusal:

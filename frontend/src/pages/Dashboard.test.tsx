@@ -86,7 +86,7 @@ it('displays HTTP 501 clearly and never claims solver success', async () => {
   expect(container.textContent).not.toContain('Backend result received')
   expect(container.textContent).toContain('No optimization result yet')
   await click('AI assistant')
-  expect(container.textContent).toContain('LIVE VERIFICATION PENDING')
+  expect(container.textContent).toContain('Verification pending')
 })
 
 it('shows loading, prevents repeat submissions and recovers after failure', async () => {
@@ -124,7 +124,7 @@ it('discards late results after a mode change and disables joint AI actions', as
   expect(container.textContent).not.toContain('Backend result received')
   expect(container.textContent).not.toContain('Displayed result mode')
   await click('AI assistant')
-  expect(container.textContent).toContain('AI actions are disabled for joint scheduling')
+  expect(container.textContent).toContain('GridPilot Energy Advisor')
 })
 
 it.each([false, true])('restores the AI handoff snapshot and isolates old responses (pending comparison: %s)', async pendingComparison => {
@@ -142,12 +142,12 @@ it.each([false, true])('restores the AI handoff snapshot and isolates old respon
   await input('limit', '20')
   await click('AI assistant')
   fetchMock.mockResolvedValueOnce(new Response(JSON.stringify({
-    source: 'mock', status: 'proposed', message: 'Deterministic proposal',
+    source: 'mock', category: 'scenario_proposal', status: 'proposed', message: 'Deterministic proposal',
     changes: { building_max_demand_kw: 15 },
     proposed_scenario: toScenario({ ...defaultEditor, limit: '15' }),
   })))
   await click('Keep peak power demand below 15 kW.')
-  await click('Review proposed changes')
+  await click('Send to advisor')
   await click('Compare as alternative')
   expect(container.querySelector<HTMLInputElement>('#alternative-limit')!.value).toBe('15')
   if (pendingComparison) {

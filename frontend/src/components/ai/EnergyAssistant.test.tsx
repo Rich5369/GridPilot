@@ -12,17 +12,17 @@ it('requires confirmation, applies validated changes and cancels proposals', asy
   document.body.append(container)
   const root = createRoot(container)
   const change = vi.fn()
-  vi.mocked(apiRequest).mockResolvedValue({ source: 'mock', status: 'proposed', message: 'Mock fixture', changes: { building_max_demand_kw: 15 }, proposed_scenario: toScenario({ ...defaultEditor, limit: '15' }) })
+  vi.mocked(apiRequest).mockResolvedValue({ source: 'mock', category: 'scenario_proposal', status: 'proposed', message: 'Mock fixture', changes: { building_max_demand_kw: 15 }, proposed_scenario: toScenario({ ...defaultEditor, limit: '15' }) })
   const click = async (label: string) => { await act(async () => [...container.querySelectorAll('button')].find(b => b.textContent === label)!.click()) }
   try {
     await act(async () => root.render(<EnergyAssistant editor={defaultEditor} onChange={change} resultScenario={null} />))
     await click('Keep peak power demand below 15 kW.')
-    await click('Review proposed changes')
+    await click('Send to advisor')
     expect(container.textContent).toContain('MOCK MODE — NOT META AI')
     expect(change).not.toHaveBeenCalled()
     await click('Cancel')
     expect(change).not.toHaveBeenCalled()
-    await click('Review proposed changes')
+    await click('Send to advisor')
     await click('Apply Changes')
     expect(change).toHaveBeenCalledExactlyOnceWith({ ...defaultEditor, limit: '15' })
   } finally {

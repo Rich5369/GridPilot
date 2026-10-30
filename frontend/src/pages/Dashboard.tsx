@@ -270,8 +270,7 @@ export function Dashboard() {
             </>
           )}
           {whatIfVisited && <div hidden={view !== 'whatif'}><Suspense fallback={<p role="status">Loading what-if comparison…</p>}><WhatIf key={whatIfSession} modeRevision={modeRevision} mode={mode} editor={editor} onChange={setEditor} alternative={alternative} setAlternative={setAlternative} busy={busy} acquire={() => { if (inFlight.current) return false; inFlight.current = true; setBusy(true); return true }} release={() => { inFlight.current = false; setBusy(false) }} /></Suspense></div>}
-          {view === 'assistant' && mode === 'joint' && <p role="status">AI actions are disabled for joint scheduling because AI explanations currently recompute EV-only results. Select EV-only to use the assistant.</p>}
-          {view === 'assistant' && mode === 'ev_only' && <EnergyAssistant onCompareProposal={next => { setWhatIfSession(session => session + 1); setAlternative(next); setWhatIfVisited(true); setView('whatif') }} editor={editor} onChange={setEditor} resultScenario={resultScenario} />}
+          {<div hidden={view !== 'assistant'}><EnergyAssistant schedulingMode={resultMode ?? mode} onCompareProposal={next => { setWhatIfSession(session => session + 1); setAlternative(next); setWhatIfVisited(true); setView('whatif') }} editor={editor} onChange={setEditor} resultScenario={resultScenario} /></div>}
           <footer>
             <span>GridPilot · Commercial energy intelligence</span>
             <span>
