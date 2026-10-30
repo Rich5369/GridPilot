@@ -133,6 +133,65 @@ class OperatingPlan(Contract):
         return self
 
 
+class EvidenceDevice(Contract):
+    device_type: Literal['ev', 'flexible']
+    device_id: str = Field(min_length=1)
+
+
+class InfeasibilityContext(Contract):
+    scheduling_mode: Literal['ev_only', 'joint']
+    tolerance: NonNegative | None
+    site_limit_kw: Positive | None = None
+    max_power_kw: Positive | None = None
+    immutable_fixed_power_kw: NonNegative | None = None
+    held_flexible_power_kw: NonNegative | None = None
+    immutable_fixed_energy_kwh: NonNegative | None = None
+    held_flexible_energy_kwh: NonNegative | None = None
+
+
+class InfeasibilityEvidence(Contract):
+    """A verified violated necessary bound or a non-localized solver proof."""
+    code: Literal['device_window_capacity', 'fixed_demand_above_site_limit',
+                  'shared_window_capacity', 'solver_infeasible']
+    message: str = Field(min_length=1)
+    proof_source: Literal['analytical_necessary_condition', 'solver_infeasible']
+    devices: list[EvidenceDevice]
+    window: HourWindow | None
+    required: NonNegative | None
+    available: NonNegative | None
+    unit: Literal['kW', 'kWh'] | None
+    context: InfeasibilityContext
+
+    @model_validator(mode='after')
+    def consistent_certificate(self) -> Self:
+        keys = [(d.device_type, d.device_id) for d in self.devices]
+        if len(keys) != len(set(keys)):
+            raise ValueError('Evidence device identities must be unique within type')
+        if self.code == 'solver_infeasible':
+            if (self.proof_source != 'solver_infeasible' or self.devices or self.context.tolerance is not None
+                    or any(v is not None for v in (self.window, self.required, self.available, self.unit))
+                    or any(v is not None for k, v in self.context.model_dump().items()
+                           if k not in ('scheduling_mode', 'tolerance'))):
+                raise ValueError('Solver-only proof cannot invent a numerical certificate or device cause')
+        else:
+            if (self.proof_source != 'analytical_necessary_condition' or self.window is None
+                    or self.required is None or self.available is None or self.context.tolerance is None
+                    or self.required <= self.available + self.context.tolerance):
+                raise ValueError('Analytical evidence requires a bound violated beyond its tolerance')
+            if self.code == 'fixed_demand_above_site_limit':
+                if (self.unit != 'kW' or self.window.end_hour != self.window.start_hour+1
+                        or self.context.site_limit_kw is None):
+                    raise ValueError('Fixed-demand evidence needs one hour and a kW site bound')
+            elif self.unit != 'kWh' or not self.devices:
+                raise ValueError('Energy-capacity evidence needs devices and kWh quantities')
+            if self.code == 'device_window_capacity' and (
+                    len(self.devices) != 1 or self.context.max_power_kw is None):
+                raise ValueError('Device capacity needs one device and its maximum power')
+            if self.code == 'shared_window_capacity' and self.context.site_limit_kw is None:
+                raise ValueError('Shared-window evidence requires its site limit')
+        return self
+
+
 class OptimizationResult(Contract):
     """Verified feasible or proven infeasible result returned by the HTTP API."""
     feasibility_status: Literal["feasible", "infeasible"]
@@ -144,6 +203,7 @@ class OptimizationResult(Contract):
     optimized_demand_kw: HourlyDemand | None = None
     constraint_violations: list[str] = Field(default_factory=list)
     operating_plan: OperatingPlan | None = None
+    infeasibility_evidence: list[InfeasibilityEvidence] | None = None
 
     @model_validator(mode="after")
     def consistent_result(self) -> Self:
@@ -158,6 +218,16 @@ class OptimizationResult(Contract):
                 (self.operating_plan.solver_status == 'infeasible')
                 != (self.feasibility_status == 'infeasible')):
             raise ValueError('Operating plan quality must agree with aggregate feasibility')
+        if self.infeasibility_evidence:
+            if self.feasibility_status != 'infeasible':
+                raise ValueError('Feasible results cannot contain infeasibility evidence')
+            if self.operating_plan is not None:
+                for item in self.infeasibility_evidence:
+                    if item.context.scheduling_mode != self.operating_plan.scheduling_mode:
+                        raise ValueError('Evidence mode must match the operating plan')
+                    solver_proof = item.proof_source == 'solver_infeasible'
+                    if solver_proof != (self.operating_plan.primary_status == 'infeasible'):
+                        raise ValueError('Evidence source must match the actual primary proof')
         return self
 
 

@@ -1,0 +1,101 @@
+{
+  "capture": "artifacts/premium-analytics/device-regression/acceptance.json",
+  "source": "real_local_http_and_chromium",
+  "recorded_base": "c3d52a4",
+  "no_optimization_runs": true,
+  "cases": [
+    {
+      "name": "ev-only-feasible",
+      "mode": "ev_only",
+      "feasibility": "feasible",
+      "primary_status": "optimal",
+      "peak_status": "optimal",
+      "metrics": {
+        "baseline": {
+          "energy_kwh": 128.8,
+          "energy_cost_usd": 20.576,
+          "peak_kw": 23.9,
+          "max_hourly_residual_kw": 0.0
+        },
+        "optimized": {
+          "energy_kwh": 128.8,
+          "energy_cost_usd": 20.5760001,
+          "peak_kw": 14.059999875000004,
+          "max_hourly_residual_kw": 0.0
+        }
+      }
+    },
+    {
+      "name": "joint-feasible",
+      "mode": "joint",
+      "feasibility": "feasible",
+      "primary_status": "optimal",
+      "peak_status": "optimal",
+      "metrics": {
+        "baseline": {
+          "energy_kwh": 128.8,
+          "energy_cost_usd": 20.576,
+          "peak_kw": 23.9,
+          "max_hourly_residual_kw": 0.0
+        },
+        "optimized": {
+          "energy_kwh": 128.8,
+          "energy_cost_usd": 20.576000099999998,
+          "peak_kw": 14.05999987500001,
+          "max_hourly_residual_kw": 1.7763568394002505e-15
+        }
+      }
+    },
+    {
+      "name": "ev-only-recovery-infeasible",
+      "mode": "ev_only",
+      "feasibility": "infeasible",
+      "primary_status": "analytic_infeasibility",
+      "peak_status": "not_run",
+      "metrics": {
+        "baseline": {
+          "energy_kwh": 98.0,
+          "energy_cost_usd": 17.84,
+          "peak_kw": 10.5,
+          "max_hourly_residual_kw": 0.0
+        }
+      }
+    },
+    {
+      "name": "joint-recovery",
+      "mode": "joint",
+      "feasibility": "feasible",
+      "primary_status": "optimal",
+      "peak_status": "optimal",
+      "metrics": {
+        "baseline": {
+          "energy_kwh": 98.0,
+          "energy_cost_usd": 17.84,
+          "peak_kw": 10.5,
+          "max_hourly_residual_kw": 0.0
+        },
+        "optimized": {
+          "energy_kwh": 98.0,
+          "energy_cost_usd": 17.84,
+          "peak_kw": 8.5,
+          "max_hourly_residual_kw": 0.0
+        }
+      }
+    },
+    {
+      "name": "joint-infeasible",
+      "mode": "joint",
+      "feasibility": "infeasible",
+      "primary_status": "analytic_infeasibility",
+      "peak_status": "not_run",
+      "metrics": {
+        "baseline": {
+          "energy_kwh": 98.0,
+          "energy_cost_usd": 17.84,
+          "peak_kw": 10.5,
+          "max_hourly_residual_kw": 0.0
+        }
+      }
+    }
+  ]
+}

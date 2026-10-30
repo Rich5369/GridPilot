@@ -1,0 +1,13 @@
+{
+  "base_revision": "904c618602beacc564e686d75c3e2ea4390b1f3b",
+  "source": "pre_E2_solver_loaded_from_git_vs_working_tree",
+  "seed": 20261030,
+  "comparisons": 214,
+  "status_counts": {
+    "optimal": 86,
+    "infeasible": 128
+  },
+  "legacy_messages_identical": true,
+  "max_cost_residual_usd": 0,
+  "max_peak_residual_kw": 0
+}
