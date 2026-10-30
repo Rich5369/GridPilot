@@ -1,0 +1,560 @@
+{
+  "target": "https://gridpilot-api-1tpf.onrender.com",
+  "source": "engineering_fixture_http",
+  "deployedBackendCommit": null,
+  "requests": [
+    {
+      "case": "joint_recovery",
+      "scheduling_mode": "joint",
+      "scenario": {
+        "operating_hours": {
+          "start_hour": 8,
+          "end_hour": 18
+        },
+        "fixed_demand_kw": [
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "electricity_prices_usd_per_kwh": [
+          0.2,
+          0.2,
+          0.2,
+          0.2,
+          0.2,
+          0.2,
+          0.2,
+          0.2,
+          0.2,
+          0.2,
+          0.2,
+          0.2,
+          0.2,
+          0.2,
+          0.2,
+          0.2,
+          0.2,
+          0.2,
+          0.2,
+          0.2,
+          0.2,
+          0.2,
+          0.2,
+          0.2
+        ],
+        "building_max_demand_kw": 3.0,
+        "ev_requirements": [
+          {
+            "id": "a",
+            "arrival_hour": 0,
+            "deadline_hour": 1,
+            "energy_required_kwh": 2.0,
+            "max_charging_power_kw": 2.0
+          }
+        ],
+        "flexible_equipment": [
+          {
+            "id": "pump",
+            "available_hours": {
+              "start_hour": 0,
+              "end_hour": 2
+            },
+            "energy_required_kwh": 2.0,
+            "max_power_kw": 2.0
+          }
+        ]
+      },
+      "attempts": [
+        {
+          "elapsedSeconds": 0.13961452700004884,
+          "httpStatus": 200
+        }
+      ],
+      "httpStatus": 200,
+      "response": {
+        "feasibility_status": "feasible",
+        "baseline_electricity_cost_usd": 5.6000000000000005,
+        "baseline_peak_demand_kw": 5.0,
+        "baseline_demand_kw": [
+          5.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "optimized_electricity_cost_usd": 5.6000000000000005,
+        "optimized_peak_demand_kw": 3.0,
+        "optimized_demand_kw": [
+          3.0,
+          3.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "constraint_violations": []
+      },
+      "status": "PASS"
+    },
+    {
+      "case": "joint_recovery",
+      "scheduling_mode": "ev_only",
+      "scenario": {
+        "operating_hours": {
+          "start_hour": 8,
+          "end_hour": 18
+        },
+        "fixed_demand_kw": [
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "electricity_prices_usd_per_kwh": [
+          0.2,
+          0.2,
+          0.2,
+          0.2,
+          0.2,
+          0.2,
+          0.2,
+          0.2,
+          0.2,
+          0.2,
+          0.2,
+          0.2,
+          0.2,
+          0.2,
+          0.2,
+          0.2,
+          0.2,
+          0.2,
+          0.2,
+          0.2,
+          0.2,
+          0.2,
+          0.2,
+          0.2
+        ],
+        "building_max_demand_kw": 3.0,
+        "ev_requirements": [
+          {
+            "id": "a",
+            "arrival_hour": 0,
+            "deadline_hour": 1,
+            "energy_required_kwh": 2.0,
+            "max_charging_power_kw": 2.0
+          }
+        ],
+        "flexible_equipment": [
+          {
+            "id": "pump",
+            "available_hours": {
+              "start_hour": 0,
+              "end_hour": 2
+            },
+            "energy_required_kwh": 2.0,
+            "max_power_kw": 2.0
+          }
+        ]
+      },
+      "attempts": [
+        {
+          "elapsedSeconds": 0.08437205700010963,
+          "httpStatus": 200
+        }
+      ],
+      "httpStatus": 200,
+      "response": {
+        "feasibility_status": "infeasible",
+        "baseline_electricity_cost_usd": 5.6000000000000005,
+        "baseline_peak_demand_kw": 5.0,
+        "baseline_demand_kw": [
+          5.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "optimized_electricity_cost_usd": null,
+        "optimized_peak_demand_kw": null,
+        "optimized_demand_kw": null,
+        "constraint_violations": [
+          "Window [0, 1): EVs require 2 kWh but shared charging capacity is at most 0 kWh",
+          "Infeasible under the fixed background/HVAC/flexible schedules."
+        ]
+      },
+      "status": "PASS"
+    },
+    {
+      "case": "joint_price_shift",
+      "scheduling_mode": "joint",
+      "scenario": {
+        "operating_hours": {
+          "start_hour": 8,
+          "end_hour": 18
+        },
+        "fixed_demand_kw": [
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "electricity_prices_usd_per_kwh": [
+          0.4,
+          0.1,
+          0.3,
+          0.3,
+          0.3,
+          0.3,
+          0.3,
+          0.3,
+          0.3,
+          0.3,
+          0.3,
+          0.3,
+          0.3,
+          0.3,
+          0.3,
+          0.3,
+          0.3,
+          0.3,
+          0.3,
+          0.3,
+          0.3,
+          0.3,
+          0.3,
+          0.3
+        ],
+        "building_max_demand_kw": 3.0,
+        "ev_requirements": [],
+        "flexible_equipment": [
+          {
+            "id": "pump",
+            "available_hours": {
+              "start_hour": 0,
+              "end_hour": 2
+            },
+            "energy_required_kwh": 2.0,
+            "max_power_kw": 2.0
+          }
+        ]
+      },
+      "attempts": [
+        {
+          "elapsedSeconds": 0.054680212999755895,
+          "httpStatus": 200
+        }
+      ],
+      "httpStatus": 200,
+      "response": {
+        "feasibility_status": "feasible",
+        "baseline_electricity_cost_usd": 7.9,
+        "baseline_peak_demand_kw": 3.0,
+        "baseline_demand_kw": [
+          3.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "optimized_electricity_cost_usd": 7.3000001,
+        "optimized_peak_demand_kw": 2.999999666666665,
+        "optimized_demand_kw": [
+          1.000000333333335,
+          2.999999666666665,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "constraint_violations": []
+      },
+      "status": "PASS"
+    },
+    {
+      "case": "joint_infeasible",
+      "scheduling_mode": "joint",
+      "scenario": {
+        "operating_hours": {
+          "start_hour": 8,
+          "end_hour": 18
+        },
+        "fixed_demand_kw": [
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "electricity_prices_usd_per_kwh": [
+          0.2,
+          0.2,
+          0.2,
+          0.2,
+          0.2,
+          0.2,
+          0.2,
+          0.2,
+          0.2,
+          0.2,
+          0.2,
+          0.2,
+          0.2,
+          0.2,
+          0.2,
+          0.2,
+          0.2,
+          0.2,
+          0.2,
+          0.2,
+          0.2,
+          0.2,
+          0.2,
+          0.2
+        ],
+        "building_max_demand_kw": 3.0,
+        "ev_requirements": [
+          {
+            "id": "a",
+            "arrival_hour": 0,
+            "deadline_hour": 2,
+            "energy_required_kwh": 3.0,
+            "max_charging_power_kw": 2.0
+          }
+        ],
+        "flexible_equipment": [
+          {
+            "id": "pump",
+            "available_hours": {
+              "start_hour": 0,
+              "end_hour": 2
+            },
+            "energy_required_kwh": 2.0,
+            "max_power_kw": 2.0
+          }
+        ]
+      },
+      "attempts": [
+        {
+          "elapsedSeconds": 0.034247934999712015,
+          "httpStatus": 200
+        }
+      ],
+      "httpStatus": 200,
+      "response": {
+        "feasibility_status": "infeasible",
+        "baseline_electricity_cost_usd": 5.800000000000001,
+        "baseline_peak_demand_kw": 5.0,
+        "baseline_demand_kw": [
+          5.0,
+          2.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "optimized_electricity_cost_usd": null,
+        "optimized_peak_demand_kw": null,
+        "optimized_demand_kw": null,
+        "constraint_violations": [
+          "Window [0, 2): EVs and flexible equipment require 5 kWh but shared capacity is at most 4 kWh",
+          "Infeasible under the immutable background/HVAC schedules."
+        ]
+      },
+      "status": "PASS"
+    }
+  ],
+  "status": "PASS"
+}

@@ -1,0 +1,32 @@
+{
+  "observedAtUtc": "2026-10-29T23:17:15.757905+00:00",
+  "canonicalFrontend": "https://gridpilot-weld.vercel.app",
+  "canonicalBackend": "https://gridpilot-api-1tpf.onrender.com",
+  "frontendOriginEvidence": "Repository homepage, public served JavaScript, and actual browser POST URLs",
+  "gitHubStatusCommit": "6d21fae295eb52ddcfafa40d610e693473c90b05",
+  "gitHubStatusState": "success",
+  "vercelStatuses": [
+    {
+      "context": "Vercel \u2013 gridpilot",
+      "state": "success",
+      "target_url": "https://vercel.com/rich5369/gridpilot/HcpJ86BscJbLnbhHq9DnGdnxqEKL"
+    },
+    {
+      "context": "Vercel \u2013 gridpilot-frontend",
+      "state": "success",
+      "target_url": "https://vercel.com/rich5369/gridpilot-frontend/2WyNkNYkfZGwRJdJf33C9hUMGFVU"
+    }
+  ],
+  "githubDeploymentEntries": 0,
+  "confirmedFrontendRevision": null,
+  "confirmedBackendRevision": null,
+  "backendHealth": {
+    "status": 200,
+    "body": {
+      "status": "ok",
+      "project": "GridPilot"
+    }
+  },
+  "provenanceLimitation": "Successful Vercel statuses identify deployments for this Git commit, but do not prove which revision the canonical alias serves. Public backend health contains no revision. Local HEAD and asset hashes are not deployed revision proof.",
+  "observedFrontendRequestBudgetMs": 90000
+}
