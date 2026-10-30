@@ -1,0 +1,1 @@
+PASS: multi-turn wire format, distinct clarification, no false verified badge, context editing/provenance, keyboard disclosure and composer, Apply and Compare, 1440/768/390 layouts; no browser errors. Mock presentation fixtures only.

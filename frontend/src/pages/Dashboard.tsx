@@ -1,12 +1,18 @@
 import { lazy, Suspense, useRef, useState } from 'react'
 import {
   Building2,
+  Globe2,
   GitCompareArrows,
   LayoutDashboard,
   SlidersHorizontal,
   Sparkles,
   Zap,
 } from 'lucide-react'
+import { MarketExplorer } from '../components/dashboard/MarketExplorer'
+import {
+  CommandMetrics,
+  ScenarioAnalytics,
+} from '../components/dashboard/CommandAnalytics'
 import { BackendStatus } from '../components/BackendStatus'
 import { EnergyInsights } from '../components/dashboard/EnergyInsights'
 import { ScenarioSummary } from '../components/dashboard/ScenarioSummary'
@@ -33,14 +39,18 @@ import {
 import type { ScenarioEditor } from '../types/dashboard'
 import type { Scenario, OptimizationResult } from '../types/api'
 const DemandChart = lazy(() =>
-  import('../components/DemandChart').then(module => ({ default: module.DemandChart })),
+  import('../components/DemandChart').then((module) => ({
+    default: module.DemandChart,
+  })),
 )
 const Comparison = lazy(() =>
   import('../components/dashboard/Comparison').then((module) => ({
     default: module.Comparison,
   })),
 )
-const WhatIf = lazy(() => import('../components/dashboard/WhatIf').then(m => ({ default: m.WhatIf })))
+const WhatIf = lazy(() =>
+  import('../components/dashboard/WhatIf').then((m) => ({ default: m.WhatIf })),
+)
 const views = [
   { id: 'overview', label: 'Energy overview', icon: LayoutDashboard },
   {
@@ -51,6 +61,7 @@ const views = [
   { id: 'comparison', label: 'Optimization', icon: GitCompareArrows },
   { id: 'whatif', label: 'What-if scenarios', icon: GitCompareArrows },
   { id: 'assistant', label: 'AI assistant', icon: Sparkles },
+  { id: 'markets', label: 'Electricity markets', icon: Globe2 },
 ] as const
 export function Dashboard() {
   const [mode, setMode] = useState<SchedulingMode>('ev_only')
@@ -73,7 +84,8 @@ export function Dashboard() {
   const [message, setMessage] = useState('')
   const invalid = Object.keys(validateEditor(editor)).length > 0
   const stale = Boolean(result) && submitted !== JSON.stringify(editor)
-  const submittedEditor: ScenarioEditor | null = result && submitted ? JSON.parse(submitted) : null
+  const submittedEditor: ScenarioEditor | null =
+    result && submitted ? JSON.parse(submitted) : null
   async function runOptimization() {
     if (invalid || inFlight.current) return
     inFlight.current = true
@@ -100,7 +112,9 @@ export function Dashboard() {
   }
   return (
     <div className="app-shell">
-      <a className="skip-link" href="#overview">Skip to main content</a>
+      <a className="skip-link" href="#overview">
+        Skip to main content
+      </a>
       <aside className="sidebar">
         <a
           className="brand"
@@ -126,7 +140,10 @@ export function Dashboard() {
               key={id}
               className={view === id ? 'nav-active' : 'nav-item'}
               aria-current={view === id ? 'page' : undefined}
-              onClick={() => { setView(id); if (id === 'whatif') setWhatIfVisited(true) }}
+              onClick={() => {
+                setView(id)
+                if (id === 'whatif') setWhatIfVisited(true)
+              }}
             >
               <Icon size={18} />
               {label}
@@ -150,7 +167,7 @@ export function Dashboard() {
           <span className="avatar">GP</span>
           <div>
             <strong>GridPilot team</strong>
-            <span>Live optimization workspace</span>
+            <span>24-hour scenario planning</span>
           </div>
         </div>
       </aside>
@@ -165,10 +182,14 @@ export function Dashboard() {
         <main id="overview" tabIndex={-1}>
           <div className="page-heading">
             <div>
-              <p className="eyebrow">YOUR ENERGY, IN FOCUS</p>
-              <h1>{views.find((v) => v.id === view)?.label}</h1>
+              <p className="eyebrow">GRIDPILOT / ENERGY INTELLIGENCE</p>
+              <h1>
+                {view === 'overview'
+                  ? 'Energy Command Center'
+                  : views.find((v) => v.id === view)?.label}
+              </h1>
               <p className="muted">
-                24 hourly intervals · Building-local time · USD
+                Clearer insights. Smarter scheduling. A more resilient business.
               </p>
             </div>
             <button
@@ -183,29 +204,71 @@ export function Dashboard() {
             </button>
           </div>
           <section className="workflow" aria-label="Energy planning workflow">
-            <div className={`workflow-status ${stale ? 'is-stale' : ''}`} role="status">{busy ? 'Calculating your submitted scenario…' : !result ? 'Ready to configure · No backend result yet' : stale ? 'Inputs changed · Run optimization to update your results' : `Result available · ${modeLabel(resultMode)} · ${result.feasibility_status}`}</div>
+            <div
+              className={`workflow-status ${stale ? 'is-stale' : ''}`}
+              role="status"
+            >
+              {busy
+                ? 'Calculating your submitted scenario…'
+                : !result
+                  ? 'Ready to configure · No backend result yet'
+                  : stale
+                    ? 'Inputs changed · Run optimization to update your results'
+                    : `Result available · ${modeLabel(resultMode)} · ${result.feasibility_status}`}
+            </div>
             <div className="workflow-actions">
-              <button className="secondary" onClick={() => setView('configuration')}>1. Configure scenario</button>
-              <button className="secondary" onClick={() => setView('comparison')}>2. Review results</button>
-              <button className="secondary" onClick={() => { setWhatIfVisited(true); setView('whatif') }}>3. Compare alternatives</button>
+              <button
+                className="secondary"
+                onClick={() => setView('configuration')}
+              >
+                1. Configure scenario
+              </button>
+              <button
+                className="secondary"
+                onClick={() => setView('comparison')}
+              >
+                2. Review results
+              </button>
+              <button
+                className="secondary"
+                onClick={() => {
+                  setWhatIfVisited(true)
+                  setView('whatif')
+                }}
+              >
+                3. Compare alternatives
+              </button>
             </div>
           </section>
           <div className="mode-control field">
             <label htmlFor="scheduling-mode">Scheduling mode</label>
-            <select id="scheduling-mode" aria-describedby="scheduling-assumptions-label" value={mode} onChange={event => {
-              modeVersion.current += 1
-              setModeRevision(modeVersion.current)
-              setMode(event.target.value as SchedulingMode)
-              setResult(null); setResultScenario(null); setMessage('Scheduling mode changed. Run again for new results.')
-            }}>
+            <select
+              id="scheduling-mode"
+              aria-describedby="scheduling-assumptions-label"
+              value={mode}
+              onChange={(event) => {
+                modeVersion.current += 1
+                setModeRevision(modeVersion.current)
+                setMode(event.target.value as SchedulingMode)
+                setResult(null)
+                setResultScenario(null)
+                setMessage(
+                  'Scheduling mode changed. Run again for new results.',
+                )
+              }}
+            >
               <option value="ev_only">EV-only</option>
               <option value="joint">EV + flexible equipment</option>
             </select>
             <details className="mode-explanation">
-              <summary id="scheduling-assumptions-label">Scheduling assumptions · {modeLabel(mode)}</summary>
-              <p>{mode === 'ev_only'
-                ? 'Moves EV charging within arrival and completion times. Equipment and fixed building demand stay unchanged.'
-                : 'Moves EV charging and eligible equipment within their allowed windows. Flexible equipment is modeled as interruptible and continuously adjustable: it can pause and vary power. Uninterrupted machine cycles are not modeled. Fixed building demand stays unchanged.'}</p>
+              <summary id="scheduling-assumptions-label">
+                Scheduling assumptions · {modeLabel(mode)}
+              </summary>
+              <p>
+                {mode === 'ev_only'
+                  ? 'Moves EV charging within arrival and completion times. Equipment and fixed building demand stay unchanged.'
+                  : 'Moves EV charging and eligible equipment within their allowed windows. Flexible equipment is modeled as interruptible and continuously adjustable: it can pause and vary power. Uninterrupted machine cycles are not modeled. Fixed building demand stays unchanged.'}
+              </p>
             </details>
           </div>
           <p id="optimization-help" className="action-help">
@@ -216,61 +279,235 @@ export function Dashboard() {
                 : 'Runs the current scenario on the backend. Results estimate one day of energy charges, excluding fixed and demand charges.'}
           </p>
           {message && (
-            <div className={message === 'Backend result received for the submitted scenario.' ? 'sr-only' : 'request-message'} role="status">
+            <div
+              className={
+                message ===
+                'Backend result received for the submitted scenario.'
+                  ? 'sr-only'
+                  : 'request-message'
+              }
+              role="status"
+            >
               {message}
             </div>
           )}
-          {(view === 'overview' || view === 'comparison') && <>
-            <Suspense fallback={<p role="status">Loading comparison…</p>}>
-              <Comparison result={result} limit={resultScenario?.building_max_demand_kw} stale={stale} />
-            </Suspense>
-            <EnergyInsights scenario={resultScenario} result={result} stale={stale} mode={resultMode} />
-            <ScenarioSummary editor={editor} mode={mode} label="Editable draft" onEdit={() => setView('configuration')} />
-            {submittedEditor && <details className="panel result-details">
-              <summary>Submitted scenario &amp; result provenance</summary>
-              <p>Displayed result mode: {modeLabel(resultMode)}</p>
-              <p className="profile-provenance">Optimizer-calculated result · Submitted inputs: {profileSource(submittedEditor)}</p>
-              <ScenarioSummary editor={submittedEditor} mode={resultMode} label="Submitted snapshot" />
-              <p>Energy charges exclude fixed and demand charges. Solver results describe modeled constraints, not verified building operation.</p>
-            </details>}
-            {!result && !invalid && <section className="panel draft-preview">
-              <p className="eyebrow">DRAFT INPUTS · NOT AN OPTIMIZATION RESULT</p>
-              <h2>Your building demand</h2>
-              <p>Fixed demand only. EV charging and flexible equipment are included after optimization.</p>
-              <Suspense fallback={<p role="status">Loading fixed demand chart…</p>}>
-                <DemandChart total={{ key: 'fixed-total', label: 'Fixed building demand', values: fixedDemand(editor) }} limit={Number(editor.limit)} />
-              </Suspense>
-            </section>}
-            {result && <details className="panel result-details">
-              <summary>Explore baseline billing assumptions</summary>
-              <p>Baseline from the submitted result{stale ? ' (previous scenario)' : ''}. Additional charges below are manually entered estimates.</p>
-              <CostBreakdown energy={result.baseline_electricity_cost_usd} inputs={billingInputs} setInputs={setBillingInputs} applied={appliedBilling} setApplied={setAppliedBilling} />
-            </details>}
-          </>}
-          {view === 'configuration' && (
-            <>
-              <ScenarioPanel editor={editor} onChange={setEditor} />
-              {!invalid && (
-                <Suspense fallback={<p role="status">Loading fixed demand chart…</p>}>
-                  <section className="panel">
-                    <h2>Fixed building demand preview</h2>
-                    <p>Draft inputs only · excludes vehicle charging and shiftable equipment schedules. Run optimization to see whole-building demand.</p>
-                    <DemandChart
-                      total={{ key: 'fixed-total', label: 'Fixed building demand', values: fixedDemand(editor) }}
-                      limit={Number(editor.limit)}
-                      sources={editor.demandProfile?.mode === 'sources'
-                        ? editor.demandProfile.sources?.map((source, i) => ({
-                            key: `source-${i}`, label: `${source.category} · fixed`, values: source.values.map(Number),
-                          }))
-                        : [{ key: 'combined', label: 'Combined / unallocated fixed demand', values: fixedDemand(editor) }]}
-                    />
-                  </section>
-                </Suspense>
-              )}
-            </>
+          {view === 'overview' && (
+            <CommandMetrics
+              result={result}
+              scenario={resultScenario}
+              stale={stale}
+            />
           )}
-          {whatIfVisited && <div hidden={view !== 'whatif'}><Suspense fallback={<p role="status">Loading what-if comparison…</p>}><WhatIf key={whatIfSession} modeRevision={modeRevision} mode={mode} editor={editor} onChange={setEditor} alternative={alternative} setAlternative={setAlternative} busy={busy} acquire={() => { if (inFlight.current) return false; inFlight.current = true; setBusy(true); return true }} release={() => { inFlight.current = false; setBusy(false) }} /></Suspense></div>}
-          {<div hidden={view !== 'assistant'}><EnergyAssistant schedulingMode={resultMode ?? mode} onCompareProposal={next => { setWhatIfSession(session => session + 1); setAlternative(next); setWhatIfVisited(true); setView('whatif') }} editor={editor} onChange={setEditor} resultScenario={resultScenario} /></div>}
+          {view === 'markets' && <MarketExplorer />}
+          <div className={view === 'overview' ? 'command-layout' : ''}>
+            <div
+              className={
+                view === 'assistant' ? 'advisor-main-hidden' : 'command-primary'
+              }
+            >
+              {view === 'overview' && <MarketExplorer />}
+              {(view === 'overview' || view === 'comparison') && (
+                <>
+                  <Suspense fallback={<p role="status">Loading comparison…</p>}>
+                    <Comparison
+                      fixedDemand={resultScenario?.fixed_demand_kw}
+                      result={result}
+                      limit={resultScenario?.building_max_demand_kw}
+                      stale={stale}
+                    />
+                  </Suspense>
+                  {(resultScenario || !invalid) && (
+                    <ScenarioAnalytics
+                      scenario={resultScenario ?? toScenario(editor)}
+                      result={result}
+                      draft={!resultScenario}
+                    />
+                  )}
+                  <EnergyInsights
+                    scenario={resultScenario}
+                    result={result}
+                    stale={stale}
+                    mode={resultMode}
+                  />
+                  <ScenarioSummary
+                    editor={editor}
+                    mode={mode}
+                    label="Editable draft"
+                    onEdit={() => setView('configuration')}
+                  />
+                  {submittedEditor && (
+                    <details className="panel result-details">
+                      <summary>
+                        Submitted scenario &amp; result provenance
+                      </summary>
+                      <p>Displayed result mode: {modeLabel(resultMode)}</p>
+                      <p className="profile-provenance">
+                        Optimizer-calculated result · Submitted inputs:{' '}
+                        {profileSource(submittedEditor)}
+                      </p>
+                      <ScenarioSummary
+                        editor={submittedEditor}
+                        mode={resultMode}
+                        label="Submitted snapshot"
+                      />
+                      <p>
+                        Energy charges exclude fixed and demand charges. Solver
+                        results describe modeled constraints, not verified
+                        building operation.
+                      </p>
+                    </details>
+                  )}
+                  {!result && !invalid && (
+                    <section className="panel draft-preview">
+                      <p className="eyebrow">
+                        DRAFT INPUTS · NOT AN OPTIMIZATION RESULT
+                      </p>
+                      <h2>Your building demand</h2>
+                      <p>
+                        Fixed demand only. EV charging and flexible equipment
+                        are included after optimization.
+                      </p>
+                      <Suspense
+                        fallback={
+                          <p role="status">Loading fixed demand chart…</p>
+                        }
+                      >
+                        <DemandChart
+                          total={{
+                            key: 'fixed-total',
+                            label: 'Fixed building demand',
+                            values: fixedDemand(editor),
+                          }}
+                          limit={Number(editor.limit)}
+                        />
+                      </Suspense>
+                    </section>
+                  )}
+                  {result && (
+                    <details className="panel result-details">
+                      <summary>Explore baseline billing assumptions</summary>
+                      <p>
+                        Baseline from the submitted result
+                        {stale ? ' (previous scenario)' : ''}. Additional
+                        charges below are manually entered estimates.
+                      </p>
+                      <CostBreakdown
+                        energy={result.baseline_electricity_cost_usd}
+                        inputs={billingInputs}
+                        setInputs={setBillingInputs}
+                        applied={appliedBilling}
+                        setApplied={setAppliedBilling}
+                      />
+                    </details>
+                  )}
+                </>
+              )}
+              {view === 'configuration' && (
+                <>
+                  <ScenarioPanel editor={editor} onChange={setEditor} />
+                  {!invalid && (
+                    <Suspense
+                      fallback={
+                        <p role="status">Loading fixed demand chart…</p>
+                      }
+                    >
+                      <section className="panel">
+                        <h2>Fixed building demand preview</h2>
+                        <p>
+                          Draft inputs only · excludes vehicle charging and
+                          shiftable equipment schedules. Run optimization to see
+                          whole-building demand.
+                        </p>
+                        <DemandChart
+                          total={{
+                            key: 'fixed-total',
+                            label: 'Fixed building demand',
+                            values: fixedDemand(editor),
+                          }}
+                          limit={Number(editor.limit)}
+                          sources={
+                            editor.demandProfile?.mode === 'sources'
+                              ? editor.demandProfile.sources?.map(
+                                  (source, i) => ({
+                                    key: `source-${i}`,
+                                    label: `${source.category} · fixed`,
+                                    values: source.values.map(Number),
+                                  }),
+                                )
+                              : [
+                                  {
+                                    key: 'combined',
+                                    label:
+                                      'Combined / unallocated fixed demand',
+                                    values: fixedDemand(editor),
+                                  },
+                                ]
+                          }
+                        />
+                      </section>
+                    </Suspense>
+                  )}
+                </>
+              )}
+              {whatIfVisited && (
+                <div hidden={view !== 'whatif'}>
+                  <Suspense
+                    fallback={<p role="status">Loading what-if comparison…</p>}
+                  >
+                    <WhatIf
+                      key={whatIfSession}
+                      modeRevision={modeRevision}
+                      mode={mode}
+                      editor={editor}
+                      onChange={setEditor}
+                      alternative={alternative}
+                      setAlternative={setAlternative}
+                      busy={busy}
+                      acquire={() => {
+                        if (inFlight.current) return false
+                        inFlight.current = true
+                        setBusy(true)
+                        return true
+                      }}
+                      release={() => {
+                        inFlight.current = false
+                        setBusy(false)
+                      }}
+                    />
+                  </Suspense>
+                </div>
+              )}
+            </div>
+            <aside
+              className={
+                view === 'overview' ? 'command-advisor' : 'full-advisor'
+              }
+              hidden={view !== 'overview' && view !== 'assistant'}
+              aria-label="Energy Advisor"
+            >
+              <details className="advisor-disclosure" open>
+                <summary>
+                  AI Energy Advisor <span>Scenario guidance</span>
+                </summary>
+                {
+                  <div>
+                    <EnergyAssistant
+                      schedulingMode={result ? resultMode : mode}
+                      onCompareProposal={(next) => {
+                        setWhatIfSession((session) => session + 1)
+                        setAlternative(next)
+                        setWhatIfVisited(true)
+                        setView('whatif')
+                      }}
+                      editor={editor}
+                      onChange={setEditor}
+                      resultScenario={resultScenario}
+                    />
+                  </div>
+                }
+              </details>
+            </aside>
+          </div>
           <footer>
             <span>GridPilot · Commercial energy intelligence</span>
             <span>

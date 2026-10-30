@@ -1,0 +1,16 @@
+
+> gridpilot-frontend@0.0.0 test
+> vitest run
+
+
+ RUN  v5.0.5 /tmp/gridpilot-command-center/frontend
+
+
+ Test Files  13 passed | 1 skipped (14)
+      Tests  101 passed | 2 skipped (103)
+   Start at  18:56:46
+   Duration  18.28s (environment 47%, tests 40%, import 11%, transform 2%, worker 1%)
+
+    Isolate  14 workers spawned · ~710ms startup each (spawn + environment, per file)
+             at least ~9.22s faster with isolate: false — reuses workers across files instead of one per file
+

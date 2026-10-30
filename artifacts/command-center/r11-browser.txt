@@ -1,0 +1,1 @@
+PASS: R1.1 contrast, light/dark preferences and responsive breakpoints; native disclosure keyboard/accessibility; 24 custom/named submitted entries and stale isolation; real EV/joint numerical results; What-if Apply/Restore.
