@@ -1,6 +1,6 @@
 # EIA commercial retail map: release candidate
 
-Prepared October 30, 2026 for the November 4 hackathon. This branch is `feature/eia-commercial-retail-map`, created directly from `origin/main` (`337aefb`). No wholesale feature commit, observation, screenshot, log, fixture or derived ISO dataset was imported. Nothing has been pushed, submitted as a PR, merged or deployed.
+Prepared October 30, 2026 for the November 4 hackathon. This branch is `feature/eia-commercial-retail-map`, created directly from `origin/main` (`337aefb`). No wholesale feature commit, observation, screenshot, log, fixture or derived ISO dataset was imported. The user authorized publication of this EIA-only candidate after final checks. Merge and deployment remain outside this task.
 
 ## Recommendation and alternatives
 
@@ -42,7 +42,7 @@ The prior `/tmp` checkout was absent at the start of this task. Both saved patch
 
 The release clone at `/workspaces/GridPilot/.eia-retail-release` was independently cloned from GitHub main. The wholesale commit objects are absent from that clone; its new history is based solely on main. New tracked assets are EIA numeric data and code/tests/docs. Existing market geometry and the price-free directory remain byte-for-byte main assets. No files from private market artifacts, patches or bundles were copied into the candidate. Build output, browser evidence and temporary downloads are not added to its Git history. Source tests use only EIA numeric content or synthetic retail parser records, never ISO fixtures.
 
-Before any later push, re-fetch main, repeat the history/tree/artifact audit, inspect the complete staged diff and confirm no generated build/evidence or private nested clone is staged. Push only the EIA branch from its independent clone after the user's publication decision, not the primary workspace or wholesale branch. This task does not authorize an automatic push or PR.
+Before any later push, re-fetch main, repeat the history/tree/artifact audit, inspect the complete staged diff and confirm no generated build/evidence or private nested clone is staged. Push only the EIA branch from its independent clone after the user's publication decision, not the primary workspace or wholesale branch. Publication of this EIA-only branch was subsequently authorized by the user after the final audit; that authorization does not include the private wholesale branch, merging or deployment.
 
 ## Render compatibility
 
@@ -58,8 +58,17 @@ The local no-auth EIA endpoint refresh succeeded; the first local HTTP endpoint 
 - Frontend: **103 passed**, two existing skipped integration tests. TypeScript/build pass; lint has no errors and two pre-existing CostBreakdown fast-refresh warnings.
 - Real browser: desktop/mobile map, all area records present, checks of selected states/D.C./Alaska/Hawaii against actual HTTP values, keyboard selection, both optimizer modes, identical tariffs, no wholesale fetches, saved-release and unavailable cases, no page errors. Focused WCAG 2 A/AA axe scan of the new explorer: zero violations.
 - Adapter tests: Commercial versus Residential columns, wrong units/layout, suppressed/nonfinite/negative values, missing state coverage, future publication, regressed report, concurrent cache callers, expiration, source failure/cold fallback, publication age, total deadline and oversized source response.
-- No push, PR, merge or deployment.
+- Final pre-PR checks: 49 EIA/API/tariff backend tests and four frontend tests passed; build and lint passed. A new no-auth source request matched the bundled reporting month, publication date and all 51 area values in 0.168 seconds.
+- The candidate can be pushed and opened for review following the user’s explicit authorization. No merge or deployment is authorized.
 
 Run `python -m pytest backend/tests -q`; `npm --prefix frontend test`; `npm --prefix frontend run build`; `npm --prefix frontend run lint`. For real browser checks run backend on 8021 with local CORS for frontend 5191 and `VITE_API_BASE_URL=http://127.0.0.1:8021`; install Playwright only in a test environment, then `node scripts/verify_eia_retail.cjs`. Browser evidence defaults to `/tmp/eia-browser-evidence`, outside the Git tree.
 
 Refresh the packaged release after an EIA publication using `python -m scripts.refresh_eia_snapshot`; review the EIA-only diff before committing. This command refuses a regressed/incomplete snapshot and never touches ISO feeds. Runtime refresh remains independent of that maintenance step.
+
+## EIA-only review screenshots
+
+These screenshots contain only publicly reusable EIA retail data; no wholesale observations or private captures are included.
+
+![Desktop EIA commercial retail map](images/eia-retail-desktop.png)
+
+![Mobile EIA commercial retail map](images/eia-retail-mobile.png)
