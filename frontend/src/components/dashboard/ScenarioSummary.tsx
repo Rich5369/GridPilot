@@ -1,3 +1,4 @@
+import { ScenarioDemandTable } from './ScenarioDemandTable'
 import type { ScenarioEditor } from '../../types/dashboard'
 import { profileSource } from '../../data/demoScenario'
 import { modeLabel, type SchedulingMode } from '../../services/api'
@@ -29,6 +30,7 @@ export function ScenarioSummary({ editor, mode, label, onEdit }: {
         <div><dt>Power per charger</dt><dd>{editor.chargerPower} kW</dd></div>
         <div><dt>Equipment power / duration</dt><dd>{editor.equipmentPower} kW × {editor.duration} h</dd></div>
       </dl>
+      <ScenarioDemandTable editor={editor} label={label} />
     </details>
     <p className="profile-provenance">{profileSource(editor)}. {(!editor.demandProfile || editor.demandProfile.mode === 'demo') && 'Fictional demonstration inputs; not meter data.'} Tariffs and equipment use your scenario settings.</p>
   </section>

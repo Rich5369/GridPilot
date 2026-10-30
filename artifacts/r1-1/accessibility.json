@@ -1,0 +1,32 @@
+[
+  {
+    "width": 1440,
+    "mode": "ev_only",
+    "violations": []
+  },
+  {
+    "width": 1440,
+    "mode": "joint",
+    "violations": []
+  },
+  {
+    "width": 768,
+    "mode": "ev_only",
+    "violations": []
+  },
+  {
+    "width": 768,
+    "mode": "joint",
+    "violations": []
+  },
+  {
+    "width": 390,
+    "mode": "ev_only",
+    "violations": []
+  },
+  {
+    "width": 390,
+    "mode": "joint",
+    "violations": []
+  }
+]

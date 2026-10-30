@@ -191,7 +191,7 @@ export function Dashboard() {
           </section>
           <div className="mode-control field">
             <label htmlFor="scheduling-mode">Scheduling mode</label>
-            <select id="scheduling-mode" value={mode} onChange={event => {
+            <select id="scheduling-mode" aria-describedby="scheduling-assumptions-label" value={mode} onChange={event => {
               modeVersion.current += 1
               setModeRevision(modeVersion.current)
               setMode(event.target.value as SchedulingMode)
@@ -200,7 +200,12 @@ export function Dashboard() {
               <option value="ev_only">EV-only</option>
               <option value="joint">EV + flexible equipment</option>
             </select>
-            <p>{mode === 'ev_only' ? 'Moves EV charging within arrival and completion times. Equipment and fixed building demand stay unchanged.' : 'Moves EV charging and eligible equipment within their allowed windows. Equipment can pause and vary power; uninterrupted machine cycles are not modeled. Fixed building demand stays unchanged.'}</p>
+            <details className="mode-explanation">
+              <summary id="scheduling-assumptions-label">Scheduling assumptions · {modeLabel(mode)}</summary>
+              <p>{mode === 'ev_only'
+                ? 'Moves EV charging within arrival and completion times. Equipment and fixed building demand stay unchanged.'
+                : 'Moves EV charging and eligible equipment within their allowed windows. Flexible equipment is modeled as interruptible and continuously adjustable: it can pause and vary power. Uninterrupted machine cycles are not modeled. Fixed building demand stays unchanged.'}</p>
+            </details>
           </div>
           <p id="optimization-help" className="action-help">
             {busy

@@ -1,0 +1,1118 @@
+{
+  "contrast": [
+    {
+      "selector": ".sidebar-note > .tag",
+      "width": 1440,
+      "colorScheme": "light",
+      "foreground": "rgb(209, 239, 173)",
+      "background": "rgb(21, 60, 50)",
+      "ratio": 9.662594783709666
+    },
+    {
+      "selector": ".workspace span",
+      "width": 1440,
+      "colorScheme": "light",
+      "foreground": "rgb(179, 201, 189)",
+      "background": "rgb(26, 64, 54)",
+      "ratio": 6.5588098253873515
+    },
+    {
+      "selector": ".nav-label",
+      "width": 1440,
+      "colorScheme": "light",
+      "foreground": "rgb(179, 201, 189)",
+      "background": "rgb(21, 60, 50)",
+      "ratio": 6.963006685639785
+    },
+    {
+      "selector": ".nav-item",
+      "width": 1440,
+      "colorScheme": "light",
+      "foreground": "rgb(197, 215, 205)",
+      "background": "rgb(21, 60, 50)",
+      "ratio": 8.10525893587926
+    },
+    {
+      "selector": ".nav-active",
+      "width": 1440,
+      "colorScheme": "light",
+      "foreground": "rgb(23, 60, 48)",
+      "background": "rgb(209, 239, 173)",
+      "ratio": 9.656054047738683
+    },
+    {
+      "selector": ".sidebar-note > .tag",
+      "width": 1024,
+      "colorScheme": "light",
+      "foreground": "rgb(209, 239, 173)",
+      "background": "rgb(21, 60, 50)",
+      "ratio": 9.662594783709666
+    },
+    {
+      "selector": ".workspace span",
+      "width": 1024,
+      "colorScheme": "light",
+      "foreground": "rgb(179, 201, 189)",
+      "background": "rgb(26, 64, 54)",
+      "ratio": 6.5588098253873515
+    },
+    {
+      "selector": ".nav-label",
+      "width": 1024,
+      "colorScheme": "light",
+      "foreground": "rgb(179, 201, 189)",
+      "background": "rgb(21, 60, 50)",
+      "ratio": 6.963006685639785
+    },
+    {
+      "selector": ".nav-item",
+      "width": 1024,
+      "colorScheme": "light",
+      "foreground": "rgb(197, 215, 205)",
+      "background": "rgb(21, 60, 50)",
+      "ratio": 8.10525893587926
+    },
+    {
+      "selector": ".nav-active",
+      "width": 1024,
+      "colorScheme": "light",
+      "foreground": "rgb(23, 60, 48)",
+      "background": "rgb(209, 239, 173)",
+      "ratio": 9.656054047738683
+    },
+    {
+      "selector": ".nav-item",
+      "width": 1000,
+      "colorScheme": "light",
+      "foreground": "rgb(197, 215, 205)",
+      "background": "rgb(21, 60, 50)",
+      "ratio": 8.10525893587926
+    },
+    {
+      "selector": ".nav-active",
+      "width": 1000,
+      "colorScheme": "light",
+      "foreground": "rgb(23, 60, 48)",
+      "background": "rgb(209, 239, 173)",
+      "ratio": 9.656054047738683
+    },
+    {
+      "selector": ".nav-item",
+      "width": 768,
+      "colorScheme": "light",
+      "foreground": "rgb(197, 215, 205)",
+      "background": "rgb(21, 60, 50)",
+      "ratio": 8.10525893587926
+    },
+    {
+      "selector": ".nav-active",
+      "width": 768,
+      "colorScheme": "light",
+      "foreground": "rgb(23, 60, 48)",
+      "background": "rgb(209, 239, 173)",
+      "ratio": 9.656054047738683
+    },
+    {
+      "selector": ".nav-item",
+      "width": 390,
+      "colorScheme": "light",
+      "foreground": "rgb(197, 215, 205)",
+      "background": "rgb(21, 60, 50)",
+      "ratio": 8.10525893587926
+    },
+    {
+      "selector": ".nav-active",
+      "width": 390,
+      "colorScheme": "light",
+      "foreground": "rgb(23, 60, 48)",
+      "background": "rgb(209, 239, 173)",
+      "ratio": 9.656054047738683
+    },
+    {
+      "selector": ".sidebar-note > .tag",
+      "width": 1440,
+      "colorScheme": "dark",
+      "foreground": "rgb(209, 239, 173)",
+      "background": "rgb(21, 60, 50)",
+      "ratio": 9.662594783709666
+    },
+    {
+      "selector": ".workspace span",
+      "width": 1440,
+      "colorScheme": "dark",
+      "foreground": "rgb(179, 201, 189)",
+      "background": "rgb(26, 64, 54)",
+      "ratio": 6.5588098253873515
+    },
+    {
+      "selector": ".nav-label",
+      "width": 1440,
+      "colorScheme": "dark",
+      "foreground": "rgb(179, 201, 189)",
+      "background": "rgb(21, 60, 50)",
+      "ratio": 6.963006685639785
+    },
+    {
+      "selector": ".nav-item",
+      "width": 1440,
+      "colorScheme": "dark",
+      "foreground": "rgb(197, 215, 205)",
+      "background": "rgb(21, 60, 50)",
+      "ratio": 8.10525893587926
+    },
+    {
+      "selector": ".nav-active",
+      "width": 1440,
+      "colorScheme": "dark",
+      "foreground": "rgb(23, 60, 48)",
+      "background": "rgb(209, 239, 173)",
+      "ratio": 9.656054047738683
+    },
+    {
+      "selector": ".sidebar-note > .tag",
+      "width": 1024,
+      "colorScheme": "dark",
+      "foreground": "rgb(209, 239, 173)",
+      "background": "rgb(21, 60, 50)",
+      "ratio": 9.662594783709666
+    },
+    {
+      "selector": ".workspace span",
+      "width": 1024,
+      "colorScheme": "dark",
+      "foreground": "rgb(179, 201, 189)",
+      "background": "rgb(26, 64, 54)",
+      "ratio": 6.5588098253873515
+    },
+    {
+      "selector": ".nav-label",
+      "width": 1024,
+      "colorScheme": "dark",
+      "foreground": "rgb(179, 201, 189)",
+      "background": "rgb(21, 60, 50)",
+      "ratio": 6.963006685639785
+    },
+    {
+      "selector": ".nav-item",
+      "width": 1024,
+      "colorScheme": "dark",
+      "foreground": "rgb(197, 215, 205)",
+      "background": "rgb(21, 60, 50)",
+      "ratio": 8.10525893587926
+    },
+    {
+      "selector": ".nav-active",
+      "width": 1024,
+      "colorScheme": "dark",
+      "foreground": "rgb(23, 60, 48)",
+      "background": "rgb(209, 239, 173)",
+      "ratio": 9.656054047738683
+    },
+    {
+      "selector": ".nav-item",
+      "width": 1000,
+      "colorScheme": "dark",
+      "foreground": "rgb(197, 215, 205)",
+      "background": "rgb(21, 60, 50)",
+      "ratio": 8.10525893587926
+    },
+    {
+      "selector": ".nav-active",
+      "width": 1000,
+      "colorScheme": "dark",
+      "foreground": "rgb(23, 60, 48)",
+      "background": "rgb(209, 239, 173)",
+      "ratio": 9.656054047738683
+    },
+    {
+      "selector": ".nav-item",
+      "width": 768,
+      "colorScheme": "dark",
+      "foreground": "rgb(197, 215, 205)",
+      "background": "rgb(21, 60, 50)",
+      "ratio": 8.10525893587926
+    },
+    {
+      "selector": ".nav-active",
+      "width": 768,
+      "colorScheme": "dark",
+      "foreground": "rgb(23, 60, 48)",
+      "background": "rgb(209, 239, 173)",
+      "ratio": 9.656054047738683
+    },
+    {
+      "selector": ".nav-item",
+      "width": 390,
+      "colorScheme": "dark",
+      "foreground": "rgb(197, 215, 205)",
+      "background": "rgb(21, 60, 50)",
+      "ratio": 8.10525893587926
+    },
+    {
+      "selector": ".nav-active",
+      "width": 390,
+      "colorScheme": "dark",
+      "foreground": "rgb(23, 60, 48)",
+      "background": "rgb(209, 239, 173)",
+      "ratio": 9.656054047738683
+    }
+  ],
+  "modes": [
+    {
+      "width": 1440,
+      "colorScheme": "light",
+      "mode": "ev_only",
+      "keyboardExpanded": true,
+      "accessibleText": "- group:\n  - text: Scheduling assumptions · EV-only\n  - paragraph: Moves EV charging within arrival and completion times. Equipment and fixed building demand stay unchanged."
+    },
+    {
+      "width": 1440,
+      "colorScheme": "light",
+      "mode": "joint",
+      "keyboardExpanded": true,
+      "accessibleText": "- group:\n  - text: Scheduling assumptions · EV + flexible equipment\n  - paragraph: \"Moves EV charging and eligible equipment within their allowed windows. Flexible equipment is modeled as interruptible and continuously adjustable: it can pause and vary power. Uninterrupted machine cycles are not modeled. Fixed building demand stays unchanged.\""
+    },
+    {
+      "width": 1024,
+      "colorScheme": "light",
+      "mode": "ev_only",
+      "keyboardExpanded": true,
+      "accessibleText": "- group:\n  - text: Scheduling assumptions · EV-only\n  - paragraph: Moves EV charging within arrival and completion times. Equipment and fixed building demand stay unchanged."
+    },
+    {
+      "width": 1024,
+      "colorScheme": "light",
+      "mode": "joint",
+      "keyboardExpanded": true,
+      "accessibleText": "- group:\n  - text: Scheduling assumptions · EV + flexible equipment\n  - paragraph: \"Moves EV charging and eligible equipment within their allowed windows. Flexible equipment is modeled as interruptible and continuously adjustable: it can pause and vary power. Uninterrupted machine cycles are not modeled. Fixed building demand stays unchanged.\""
+    },
+    {
+      "width": 1000,
+      "colorScheme": "light",
+      "mode": "ev_only",
+      "keyboardExpanded": true,
+      "accessibleText": "- group:\n  - text: Scheduling assumptions · EV-only\n  - paragraph: Moves EV charging within arrival and completion times. Equipment and fixed building demand stay unchanged."
+    },
+    {
+      "width": 1000,
+      "colorScheme": "light",
+      "mode": "joint",
+      "keyboardExpanded": true,
+      "accessibleText": "- group:\n  - text: Scheduling assumptions · EV + flexible equipment\n  - paragraph: \"Moves EV charging and eligible equipment within their allowed windows. Flexible equipment is modeled as interruptible and continuously adjustable: it can pause and vary power. Uninterrupted machine cycles are not modeled. Fixed building demand stays unchanged.\""
+    },
+    {
+      "width": 768,
+      "colorScheme": "light",
+      "mode": "ev_only",
+      "keyboardExpanded": true,
+      "accessibleText": "- group:\n  - text: Scheduling assumptions · EV-only\n  - paragraph: Moves EV charging within arrival and completion times. Equipment and fixed building demand stay unchanged."
+    },
+    {
+      "width": 768,
+      "colorScheme": "light",
+      "mode": "joint",
+      "keyboardExpanded": true,
+      "accessibleText": "- group:\n  - text: Scheduling assumptions · EV + flexible equipment\n  - paragraph: \"Moves EV charging and eligible equipment within their allowed windows. Flexible equipment is modeled as interruptible and continuously adjustable: it can pause and vary power. Uninterrupted machine cycles are not modeled. Fixed building demand stays unchanged.\""
+    },
+    {
+      "width": 390,
+      "colorScheme": "light",
+      "mode": "ev_only",
+      "keyboardExpanded": true,
+      "accessibleText": "- group:\n  - text: Scheduling assumptions · EV-only\n  - paragraph: Moves EV charging within arrival and completion times. Equipment and fixed building demand stay unchanged."
+    },
+    {
+      "width": 390,
+      "colorScheme": "light",
+      "mode": "joint",
+      "keyboardExpanded": true,
+      "accessibleText": "- group:\n  - text: Scheduling assumptions · EV + flexible equipment\n  - paragraph: \"Moves EV charging and eligible equipment within their allowed windows. Flexible equipment is modeled as interruptible and continuously adjustable: it can pause and vary power. Uninterrupted machine cycles are not modeled. Fixed building demand stays unchanged.\""
+    },
+    {
+      "width": 1440,
+      "colorScheme": "dark",
+      "mode": "ev_only",
+      "keyboardExpanded": true,
+      "accessibleText": "- group:\n  - text: Scheduling assumptions · EV-only\n  - paragraph: Moves EV charging within arrival and completion times. Equipment and fixed building demand stay unchanged."
+    },
+    {
+      "width": 1440,
+      "colorScheme": "dark",
+      "mode": "joint",
+      "keyboardExpanded": true,
+      "accessibleText": "- group:\n  - text: Scheduling assumptions · EV + flexible equipment\n  - paragraph: \"Moves EV charging and eligible equipment within their allowed windows. Flexible equipment is modeled as interruptible and continuously adjustable: it can pause and vary power. Uninterrupted machine cycles are not modeled. Fixed building demand stays unchanged.\""
+    },
+    {
+      "width": 1024,
+      "colorScheme": "dark",
+      "mode": "ev_only",
+      "keyboardExpanded": true,
+      "accessibleText": "- group:\n  - text: Scheduling assumptions · EV-only\n  - paragraph: Moves EV charging within arrival and completion times. Equipment and fixed building demand stay unchanged."
+    },
+    {
+      "width": 1024,
+      "colorScheme": "dark",
+      "mode": "joint",
+      "keyboardExpanded": true,
+      "accessibleText": "- group:\n  - text: Scheduling assumptions · EV + flexible equipment\n  - paragraph: \"Moves EV charging and eligible equipment within their allowed windows. Flexible equipment is modeled as interruptible and continuously adjustable: it can pause and vary power. Uninterrupted machine cycles are not modeled. Fixed building demand stays unchanged.\""
+    },
+    {
+      "width": 1000,
+      "colorScheme": "dark",
+      "mode": "ev_only",
+      "keyboardExpanded": true,
+      "accessibleText": "- group:\n  - text: Scheduling assumptions · EV-only\n  - paragraph: Moves EV charging within arrival and completion times. Equipment and fixed building demand stay unchanged."
+    },
+    {
+      "width": 1000,
+      "colorScheme": "dark",
+      "mode": "joint",
+      "keyboardExpanded": true,
+      "accessibleText": "- group:\n  - text: Scheduling assumptions · EV + flexible equipment\n  - paragraph: \"Moves EV charging and eligible equipment within their allowed windows. Flexible equipment is modeled as interruptible and continuously adjustable: it can pause and vary power. Uninterrupted machine cycles are not modeled. Fixed building demand stays unchanged.\""
+    },
+    {
+      "width": 768,
+      "colorScheme": "dark",
+      "mode": "ev_only",
+      "keyboardExpanded": true,
+      "accessibleText": "- group:\n  - text: Scheduling assumptions · EV-only\n  - paragraph: Moves EV charging within arrival and completion times. Equipment and fixed building demand stay unchanged."
+    },
+    {
+      "width": 768,
+      "colorScheme": "dark",
+      "mode": "joint",
+      "keyboardExpanded": true,
+      "accessibleText": "- group:\n  - text: Scheduling assumptions · EV + flexible equipment\n  - paragraph: \"Moves EV charging and eligible equipment within their allowed windows. Flexible equipment is modeled as interruptible and continuously adjustable: it can pause and vary power. Uninterrupted machine cycles are not modeled. Fixed building demand stays unchanged.\""
+    },
+    {
+      "width": 390,
+      "colorScheme": "dark",
+      "mode": "ev_only",
+      "keyboardExpanded": true,
+      "accessibleText": "- group:\n  - text: Scheduling assumptions · EV-only\n  - paragraph: Moves EV charging within arrival and completion times. Equipment and fixed building demand stay unchanged."
+    },
+    {
+      "width": 390,
+      "colorScheme": "dark",
+      "mode": "joint",
+      "keyboardExpanded": true,
+      "accessibleText": "- group:\n  - text: Scheduling assumptions · EV + flexible equipment\n  - paragraph: \"Moves EV charging and eligible equipment within their allowed windows. Flexible equipment is modeled as interruptible and continuously adjustable: it can pause and vary power. Uninterrupted machine cycles are not modeled. Fixed building demand stays unchanged.\""
+    }
+  ],
+  "results": [
+    {
+      "mode": "ev_only",
+      "scenario": {
+        "operating_hours": {
+          "start_hour": 8,
+          "end_hour": 18
+        },
+        "building_max_demand_kw": 25,
+        "fixed_demand_kw": [
+          0,
+          1.125,
+          1.25,
+          1.375,
+          1.5,
+          1.625,
+          1.75,
+          1.875,
+          2,
+          2.125,
+          2.25,
+          2.375,
+          2.123456789,
+          2.625,
+          2.75,
+          2.875,
+          3,
+          3.125,
+          3.25,
+          3.375,
+          3.5,
+          3.625,
+          3.75,
+          3.875
+        ],
+        "electricity_prices_usd_per_kwh": [
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.28,
+          0.28,
+          0.28,
+          0.28,
+          0.28,
+          0.28,
+          0.12,
+          0.12,
+          0.12,
+          0.12
+        ],
+        "ev_requirements": [
+          {
+            "id": "office-ev-1",
+            "arrival_hour": 9,
+            "deadline_hour": 17,
+            "energy_required_kwh": 14.4,
+            "max_charging_power_kw": 7.2
+          },
+          {
+            "id": "office-ev-2",
+            "arrival_hour": 9,
+            "deadline_hour": 17,
+            "energy_required_kwh": 14.4,
+            "max_charging_power_kw": 7.2
+          }
+        ],
+        "flexible_equipment": [
+          {
+            "id": "office-equipment",
+            "available_hours": {
+              "start_hour": 10,
+              "end_hour": 16
+            },
+            "energy_required_kwh": 6,
+            "max_power_kw": 3
+          }
+        ]
+      },
+      "result": {
+        "feasibility_status": "feasible",
+        "baseline_electricity_cost_usd": 13.970814814679999,
+        "baseline_peak_demand_kw": 19.65,
+        "baseline_demand_kw": [
+          0,
+          1.125,
+          1.25,
+          1.375,
+          1.5,
+          1.625,
+          1.75,
+          1.875,
+          2,
+          16.525,
+          19.65,
+          5.375,
+          2.123456789,
+          2.625,
+          2.75,
+          2.875,
+          3,
+          3.125,
+          3.25,
+          3.375,
+          3.5,
+          3.625,
+          3.75,
+          3.875
+        ],
+        "optimized_electricity_cost_usd": 13.970814914679998,
+        "optimized_peak_demand_kw": 9.259691232800002,
+        "optimized_demand_kw": [
+          0,
+          1.125,
+          1.25,
+          1.375,
+          1.5,
+          1.625,
+          1.75,
+          1.875,
+          2,
+          9.259691232800002,
+          9.259691232800002,
+          9.259691232800002,
+          9.259691232800002,
+          9.259691232800002,
+          2.75,
+          2.875000624999991,
+          3,
+          3.125,
+          3.25,
+          3.375,
+          3.5,
+          3.625,
+          3.75,
+          3.875
+        ],
+        "constraint_violations": [],
+        "operating_plan": {
+          "scheduling_mode": "ev_only",
+          "solver_status": "optimal",
+          "primary_status": "optimal",
+          "peak_tiebreak_status": "optimal",
+          "primary_optimum_usd": 13.970814814679999,
+          "verification_status": "passed",
+          "warnings": [],
+          "baseline_constraint_violations": [],
+          "device_schedules": [
+            {
+              "device_id": "office-ev-1",
+              "device_type": "ev",
+              "scheduling_role": "optimized",
+              "required_energy_kwh": 14.4,
+              "available_hours": {
+                "start_hour": 9,
+                "end_hour": 17
+              },
+              "max_power_kw": 7.2,
+              "baseline_power_kw": [
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                7.2,
+                7.2,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0
+              ],
+              "baseline_delivered_energy_kwh": 14.4,
+              "optimized_power_kw": [
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                7.134691232800001,
+                4.009691232800002,
+                3.255617534399997,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0
+              ],
+              "optimized_delivered_energy_kwh": 14.399999999999999
+            },
+            {
+              "device_id": "office-ev-2",
+              "device_type": "ev",
+              "scheduling_role": "optimized",
+              "required_energy_kwh": 14.4,
+              "available_hours": {
+                "start_hour": 9,
+                "end_hour": 17
+              },
+              "max_power_kw": 7.2,
+              "baseline_power_kw": [
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                7.2,
+                7.2,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0
+              ],
+              "baseline_delivered_energy_kwh": 14.4,
+              "optimized_power_kw": [
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0.6290736984000047,
+                7.136234443800001,
+                6.634691232800001,
+                0,
+                6.249999909859306e-7,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0
+              ],
+              "optimized_delivered_energy_kwh": 14.399999999999997
+            },
+            {
+              "device_id": "office-equipment",
+              "device_type": "flexible",
+              "scheduling_role": "held_at_baseline",
+              "required_energy_kwh": 6,
+              "available_hours": {
+                "start_hour": 10,
+                "end_hour": 16
+              },
+              "max_power_kw": 3,
+              "baseline_power_kw": [
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                3,
+                3,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0
+              ],
+              "baseline_delivered_energy_kwh": 6,
+              "optimized_power_kw": [
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                3,
+                3,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0
+              ],
+              "optimized_delivered_energy_kwh": 6
+            }
+          ]
+        }
+      }
+    },
+    {
+      "mode": "joint",
+      "scenario": {
+        "operating_hours": {
+          "start_hour": 8,
+          "end_hour": 18
+        },
+        "building_max_demand_kw": 25,
+        "fixed_demand_kw": [
+          3.125,
+          3.125,
+          3.125,
+          3.125,
+          3.125,
+          3.125,
+          3.125,
+          3.125,
+          3.125,
+          3.125,
+          3.125,
+          3.125,
+          3.125,
+          3.125,
+          3.125,
+          3.125,
+          3.125,
+          3.125,
+          3.125,
+          3.125,
+          3.125,
+          3.125,
+          3.125,
+          3.125
+        ],
+        "electricity_prices_usd_per_kwh": [
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.28,
+          0.28,
+          0.28,
+          0.28,
+          0.28,
+          0.28,
+          0.12,
+          0.12,
+          0.12,
+          0.12
+        ],
+        "ev_requirements": [
+          {
+            "id": "office-ev-1",
+            "arrival_hour": 9,
+            "deadline_hour": 17,
+            "energy_required_kwh": 14.4,
+            "max_charging_power_kw": 7.2
+          },
+          {
+            "id": "office-ev-2",
+            "arrival_hour": 9,
+            "deadline_hour": 17,
+            "energy_required_kwh": 14.4,
+            "max_charging_power_kw": 7.2
+          }
+        ],
+        "flexible_equipment": [
+          {
+            "id": "office-equipment",
+            "available_hours": {
+              "start_hour": 10,
+              "end_hour": 16
+            },
+            "energy_required_kwh": 6,
+            "max_power_kw": 3
+          }
+        ]
+      },
+      "result": {
+        "feasibility_status": "feasible",
+        "baseline_electricity_cost_usd": 16.176,
+        "baseline_peak_demand_kw": 20.525,
+        "baseline_demand_kw": [
+          3.125,
+          3.125,
+          3.125,
+          3.125,
+          3.125,
+          3.125,
+          3.125,
+          3.125,
+          3.125,
+          17.525,
+          20.525,
+          6.125,
+          3.125,
+          3.125,
+          3.125,
+          3.125,
+          3.125,
+          3.125,
+          3.125,
+          3.125,
+          3.125,
+          3.125,
+          3.125,
+          3.125
+        ],
+        "optimized_electricity_cost_usd": 16.1760001,
+        "optimized_peak_demand_kw": 10.084999875000001,
+        "optimized_demand_kw": [
+          3.125,
+          3.125,
+          3.125,
+          3.125,
+          3.125,
+          3.125,
+          3.125,
+          3.125,
+          3.125,
+          10.084999875,
+          10.084999875,
+          10.084999875000001,
+          10.084999875,
+          10.084999875,
+          3.125,
+          3.125000625000002,
+          3.125,
+          3.125,
+          3.125,
+          3.125,
+          3.125,
+          3.125,
+          3.125,
+          3.125
+        ],
+        "constraint_violations": [],
+        "operating_plan": {
+          "scheduling_mode": "joint",
+          "solver_status": "optimal",
+          "primary_status": "optimal",
+          "peak_tiebreak_status": "optimal",
+          "primary_optimum_usd": 16.176,
+          "verification_status": "passed",
+          "warnings": [],
+          "baseline_constraint_violations": [],
+          "device_schedules": [
+            {
+              "device_id": "office-ev-1",
+              "device_type": "ev",
+              "scheduling_role": "optimized",
+              "required_energy_kwh": 14.4,
+              "available_hours": {
+                "start_hour": 9,
+                "end_hour": 17
+              },
+              "max_power_kw": 7.2,
+              "baseline_power_kw": [
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                7.2,
+                7.2,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0
+              ],
+              "baseline_delivered_energy_kwh": 14.4,
+              "optimized_power_kw": [
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                6.959999874999999,
+                3.9599998749999994,
+                3.4800002499999994,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0
+              ],
+              "optimized_delivered_energy_kwh": 14.399999999999999
+            },
+            {
+              "device_id": "office-ev-2",
+              "device_type": "ev",
+              "scheduling_role": "optimized",
+              "required_energy_kwh": 14.4,
+              "available_hours": {
+                "start_hour": 9,
+                "end_hour": 17
+              },
+              "max_power_kw": 7.2,
+              "baseline_power_kw": [
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                7.2,
+                7.2,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0
+              ],
+              "baseline_delivered_energy_kwh": 14.4,
+              "optimized_power_kw": [
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0.47999962500000043,
+                6.959999874999999,
+                6.959999874999999,
+                0,
+                6.250000017791677e-7,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0
+              ],
+              "optimized_delivered_energy_kwh": 14.4
+            },
+            {
+              "device_id": "office-equipment",
+              "device_type": "flexible",
+              "scheduling_role": "optimized",
+              "required_energy_kwh": 6,
+              "available_hours": {
+                "start_hour": 10,
+                "end_hour": 16
+              },
+              "max_power_kw": 3,
+              "baseline_power_kw": [
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                3,
+                3,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0
+              ],
+              "baseline_delivered_energy_kwh": 6,
+              "optimized_power_kw": [
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                3,
+                3,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0
+              ],
+              "optimized_delivered_energy_kwh": 6
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "errors": [],
+  "pass": true
+}
