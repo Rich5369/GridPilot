@@ -10,7 +10,18 @@ Richard's PR #37 merged during verification. The branch was fast-forwarded to
 `254e4af30d72cac73ce378e41df7fa199c059258` without overlapping edits. This is the
 latest main checked before publication. Its backend is identical to the initial
 base; its frontend analytics changes and new E1 captures were checked separately.
-The implementation is the E2 PR head, not the main/base SHA recorded in captures.
+Verified implementation commit:
+`78179d94af4059efa0d49694717073d26d78bf71`.
+Review PR: <https://github.com/Rich5369/GridPilot/pull/39>, with Rich5369 requested.
+The main/base SHA recorded in HTTP captures is not the implementation SHA.
+
+At final publication, PR #38 had also merged to main
+`e390fca2edc7bbd76396dd44f4009967439311e5`. Its changes are frontend analytics,
+tests and artifacts only; no backend/E1 contract changes. It is **not included**
+in this tested branch, whose application base remains PR #37 / `254e4af`.
+The PR is mergeable; the frontend counts/build above describe that tested base,
+not the later #38 plotting changes. No new application acceptance for #38 is
+claimed. This documentation follow-up does not change the verified implementation.
 Tests and new local HTTP evidence were taken from this branch's implementation
 working tree before its review commit. Nothing was merged or deployed.
 
