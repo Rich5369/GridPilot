@@ -504,6 +504,7 @@ export function Dashboard() {
                       editor={editor}
                       onChange={setEditor}
                       resultScenario={resultScenario}
+                      resultId={result?.result_id}
                     />
                   </div>
                 }

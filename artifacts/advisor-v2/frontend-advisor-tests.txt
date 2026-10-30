@@ -1,0 +1,13 @@
+
+> gridpilot-frontend@0.0.0 test
+> vitest run src/components/ai/EnergyAssistant.test.tsx
+
+
+ RUN  v5.0.5 /tmp/gridpilot-advisor/frontend
+
+
+ Test Files  1 passed (1)
+      Tests  3 passed (3)
+   Start at  21:59:47
+   Duration  1.40s (environment 75%, tests 15%, transform 6%, import 4%, worker 1%)
+

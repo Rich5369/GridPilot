@@ -1,0 +1,1 @@
+PASS: actual local HTTP solver and unavailable provider; injected advisor questions, continuity, exact result ID, explicit Compare/Apply, keyboard, desktop/mobile; axe: no WCAG A/AA violations in advisor. NOT live Meta acceptance.

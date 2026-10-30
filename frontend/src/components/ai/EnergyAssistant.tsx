@@ -12,25 +12,25 @@ type Proposal = {
   proposed_scenario: Scenario | null
 }
 type Profile = Record<string, string | number | null>
-type Advisor = Omit<Proposal, 'status'> & { category: 'answer' | 'clarification_required' | 'scenario_proposal' | 'unavailable_or_unsupported'; facts: string[]; profile: Profile }
+type Advisor = Omit<Proposal, 'status'> & { category: 'answer' | 'clarification_required' | 'scenario_proposal' | 'unavailable_or_unsupported'; facts: string[]; follow_up_questions?: string[]; missing_information?: string[]; profile: Profile }
 
 const profileFields = ['business_type', 'employee_count', 'operating_hours', 'electricity_cost_and_period', 'consumption_and_units', 'equipment', 'goals', 'restrictions']
 const fieldLabel = (key: string) => ({ electricity_cost_and_period: 'Electricity cost & billing period', consumption_and_units: 'Consumption & units' }[key] ?? key.replaceAll('_', ' '))
 const examples = ['Keep peak power demand below 15 kW.', 'Compare a lower power-cap scenario.']
-export function EnergyAssistant({ editor, onChange, resultScenario, onCompareProposal, schedulingMode = 'ev_only' }: {
-  schedulingMode?: 'ev_only' | 'joint'; editor: ScenarioEditor; onChange: (editor: ScenarioEditor) => void; resultScenario: Scenario | null; onCompareProposal?: (e: ScenarioEditor) => void
+export function EnergyAssistant({ editor, onChange, resultScenario, onCompareProposal, schedulingMode = 'ev_only', resultId }: {
+  resultId?: string | null; schedulingMode?: 'ev_only' | 'joint'; editor: ScenarioEditor; onChange: (editor: ScenarioEditor) => void; resultScenario: Scenario | null; onCompareProposal?: (e: ScenarioEditor) => void
 }) {
   const [request, setRequest] = useState('')
   const [proposal, setProposal] = useState<Proposal | null>(null)
   const [snapshot, setSnapshot] = useState('')
-  const [history, setHistory] = useState<{role: 'user' | 'assistant'; content: string; category?: Advisor['category']; message?: string; facts?: string[]}[]>([])
+  const [history, setHistory] = useState<{role: 'user' | 'assistant'; content: string; category?: Advisor['category']; message?: string; facts?: string[]; questions?: string[]}[]>([])
   const [profile, setProfile] = useState<Profile>({})
   const [edited, setEdited] = useState<Record<string, string | number | null>>({})
   const [source, setSource] = useState('No advisor reply yet')
   const [conversation, setConversation] = useState('')
   const validDraft = !Object.keys(validateEditor(editor)).length
   const draftScenario = validDraft ? toScenario(editor) : null
-  const contextKey = JSON.stringify(resultScenario ?? draftScenario) + schedulingMode
+  const contextKey = JSON.stringify(resultScenario ?? draftScenario) + schedulingMode + (resultId ?? '')
   const contextRef = useRef(contextKey)
   useEffect(() => { contextRef.current = contextKey }, [contextKey])
   const [busy, setBusy] = useState(false)
@@ -45,14 +45,14 @@ export function EnergyAssistant({ editor, onChange, resultScenario, onComparePro
     setSnapshot(current)
     try {
       const prior = conversation === submittedKey ? history : []
-      const body = { request, history: prior.slice(-12).map(({ role, content }) => ({ role, content })), profile, scenario: resultScenario ?? toScenario(editor), scheduling_mode: schedulingMode }
+      const body = { request, history: prior.slice(-12).map(({ role, content }) => ({ role, content })), profile, scenario: resultScenario ?? toScenario(editor), scheduling_mode: schedulingMode, result_id: resultId ?? null }
       const response = await apiRequest<Advisor>('/api/ai/conversation', {
         method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body), signal: AbortSignal.timeout(60000),
       })
       if (contextRef.current !== submittedKey) { setError('Scenario changed during the request. Please send again.'); return }
       setConversation(submittedKey)
-      setHistory([...prior, { role: 'user', content: request }, { role: 'assistant', category: response.category, message: response.message, facts: response.facts ?? [], content: [response.message, ...(response.facts ?? [])].join('\n\n').slice(0, 3000) }].slice(-12) as typeof history)
-      setProfile(response.profile ?? {})
+      setHistory([...prior, { role: 'user', content: request }, { role: 'assistant', category: response.category, message: response.message, facts: response.facts ?? [], questions: response.follow_up_questions ?? [], content: [response.message, ...(response.follow_up_questions ?? []), ...(response.facts ?? [])].join('\n\n').slice(0, 3000) }].slice(-12) as typeof history)
+      setProfile({...response.profile, ...edited})
       setSource(response.source === 'meta' ? 'Meta · reply received' : 'MOCK MODE — NOT META AI')
       if (response.category === 'scenario_proposal') setProposal({ ...response, status: 'proposed' })
     } catch (e) {
@@ -86,7 +86,7 @@ export function EnergyAssistant({ editor, onChange, resultScenario, onComparePro
       <div className="section-heading"><h3 id="business-context-heading">Business context</h3><span className="advisor-caption">Session only · separate from engineering inputs</span></div>
       {profileFields.some(key => profile[key] != null && profile[key] !== '') ? <dl className="advisor-context-summary">{profileFields.filter(key => profile[key] != null && profile[key] !== '').map(key => <div key={key}><dt>{fieldLabel(key)}</dt><dd>{profile[key]} <span className="advisor-provenance">{Object.hasOwn(edited, key) && edited[key] === profile[key] ? 'User edited' : 'Extracted'}</span></dd></div>)}</dl> : <p className="advisor-context-empty">No business details yet. Tell me about your operations, goals, or restrictions to add context.</p>}
       <details><summary>Edit business details <span className="advisor-caption">{profileFields.filter(key => profile[key] != null && profile[key] !== '').length} of 8 provided</span></summary>
-        <p className="advisor-caption">Extracted details come from your messages. Review or correct them here; unknown details are optional.</p>
+        <p className="advisor-caption">Extracted details are unconfirmed excerpts from your messages. Review or correct them here; unknown details are optional.</p>
         <div className="advisor-fields">{profileFields.map(key => <label key={key}>{fieldLabel(key)}<input type={key === 'employee_count' ? 'number' : 'text'} placeholder="Not provided" min="0" maxLength={key === 'business_type' ? 120 : key === 'equipment' || key === 'goals' || key === 'restrictions' ? 500 : 200} value={profile[key] ?? ''} onChange={e => { const value = e.target.value === '' ? null : key === 'employee_count' ? Number(e.target.value) : e.target.value; setProfile(p => ({...p, [key]: value})); setEdited(p => ({...p, [key]: value})) }} /></label>)}</div>
       </details>
     </section>
@@ -95,6 +95,7 @@ export function EnergyAssistant({ editor, onChange, resultScenario, onComparePro
     <div className="advisor-history" role="log" aria-label="Energy advisor conversation" aria-live="polite" aria-busy={busy}>{history.map((turn, i) => <article className={`advisor-message ${turn.role} ${turn.category ?? ''}`} key={i}>
       <div className="advisor-message-heading"><strong>{turn.role === 'user' ? 'You' : 'Energy Advisor'}</strong>{turn.role === 'assistant' && <span>{turn.category === 'clarification_required' ? 'Clarification needed' : turn.category === 'scenario_proposal' ? 'Proposal · review required' : turn.category === 'unavailable_or_unsupported' ? 'Supported scope' : 'Scenario guidance'}</span>}</div>
       <p>{turn.message ?? turn.content}</p>
+      {!!turn.questions?.length && <section aria-label="Follow-up questions"><h4>Next questions</h4><ul>{turn.questions.map(question => <li key={question}>{question}</li>)}</ul></section>}
       {!!turn.facts?.length && <section className="advisor-evidence" aria-label="Scenario evidence"><h4>Scenario evidence</h4>{turn.facts.map((fact, index) => <div className={fact.startsWith('Verified submitted ') ? 'advisor-verified' : 'advisor-fact'} key={index}>{fact.startsWith('Verified submitted ') && <span className="advisor-evidence-label">Verified solver result</span>}<p>{fact}</p></div>)}</section>}
     </article>)}</div>
     {proposal && <div className="advisor-proposal" aria-label="Proposed scenario changes"><span className="advisor-eyebrow">REVIEW SCENARIO CHANGES</span><h3>Proposed operational change</h3><p className="advisor-caption">Not yet applied · feasibility and savings have not been calculated for this proposal.</p><p>{proposal.message}</p>

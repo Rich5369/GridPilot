@@ -1,0 +1,12 @@
+{
+  "source": "read-only hosted HTTP; no inference",
+  "health_status": 200,
+  "health": {
+    "status": "ok",
+    "project": "GridPilot"
+  },
+  "openapi_status": 200,
+  "conversation_deployed": true,
+  "execution_id_deployed": false,
+  "backend_git_sha": "not exposed by health"
+}

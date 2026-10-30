@@ -25,7 +25,7 @@ def provider(monkeypatch):
     sdk.__enter__.return_value.chat.completions.create = create
     monkeypatch.setattr(openai, 'OpenAI', MagicMock(return_value=sdk))
     def select(**overrides):
-        data = dict(category='answer', fact_keys=['cost'], clarification='none', profile=BusinessProfile().model_dump(), changes={})
+        data = dict(answer='Here is the evidence for your submitted scenario.', category='answer', fact_keys=['cost'], clarification='none', profile=BusinessProfile().model_dump(), changes={})
         data.update(overrides)
         create.return_value = SimpleNamespace(choices=[SimpleNamespace(finish_reason='stop', message=SimpleNamespace(content=json.dumps(data), refusal=None))])
     select()
@@ -37,7 +37,7 @@ def ask(**kwargs):
 def test_grounding_without_resolve_and_isolation(provider, monkeypatch):
     result = client.post('/api/optimize', json=SAMPLE).json()
     monkeypatch.setattr('backend.api.routes.optimize_scenario', lambda *a, **k: pytest.fail('Informational question solved again'))
-    response = ask().json()
+    response = ask(result_id=result['result_id']).json()
     assert f"{result['baseline_electricity_cost_usd']:.4f}" in response['facts'][0]
     assert 'No retained' in ask(scheduling_mode='joint').json()['facts'][0]
     draft = deepcopy(SAMPLE); draft['building_max_demand_kw'] = 999
@@ -46,7 +46,7 @@ def test_grounding_without_resolve_and_isolation(provider, monkeypatch):
 
 def test_continuity_profile_and_clarification(provider):
     profile = BusinessProfile(business_type='office', employee_count=10, electricity_cost_and_period='USD 2000 monthly').model_dump()
-    provider[1](category='clarification_required', clarification='scope', profile=profile, fact_keys=[])
+    provider[1](answer='Does this limit apply to the entire building?', category='clarification_required', clarification='scope', profile=profile, fact_keys=[])
     history=[dict(role='user', content='Can we stay below 15 kW?'), dict(role='assistant', content='For the whole building?')]
     response=ask(history=history, profile=profile)
     assert response.status_code == 200

@@ -44,7 +44,8 @@ def optimize(scenario: Scenario, scheduling_mode: Literal["ev_only", "joint"] = 
             result = optimize_scenario(scenario, optimize_flexible=True)
         else:
             result = optimize_scenario(scenario)
-        validated = OptimizationResult.model_validate(result)
+        from uuid import uuid4
+        validated = OptimizationResult.model_validate(result).model_copy(update={"result_id": uuid4().hex})
         from backend.ai.snapshots import remember
         remember(scenario, scheduling_mode, validated)
         return validated

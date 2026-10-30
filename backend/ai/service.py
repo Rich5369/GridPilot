@@ -101,6 +101,6 @@ def generate(schema: type[T], instructions: str, payload: dict, *, completion_to
         raise fail(429, 'ai_rate_limited', 'Meta AI rate limit reached. Try again later.') from None
     except APIError as exc:
         log_provider_error(exc)
-        raise fail(502, 'ai_provider_error', 'Meta AI request failed. Check backend credentials and model access.') from None
+        raise fail(502, 'ai_provider_error', 'Meta AI request failed upstream. Model access or provider routing may be unavailable. Optimization remains available.') from None
     except (ValidationError, ValueError, IndexError, AttributeError):
         raise fail(502, 'ai_invalid_response', 'Meta AI returned an invalid response. No changes were applied.') from None
