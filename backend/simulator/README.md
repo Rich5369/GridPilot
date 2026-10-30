@@ -9,6 +9,11 @@ Use [the current project README](../../README.md) for setup/status and
 [the demo walkthrough](../../docs/demo-walkthrough.md) for presentation; milestone
 reports below retain their historical measurements and limitations.
 
+The [E1 device operating-plan extension](../../docs/device-operating-plans.md)
+adds optional same-outcome EV/flexible schedules and quality metadata at the
+shared adapter boundary. It preserves this engine's mathematics/assumptions;
+frontend timeline integration and deployment remain Richard's follow-up.
+
 A deterministic baseline simulator for a fictional small commercial office.
 No hardware, live tariff, AI, HTTP server or optimizer is required. Import from
 repository root; the package depends on Pydantic and NumPy, not FastAPI.
