@@ -1,5 +1,9 @@
 # Advisor completion diagnostics and grounded cost explanations
 
+> Update: the subsequent PR #41 production acceptance reproduced a confirmed
+> completion-budget exhaustion. See [the correction and evidence](advisor-completion-budget.md).
+> The pre-diagnostic historical record below remains unchanged.
+
 ## Historical failure: what is known
 
 The October 30, 2026 production audit recorded a detailed fictional warehouse

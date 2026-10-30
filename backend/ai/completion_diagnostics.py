@@ -61,10 +61,12 @@ def _field_path(location, root):
 
 
 class CompletionDiagnostics:
-    def __init__(self, schema, completion_token_limit):
+    def __init__(self, schema, completion_token_limit, *, reasoning_effort=None):
         self.schema = schema
         self.completion_token_limit = completion_token_limit
         self.completion_tokens = None
+        self.reasoning_tokens = None
+        self.reasoning_effort = reasoning_effort if reasoning_effort in {'minimal', 'low', 'medium', 'high', 'xhigh', 'max'} else None
         self.content_present = None
         self.refusal_present = None
         self.correlation_id = uuid4().hex
@@ -77,6 +79,10 @@ class CompletionDiagnostics:
         self.provider_request_id = safe_token(getattr(response, '_request_id', None))
         tokens = getattr(getattr(response, 'usage', None), 'completion_tokens', None)
         self.completion_tokens = tokens if type(tokens) is int and 0 <= tokens <= 10**9 else None
+        reasoning = getattr(getattr(getattr(response, 'usage', None), 'completion_tokens_details', None), 'reasoning_tokens', None)
+        # Numeric usage only; never retain reasoning text or untrusted usage objects.
+        self.reasoning_tokens = reasoning if (type(reasoning) is int and self.completion_tokens is not None
+                                             and 0 <= reasoning <= self.completion_tokens) else None
 
     def invalid(self, category, *, validation=None):
         record = {
@@ -89,6 +95,8 @@ class CompletionDiagnostics:
             'refusal_present': self.refusal_present,
             'completion_token_limit': self.completion_token_limit,
             'completion_tokens': self.completion_tokens,
+            'reasoning_tokens': self.reasoning_tokens,
+            'reasoning_effort': self.reasoning_effort,
             'response_status': 502,
             # Typed SDK return establishes success, but not the exact HTTP code.
             'upstream_status_class': '2xx' if self.provider_response_received else None,
@@ -110,7 +118,11 @@ class CompletionDiagnostics:
             record['validation_errors_truncated'] = validation.error_count() > 12
         logger.warning('Meta completion rejected %s', record)
         from backend.ai.service import fail
-        error = fail(502, 'ai_invalid_response', 'Meta AI returned an invalid response. No changes were applied.')
+        message = ('Meta AI could not finish this reply. No changes were applied. '
+                   'Try a shorter question or continue with manual optimization.'
+                   if category == 'truncated' else
+                   'Meta AI returned an invalid response. No changes were applied.')
+        error = fail(502, 'ai_invalid_response', message)
         error.detail['request_id'] = self.correlation_id
         error.headers = {'X-Request-ID': self.correlation_id}
         raise error from None

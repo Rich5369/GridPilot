@@ -34,7 +34,9 @@ def fixture(**kwargs):
     truncated=request=='fixture truncated'
     return SimpleNamespace(_request_id='req-local-fixture',choices=[SimpleNamespace(
         finish_reason='length' if truncated else 'stop',
-        message=SimpleNamespace(content='PRIVATE-TRUNCATED-CANARY' if truncated else json.dumps(selection),refusal=None))])
+        message=SimpleNamespace(content=None if truncated else json.dumps(selection),refusal=None))],
+        usage=SimpleNamespace(completion_tokens=5000 if truncated else 900,
+            completion_tokens_details=SimpleNamespace(reasoning_tokens=5000 if truncated else 300)))
 
 
 class InjectedSDK:

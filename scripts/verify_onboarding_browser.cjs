@@ -1,7 +1,7 @@
 // Actual local HTTP application/optimizer; server SDK is an injected fixture, NOT live Meta.
 const {chromium}=require(process.env.PLAYWRIGHT_MODULE || 'playwright')
 const assert=require('node:assert/strict'),fs=require('node:fs')
-const output='artifacts/onboarding-validation'
+const output='artifacts/completion-budget'
 const warehouse='I operate a warehouse with 30 employees working from 7 AM to 7 PM. My electricity bill is about $6,000 per month. We have four electric forklifts and charge delivery trucks. I want to cut our electricity expenses by 50%.'
 ;(async()=>{
  const browser=await chromium.launch({headless:true})
@@ -37,14 +37,20 @@ const warehouse='I operate a warehouse with 30 employees working from 7 AM to 7 
   assert(!explained.message.includes('Flexible equipment caused'))
   assert(explained.facts.some(f=>f.includes('difference USD 0.0000')))
   evidence.checks.push('Multi-turn profile/history retained; exact result ID; adversarial causal prose replaced by aggregate explanation and device ledger')
+  const priorArticles=await page.getByRole('log').locator('article').count()
   const failed=await send('fixture truncated');assert.equal(failed.status(),502)
   const failure=await failed.json();assert.match(failure.detail.request_id,/^[0-9a-f]{32}$/)
   evidence.sanitizedFailure=failure;evidence.failureHeader=failed.headers()['x-request-id']
   assert.equal(evidence.failureHeader,failure.detail.request_id)
   await page.getByText('Meta unavailable · last request failed',{exact:true}).waitFor()
-  assert(!(await page.locator('body').innerText()).includes('PRIVATE-TRUNCATED-CANARY'))
+  await page.getByText('Meta AI could not finish this reply. No changes were applied. Try a shorter question or continue with manual optimization.',{exact:true}).waitFor()
+  assert.equal(await page.getByRole('log').locator('article').count(),priorArticles)
+  assert.equal(await page.locator('#ai-request').inputValue(),'fixture truncated')
+  assert((await page.locator('.advisor-context-summary').innerText()).includes('30'))
   evidence.checks.push('Truncated completion fails closed with correlation ID and existing unavailable UI; no raw content exposure or retry')
   const proposed=await send('Keep the entire building below 15 kW.');assert.equal(proposed.status(),200)
+  assert.equal(proposed.request().postDataJSON().profile.employee_count,30)
+  assert(!proposed.request().postDataJSON().history.some(t=>t.content==='fixture truncated'))
   await page.getByRole('heading',{name:'Proposed operational change',exact:true}).waitFor()
   await click('Compare as alternative')
   const responses=[];const listener=r=>{if(isSolve(r))responses.push(r)};page.on('response',listener)
