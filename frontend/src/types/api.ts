@@ -22,7 +22,31 @@ export interface Scenario {
   ev_requirements: EVRequirement[]
   flexible_equipment?: FlexibleEquipment[]
 }
+export interface DeviceSchedule {
+  device_id: string
+  device_type: 'ev' | 'flexible'
+  scheduling_role: 'optimized' | 'held_at_baseline'
+  required_energy_kwh: number
+  available_hours: HourWindow
+  max_power_kw: number
+  baseline_power_kw: number[]
+  baseline_delivered_energy_kwh: number
+  optimized_power_kw: number[] | null
+  optimized_delivered_energy_kwh: number | null
+}
+export interface OperatingPlan {
+  scheduling_mode: 'ev_only' | 'joint'
+  solver_status: 'optimal' | 'feasible' | 'infeasible'
+  primary_status: 'optimal' | 'feasible' | 'infeasible' | 'analytic_infeasibility'
+  peak_tiebreak_status: 'optimal' | 'feasible' | 'unresolved' | 'not_run'
+  primary_optimum_usd: number | null
+  verification_status: 'passed' | 'unavailable'
+  warnings: string[]
+  baseline_constraint_violations: string[]
+  device_schedules: DeviceSchedule[]
+}
 export interface OptimizationResult {
+  operating_plan?: OperatingPlan | null
   feasibility_status: 'feasible' | 'infeasible'
   baseline_electricity_cost_usd: number
   optimized_electricity_cost_usd: number | null

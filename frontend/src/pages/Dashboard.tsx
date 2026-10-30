@@ -1,3 +1,4 @@
+import { OperatingTimeline } from '../components/dashboard/OperatingTimeline'
 import { lazy, Suspense, useRef, useState } from 'react'
 import {
   Building2,
@@ -316,6 +317,7 @@ export function Dashboard() {
                       stale={stale}
                     />
                   </Suspense>
+                  <OperatingTimeline key={JSON.stringify(result)} result={result} scenario={resultScenario} mode={resultMode} stale={stale} />
                   {(resultScenario || !invalid) && (
                     <ScenarioAnalytics
                       scenario={resultScenario ?? toScenario(editor)}
