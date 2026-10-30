@@ -3,26 +3,38 @@
 const { chromium } = require('playwright')
 const assert = require('node:assert/strict')
 const fs = require('node:fs/promises')
+const path = require('node:path')
 const { createHash } = require('node:crypto')
 const { execFileSync } = require('node:child_process')
 const ts = require('../frontend/node_modules/typescript')
 const { assertChartRendered } = require('./chart-rendering.cjs')
-const output = 'docs/verification/joint-application-captures.json'
-const frontend = 'http://127.0.0.1:5177'
-const backend = 'http://127.0.0.1:8007'
+const output = process.env.GRIDPILOT_CAPTURE_OUTPUT || 'docs/verification/joint-application-captures.json'
+const frontend = process.env.GRIDPILOT_FRONTEND_URL || 'http://127.0.0.1:5177'
+const backend = process.env.GRIDPILOT_BACKEND_URL || 'http://127.0.0.1:8007'
+const screenshotDir = process.env.GRIDPILOT_SCREENSHOT_DIR || 'docs/screenshots'
+const screenshotPrefix = process.env.GRIDPILOT_SCREENSHOT_PREFIX || 'joint-ee'
+const pairOnly = process.env.GRIDPILOT_PAIR_ONLY === '1'
+const local = [frontend, backend].every(url => ['localhost', '127.0.0.1', '[::1]'].includes(new URL(url).hostname))
+if (!local) {
+  assert(path.resolve(output) !== path.resolve('docs/verification/joint-application-captures.json'), 'Hosted captures require a separate output')
+  assert(path.resolve(screenshotDir) !== path.resolve('docs/screenshots') || screenshotPrefix !== 'joint-ee', 'Hosted screenshots require separate paths')
+}
 const revision = execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim()
 const cleanZero = v => v.toFixed(2) === '-0.00' ? '0.00' : v.toFixed(2)
-const data = { testedFrontendCommit: revision, testedBackendCommit: revision,
-  frontend, backend, build: 'Vite production build; VITE_API_BASE_URL=' + backend,
+const data = { testedFrontendCommit: local ? revision : null, testedBackendCommit: local ? revision : null,
+  localEngineeringReferenceCommit: revision,
+  frontend, backend, build: local ? 'Vite production build; VITE_API_BASE_URL=' + backend : 'Public hosted assets; deployed revisions not inferred from local HEAD',
   responseMocking: false, startedAt: new Date().toISOString(), requests: [], pairs: [], checks: [], screenshots: [], errors: [] }
 
 ;(async () => {
   const source = await fs.readFile('frontend/src/data/demoScenario.ts', 'utf8')
   data.productSourceDiffAtRun = execFileSync('git', ['diff', '--name-only', 'HEAD', '--', 'backend', 'frontend'], { encoding: 'utf8' }).trim()
   assert.equal(data.productSourceDiffAtRun, '', 'Acceptance requires unchanged product sources')
-  data.buildAssets = {}
-  for (const name of await fs.readdir('frontend/dist/assets')) {
-    data.buildAssets[name] = createHash('sha256').update(await fs.readFile('frontend/dist/assets/'+name)).digest('hex')
+  if (local) {
+    data.buildAssets = {}
+    for (const name of await fs.readdir('frontend/dist/assets')) {
+      data.buildAssets[name] = createHash('sha256').update(await fs.readFile('frontend/dist/assets/'+name)).digest('hex')
+    }
   }
   const compiled = ts.transpileModule(source, { compilerOptions: { module: ts.ModuleKind.CommonJS } }).outputText
   const adapter = {}
@@ -30,6 +42,7 @@ const data = { testedFrontendCommit: revision, testedBackendCommit: revision,
   const browser = await chromium.launch({ headless: true })
   try {
     const page = await browser.newPage({ viewport: { width: 1440, height: 1100 } })
+    if (!local) page.setDefaultTimeout(95000) // Hosted client budget is 90 s; allow UI completion.
     page.on('pageerror', e => data.errors.push(e.message))
     const nav = name => page.getByRole('navigation').getByRole('button', { name, exact: true }).click()
     const click = name => page.getByRole('button', { name, exact: true }).click()
@@ -93,7 +106,7 @@ const data = { testedFrontendCommit: revision, testedBackendCommit: revision,
         for (let i = 0; i < await page.locator('.comparison .chart:visible').count(); i++)
           await assertChartRendered(page, page.locator('.comparison .chart:visible').nth(i))
         await page.evaluate(() => scrollTo(0, 0))
-        const path = `docs/screenshots/joint-ee-${name}-${width}.png`
+        const path = `${screenshotDir}/${screenshotPrefix}-${name}-${width}.png`
         await page.screenshot({ path, fullPage: true })
         data.screenshots.push(path)
       }
@@ -134,8 +147,16 @@ const data = { testedFrontendCommit: revision, testedBackendCommit: revision,
       return records
     }
     await page.goto(frontend)
+    if (!local) {
+      data.servedFrontendScripts = []
+      for (const url of await page.locator('script[src]').evaluateAll(nodes => nodes.map(n => n.src))) {
+        const asset = await page.request.get(url)
+        data.servedFrontendScripts.push({ url, sha256: createHash('sha256').update(await asset.body()).digest('hex') })
+      }
+    }
     await page.getByText('Backend connected', { exact: true }).waitFor()
     await page.locator('#scheduling-mode').selectOption('joint')
+    if (!pairOnly) {
     await run('demo-dashboard')
     await screenshots('demo-result')
     await nav('Scenario configuration')
@@ -144,18 +165,24 @@ const data = { testedFrontendCommit: revision, testedBackendCommit: revision,
     for (let h=0;h<24;h++) await page.locator(`#current-fixed-demand-${h}`).fill(String(2+h*0.25))
     await run('custom-dashboard')
     await screenshots('custom-result')
+    }
     await nav('Scenario configuration')
+    const reference = pairOnly ? JSON.parse(await fs.readFile('docs/verification/joint-application-captures.json', 'utf8')).requests.find(r => r.id === 'sources-dashboard') : null
+    if (reference) {
+      for (const key of Object.keys(adapter.defaultEditor)) await page.locator('#'+key).fill(reference.editorSnapshot[key])
+    }
     await page.locator('#current-fixed-demand-mode').selectOption('sources')
     await click('Add Lighting'); await click('Add Refrigeration')
     for (let i=0;i<2;i++) {
       const details = page.locator('.profile-hours').nth(i)
       await details.locator('summary').click()
-      for (let h=0;h<24;h++) await page.locator(`#current-fixed-demand-source-${i}-${h}`).fill(String(i===0?2:1))
+      for (let h=0;h<24;h++) await page.locator(`#current-fixed-demand-source-${i}-${h}`).fill(reference ? reference.editorSnapshot.demandProfile.sources[i].values[h] : String(i===0?2:1))
       await details.locator('summary').click()
     }
     await page.locator('#arrival').fill('15'); await page.locator('#deadline').fill('22')
     const named = await run('sources-dashboard')
-    await screenshots('sources-result')
+    if (reference) assert.deepEqual(named.scenario, reference.scenario, 'Reuse complete PR #25 inputs')
+    if (!pairOnly) await screenshots('sources-result')
     await nav('Scenario configuration')
     await page.locator('#limit').fill('24')
     await nav('Optimization')
@@ -171,6 +198,7 @@ const data = { testedFrontendCommit: revision, testedBackendCommit: revision,
     await page.getByText('Outdated comparison results are hidden', { exact: false }).waitFor()
     assert.equal(await page.locator('.what-if article').count(), 0)
     data.checks.push('What-if input edit hides prior results')
+    if (!pairOnly) {
     await page.locator('#alternative-limit').fill('15')
     await click('Apply alternative to current')
     await nav('Scenario configuration')
@@ -203,11 +231,19 @@ const data = { testedFrontendCommit: revision, testedBackendCommit: revision,
     await page.locator('#limit').fill('2')
     await run('infeasible-dashboard')
     await screenshots('dashboard-infeasible')
+    } else {
+      await page.locator('#scheduling-mode').selectOption('ev_only')
+      assert.equal(await page.locator('.what-if article').count(),0)
+      assert.equal(await page.getByText('Displayed result mode: EV + flexible equipment', {exact:true}).count(),0)
+      await page.locator('#scheduling-mode').selectOption('joint')
+      assert.equal(await page.locator('.what-if article').count(),0)
+      data.checks.push('Mode change clears dashboard and hides old What-if results; switching back does not revive them')
+    }
     assert.equal(named.editorSnapshot.demandProfile.sources.length,2)
     assert.deepEqual(data.errors,[])
     data.completedAt = new Date().toISOString()
     data.status='PASS'
-    console.log(`PASS: ${data.requests.length} real joint responses; profiles, charts, What-if, Apply/Restore and stale/mode checks`)
+    console.log(`PASS: ${data.requests.length} real joint responses; ${pairOnly ? 'named sources, charts, What-if and input/mode invalidation' : 'profiles, charts, What-if, Apply/Restore and stale/mode checks'}`)
   } catch(error) {
     data.status='FAIL'; data.failure=error.stack; throw error
   } finally {

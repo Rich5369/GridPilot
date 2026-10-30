@@ -4,6 +4,7 @@ Run from repo root: backend/.venv/bin/python scripts/verify_joint_application_ca
 """
 import json
 import hashlib
+import argparse
 from pathlib import Path
 import re
 import sys
@@ -25,9 +26,15 @@ def near(actual, expected, tolerance=PHYSICAL):
 
 
 def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--input', type=Path, default=ROOT / 'docs/verification/joint-application-captures.json')
+    parser.add_argument('--output', type=Path, default=ROOT / 'docs/verification/joint-application-numerical-checks.json')
+    args = parser.parse_args()
+    if args.input.resolve() != (ROOT / 'docs/verification/joint-application-captures.json').resolve() and args.output.resolve() == (ROOT / 'docs/verification/joint-application-numerical-checks.json').resolve():
+        parser.error('Specify a separate --output when verifying a different capture')
     if not __debug__:
         raise RuntimeError('Run verification with Python assertions enabled')
-    captures = json.loads((ROOT / 'docs/verification/joint-application-captures.json').read_text())
+    captures = json.loads(args.input.read_text())
     assert captures['status'] == 'PASS'
     frontend_source = (ROOT / 'frontend/src/data/demoScenario.ts').read_text()
     hvac = json.loads(re.search(r'export const hvac = (\[[\s\S]*?\])', frontend_source)[1].replace(',\n]', '\n]'))
@@ -149,13 +156,15 @@ def main():
             assert pair['displayedAlternativeMinusCurrent'] == []
         pairs.append({**pair, 'rawAlternativeMinusCurrent': differences})
     report = {'status': 'PASS',
-              'capturesSha256': hashlib.sha256((ROOT / 'docs/verification/joint-application-captures.json').read_bytes()).hexdigest(),
+              'capturesSha256': hashlib.sha256(args.input.read_bytes()).hexdigest(),
               'testedFrontendCommit': captures['testedFrontendCommit'],
               'testedBackendCommit': captures['testedBackendCommit'],
+              'localEngineeringReferenceCommit': captures.get('localEngineeringReferenceCommit'),
               'physicalToleranceKwKwh': PHYSICAL, 'costToleranceUsd': COST,
               'requests': results, 'pairs': pairs,
-              'scope': 'Captured HTTP aggregate checks; per-equipment direct solver checks; no production verification'}
-    (ROOT / 'docs/verification/joint-application-numerical-checks.json').write_text(json.dumps(report, indent=2)+'\n')
+              'httpTarget': captures.get('backend'),
+              'scope': 'Captured HTTP aggregate checks; independent local per-equipment solver checks; no deployed revision assertion'}
+    args.output.write_text(json.dumps(report, indent=2)+'\n')
     print(f'PASS: {len(results)} captured application requests; {len(pairs)} comparisons')
 
 
