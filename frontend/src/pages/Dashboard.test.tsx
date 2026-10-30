@@ -298,3 +298,50 @@ it('marks a late response stale if the draft was edited while the request was ru
   expect(container.querySelector('[aria-label="Submitted snapshot"]')!.textContent).toContain('25 kW')
   expect(container.querySelector('[aria-label="Editable draft"]')!.textContent).toContain('12 kW')
 })
+
+it.each(['ev_only', 'joint'])('exposes the %s scheduling assumptions through a native labeled disclosure', async mode => {
+  await act(async () => root.render(<Dashboard />))
+  const select = container.querySelector<HTMLSelectElement>('#scheduling-mode')!
+  await act(async () => {
+    select.value = mode
+    select.dispatchEvent(new Event('change', { bubbles: true }))
+  })
+  const disclosure = container.querySelector<HTMLDetailsElement>('.mode-explanation')!
+  expect(disclosure.open).toBe(false)
+  expect(disclosure.querySelector('summary')!.id).toBe(select.getAttribute('aria-describedby'))
+  expect(disclosure.textContent).toContain(mode === 'joint'
+    ? 'Flexible equipment is modeled as interruptible and continuously adjustable'
+    : 'Equipment and fixed building demand stay unchanged.')
+  if (mode === 'joint') expect(disclosure.textContent).toContain('Uninterrupted machine cycles are not modeled.')
+  await act(async () => disclosure.querySelector('summary')!.click())
+  expect(disclosure.open).toBe(true)
+})
+
+it.each(['custom', 'sources'])('keeps all submitted %s profile entries independent of later draft edits', async profile => {
+  await act(async () => root.render(<Dashboard />))
+  await click('Scenario configuration')
+  await selectProfile(profile)
+  if (profile === 'sources') await click('Add Lighting')
+  const id = profile === 'sources' ? 'current-fixed-demand-source-0-' : 'current-fixed-demand-'
+  await input(`${id}0`, '2.125')
+  await input(`${id}23`, '3.75')
+  fetchMock.mockResolvedValueOnce(new Response(JSON.stringify({
+    feasibility_status: 'feasible', baseline_electricity_cost_usd: 20,
+    optimized_electricity_cost_usd: 18, baseline_peak_demand_kw: 3,
+    optimized_peak_demand_kw: 2, baseline_demand_kw: Array(24).fill(3),
+    optimized_demand_kw: Array(24).fill(2), constraint_violations: [],
+  })))
+  await click('Run optimization')
+  await click('Scenario configuration')
+  await input(`${id}0`, '9.5')
+  await click('Energy overview')
+  const snapshot = container.querySelector('[aria-label="Submitted snapshot hourly fixed-demand inputs"]')!
+  const draft = container.querySelector('[aria-label="Editable draft hourly fixed-demand inputs"]')!
+  expect(snapshot.querySelectorAll('tbody tr')).toHaveLength(24)
+  expect(snapshot.querySelector('tbody tr td')!.textContent).toBe('2.125')
+  expect(snapshot.querySelector('tbody tr:last-child td')!.textContent).toBe('3.75')
+  expect(draft.querySelector('tbody tr td')!.textContent).toBe('9.5')
+  expect(snapshot.textContent).toContain('Submitted snapshot')
+  expect(snapshot.querySelectorAll('input')).toHaveLength(0)
+  expect(container.querySelector('[data-testid="result"]')!.getAttribute('data-stale')).toBe('true')
+})
