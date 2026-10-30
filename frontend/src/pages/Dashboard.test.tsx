@@ -8,8 +8,8 @@ vi.mock('../components/EnergyChart', () => ({
   EnergyChart: () => <div>24-hour chart</div>,
 }))
 vi.mock('../components/dashboard/Comparison', () => ({
-  Comparison: ({ result }: { result: unknown }) => (
-    <div>{result ? 'Backend result' : 'No optimization result yet'}</div>
+  Comparison: ({ result, stale, limit }: { result: unknown; stale: boolean; limit?: number }) => (
+    <div data-testid="result" data-stale={stale} data-limit={limit}>{result ? 'Backend result' : 'No optimization result yet'}</div>
   ),
 }))
 Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true })
@@ -48,9 +48,10 @@ async function input(id: string, value: string) {
     element.dispatchEvent(new Event('input', { bubbles: true }))
   })
 }
-it('edits, validates and resets the draft without changing demo results', async () => {
+it('shows current draft inputs without fictional result metrics and validates edits', async () => {
   await act(async () => root.render(<Dashboard />))
-  expect(container.textContent).toContain('128.8')
+  expect(container.textContent).not.toContain('128.8')
+  expect(container.textContent).toContain('No optimization result yet')
   await click('Scenario configuration')
   await input('limit', '12')
   expect(container.textContent).toContain('12 kW limit')
@@ -67,9 +68,10 @@ it('edits, validates and resets the draft without changing demo results', async 
   expect(container.querySelector<HTMLInputElement>('#limit')!.value).toBe('25')
   await input('limit', '15')
   await click('Energy overview')
-  expect(container.textContent).toContain('128.8')
+  expect(container.textContent).not.toContain('128.8')
+  expect(container.textContent).toContain('No optimization result yet')
   expect(container.textContent).toContain(
-    'Charts and costs retain the original fixture',
+    '15 kW',
   )
 })
 it('displays HTTP 501 clearly and never claims solver success', async () => {
@@ -170,10 +172,10 @@ it.each([false, true])('restores the AI handoff snapshot and isolates old respon
   expect(container.querySelector<HTMLSelectElement>('#scheduling-mode')!.value).toBe('ev_only')
 })
 
-it('guides configuration to results and scopes fictional data warnings to overview', async () => {
+it('guides configuration to results and labels demonstration inputs on overview', async () => {
   await act(async () => root.render(<Dashboard />))
   expect(container.querySelector('[aria-label="Energy planning workflow"]')).toBeTruthy()
-  expect(container.querySelector('.demo-banner')).toBeTruthy()
+  expect(container.textContent).toContain('Fictional demonstration inputs; not meter data.')
   await click('1. Configure scenario')
   expect(container.querySelector('#limit')).toBeTruthy()
   expect(container.querySelector('.demo-banner')).toBeNull()
@@ -256,4 +258,43 @@ it('keeps hourly profile snapshots independent through What-if edit, apply and r
   await click('Restore starting scenario')
   await click('Scenario configuration')
   expect(container.querySelector<HTMLInputElement>('#current-fixed-demand-10')!.value).toBe('10')
+})
+
+it('keeps submitted limits and provenance when the draft changes and returns results to overview', async () => {
+  await act(async () => root.render(<Dashboard />))
+  fetchMock.mockResolvedValueOnce(new Response(JSON.stringify({
+    feasibility_status: 'feasible', baseline_electricity_cost_usd: 20,
+    optimized_electricity_cost_usd: 18, baseline_peak_demand_kw: 3,
+    optimized_peak_demand_kw: 2, baseline_demand_kw: Array(24).fill(3),
+    optimized_demand_kw: Array(24).fill(2), constraint_violations: [],
+  })))
+  await click('Run optimization')
+  await click('Scenario configuration')
+  await input('limit', '10')
+  await click('Energy overview')
+  const result = container.querySelector('[data-testid="result"]')!
+  expect(result.getAttribute('data-stale')).toBe('true')
+  expect(result.getAttribute('data-limit')).toBe('25')
+  expect(container.querySelector('[aria-label="Editable draft"]')!.textContent).toContain('10 kW')
+  expect(container.querySelector('[aria-label="Submitted snapshot"]')!.textContent).toContain('25 kW')
+  expect(container.textContent).toContain('Backend result')
+  expect(container.textContent).not.toContain('128.8')
+})
+
+it('marks a late response stale if the draft was edited while the request was running', async () => {
+  await act(async () => root.render(<Dashboard />))
+  let resolve!: (value: Response) => void
+  fetchMock.mockImplementationOnce(() => new Promise(r => { resolve = r }))
+  await click('Run optimization')
+  await click('Scenario configuration')
+  await input('limit', '12')
+  await act(async () => resolve(new Response(JSON.stringify({
+    feasibility_status: 'feasible', baseline_electricity_cost_usd: 20,
+    optimized_electricity_cost_usd: 18, baseline_peak_demand_kw: 3,
+    optimized_peak_demand_kw: 2, baseline_demand_kw: Array(24).fill(3),
+    optimized_demand_kw: Array(24).fill(2), constraint_violations: [],
+  }))))
+  expect(container.querySelector('[data-testid="result"]')!.getAttribute('data-stale')).toBe('true')
+  expect(container.querySelector('[aria-label="Submitted snapshot"]')!.textContent).toContain('25 kW')
+  expect(container.querySelector('[aria-label="Editable draft"]')!.textContent).toContain('12 kW')
 })

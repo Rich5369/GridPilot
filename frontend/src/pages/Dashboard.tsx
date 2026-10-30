@@ -1,18 +1,14 @@
 import { lazy, Suspense, useRef, useState } from 'react'
 import {
-  Activity,
   Building2,
-  CircleDollarSign,
-  FlaskConical,
   GitCompareArrows,
   LayoutDashboard,
-  PlugZap,
   SlidersHorizontal,
   Sparkles,
   Zap,
 } from 'lucide-react'
 import { BackendStatus } from '../components/BackendStatus'
-import { MetricCard } from '../components/MetricCard'
+import { ScenarioSummary } from '../components/dashboard/ScenarioSummary'
 import { ScenarioPanel } from '../components/configuration/ScenarioPanel'
 import {
   CostBreakdown,
@@ -21,8 +17,6 @@ import {
 import { EnergyAssistant } from '../components/ai/EnergyAssistant'
 import {
   defaultEditor,
-  demoResult,
-  money,
   profileSource,
   fixedDemand,
   toScenario,
@@ -39,11 +33,6 @@ import type { ScenarioEditor } from '../types/dashboard'
 import type { Scenario, OptimizationResult } from '../types/api'
 const DemandChart = lazy(() =>
   import('../components/DemandChart').then(module => ({ default: module.DemandChart })),
-)
-const EnergyChart = lazy(() =>
-  import('../components/EnergyChart').then((module) => ({
-    default: module.EnergyChart,
-  })),
 )
 const Comparison = lazy(() =>
   import('../components/dashboard/Comparison').then((module) => ({
@@ -82,7 +71,8 @@ export function Dashboard() {
   const inFlight = useRef(false)
   const [message, setMessage] = useState('')
   const invalid = Object.keys(validateEditor(editor)).length > 0
-  const draftChanged = JSON.stringify(editor) !== JSON.stringify(defaultEditor)
+  const stale = Boolean(result) && submitted !== JSON.stringify(editor)
+  const submittedEditor: ScenarioEditor | null = result && submitted ? JSON.parse(submitted) : null
   async function runOptimization() {
     if (invalid || inFlight.current) return
     inFlight.current = true
@@ -124,8 +114,8 @@ export function Dashboard() {
         <div className="workspace">
           <Building2 size={20} />
           <div>
-            <strong>Northstar Office</strong>
-            <span>Fictional commercial building</span>
+            <strong>Scenario workspace</strong>
+            <span>Single-day energy planning</span>
           </div>
         </div>
         <p className="nav-label">WORKSPACE</p>
@@ -177,7 +167,7 @@ export function Dashboard() {
               <p className="eyebrow">YOUR ENERGY, IN FOCUS</p>
               <h1>{views.find((v) => v.id === view)?.label}</h1>
               <p className="muted">
-                Northstar Office · Single-day planning workspace
+                24 hourly intervals · Building-local time · USD
               </p>
             </div>
             <button
@@ -192,15 +182,12 @@ export function Dashboard() {
             </button>
           </div>
           <section className="workflow" aria-label="Energy planning workflow">
-            <p className="eyebrow">PLAN YOUR DAY</p>
-            <h2>Shift energy use. Understand the tradeoffs.</h2>
-            <p>Configure one day of demand, run the optimizer, then compare energy costs and peak power.</p>
-            <ol>
-              <li><button className="secondary" onClick={() => setView('configuration')} aria-current={view === 'configuration' ? 'step' : undefined}>1. Configure scenario</button></li>
-              <li><button className="secondary" onClick={() => setView('comparison')} aria-current={view === 'comparison' ? 'step' : undefined}>2. Review results</button></li>
-              <li><button className="secondary" onClick={() => { setWhatIfVisited(true); setView('whatif') }}>3. Compare alternatives</button></li>
-            </ol>
-            <p className="workflow-status" role="status">{busy ? 'Calculating your submitted scenario…' : !result ? 'Ready to configure · No backend result yet' : submitted !== JSON.stringify(editor) ? 'Inputs changed · Run optimization to update your results' : `Result available · ${modeLabel(resultMode)} · ${result.feasibility_status}`}</p>
+            <div className={`workflow-status ${stale ? 'is-stale' : ''}`} role="status">{busy ? 'Calculating your submitted scenario…' : !result ? 'Ready to configure · No backend result yet' : stale ? 'Inputs changed · Run optimization to update your results' : `Result available · ${modeLabel(resultMode)} · ${result.feasibility_status}`}</div>
+            <div className="workflow-actions">
+              <button className="secondary" onClick={() => setView('configuration')}>1. Configure scenario</button>
+              <button className="secondary" onClick={() => setView('comparison')}>2. Review results</button>
+              <button className="secondary" onClick={() => { setWhatIfVisited(true); setView('whatif') }}>3. Compare alternatives</button>
+            </div>
           </section>
           <div className="mode-control field">
             <label htmlFor="scheduling-mode">Scheduling mode</label>
@@ -215,11 +202,6 @@ export function Dashboard() {
             </select>
             <p>{mode === 'ev_only' ? 'Moves EV charging within arrival and completion times. Equipment and fixed building demand stay unchanged.' : 'Moves EV charging and eligible equipment within their allowed windows. Equipment can pause and vary power; uninterrupted machine cycles are not modeled. Fixed building demand stays unchanged.'}</p>
           </div>
-          <p className="profile-provenance">Draft inputs: {profileSource(editor)}. Tariffs and equipment use your scenario settings.</p>
-          {result && <>
-            <p>Displayed result mode: {modeLabel(resultMode)}</p>
-            <p className="profile-provenance">Optimizer-calculated result · Submitted inputs: {profileSource(JSON.parse(submitted))}</p>
-          </>}
           <p id="optimization-help" className="action-help">
             {busy
               ? `Optimization is running. This request can take up to ${OPTIMIZATION_TIMEOUT_MS / 1000} seconds. Please wait.`
@@ -228,94 +210,36 @@ export function Dashboard() {
                 : 'Runs the current scenario on the backend. Results estimate one day of energy charges, excluding fixed and demand charges.'}
           </p>
           {message && (
-            <div className="request-message" role="status">
+            <div className={message === 'Backend result received for the submitted scenario.' ? 'sr-only' : 'request-message'} role="status">
               {message}
             </div>
           )}
-          {view === 'overview' && <div className="demo-banner">
-            <FlaskConical size={20} />
-            <p>
-              <strong>Demo Data.</strong> Overview charts and metrics use a
-              deterministic fictional office profile, not a real simulation or
-              solver result. Backend results, when available, appear separately
-              under Optimization.
-            </p>
-            <span className="tag">DEMO DATA</span>
-          </div>}
-          {view === 'overview' && draftChanged && (
-            <div className="draft-banner">
-              Draft inputs differ from the displayed demo. Charts and costs
-              retain the original fixture; editing inputs does not run a
-              simulation.
-            </div>
-          )}
-          {view === 'overview' && (
-            <>
-              <section className="metrics" aria-label="Calculated demo metrics">
-                <MetricCard
-                  title="Daily electricity consumption"
-                  value={demoResult.energyKwh.toFixed(1)}
-                  unit="kWh"
-                  description="Calculated from 24 demo intervals"
-                  icon={PlugZap}
-                />
-                <MetricCard
-                  title="Daily energy charges"
-                  value={money(demoResult.energyCostUsd)}
-                  unit="USD"
-                  description="Demo baseline · energy-only operating cost"
-                  icon={CircleDollarSign}
-                />
-                <MetricCard
-                  title="Maximum modeled demand"
-                  value={demoResult.peakKw.toFixed(1)}
-                  unit="kW"
-                  description={`Displayed scenario limit: ${demoResult.scenario.building_max_demand_kw} kW`}
-                  icon={Activity}
-                />
-              </section>
-              <div className="scenario-strip">
-                <span>
-                  <Building2 size={16} />
-                  Demo building limit{' '}
-                  <strong>
-                    {demoResult.scenario.building_max_demand_kw} kW
-                  </strong>
-                </span>
-                <span>
-                  Draft building limit <strong>{editor.limit || '—'} kW</strong>
-                </span>
-                <button onClick={() => setView('configuration')}>
-                  Edit scenario →
-                </button>
-              </div>
-              <div className="content-grid">
-                <Suspense
-                  fallback={
-                    <div className="panel loading" role="status">
-                      Loading demand chart…
-                    </div>
-                  }
-                >
-                  <EnergyChart result={demoResult} />
-                </Suspense>
-                <CostBreakdown
-                  energy={demoResult.energyCostUsd}
-                  inputs={billingInputs}
-                  setInputs={setBillingInputs}
-                  applied={appliedBilling}
-                  setApplied={setAppliedBilling}
-                />
-              </div>
-              <Suspense fallback={<p role="status">Loading comparison…</p>}>
-                <Comparison
-                  result={result}
-                limit={resultScenario?.building_max_demand_kw}
-                  stale={submitted !== JSON.stringify(editor)}
-                />
+          {(view === 'overview' || view === 'comparison') && <>
+            <Suspense fallback={<p role="status">Loading comparison…</p>}>
+              <Comparison result={result} limit={resultScenario?.building_max_demand_kw} stale={stale} />
+            </Suspense>
+            <ScenarioSummary editor={editor} mode={mode} label="Editable draft" onEdit={() => setView('configuration')} />
+            {submittedEditor && <details className="panel result-details">
+              <summary>Submitted scenario &amp; result provenance</summary>
+              <p>Displayed result mode: {modeLabel(resultMode)}</p>
+              <p className="profile-provenance">Optimizer-calculated result · Submitted inputs: {profileSource(submittedEditor)}</p>
+              <ScenarioSummary editor={submittedEditor} mode={resultMode} label="Submitted snapshot" />
+              <p>Energy charges exclude fixed and demand charges. Solver results describe modeled constraints, not verified building operation.</p>
+            </details>}
+            {!result && !invalid && <section className="panel draft-preview">
+              <p className="eyebrow">DRAFT INPUTS · NOT AN OPTIMIZATION RESULT</p>
+              <h2>Your building demand</h2>
+              <p>Fixed demand only. EV charging and flexible equipment are included after optimization.</p>
+              <Suspense fallback={<p role="status">Loading fixed demand chart…</p>}>
+                <DemandChart total={{ key: 'fixed-total', label: 'Fixed building demand', values: fixedDemand(editor) }} limit={Number(editor.limit)} />
               </Suspense>
-            </>
-          )}
+            </section>}
+            {result && <details className="panel result-details">
+              <summary>Explore baseline billing assumptions</summary>
+              <p>Baseline from the submitted result{stale ? ' (previous scenario)' : ''}. Additional charges below are manually entered estimates.</p>
+              <CostBreakdown energy={result.baseline_electricity_cost_usd} inputs={billingInputs} setInputs={setBillingInputs} applied={appliedBilling} setApplied={setAppliedBilling} />
+            </details>}
+          </>}
           {view === 'configuration' && (
             <>
               <ScenarioPanel editor={editor} onChange={setEditor} />
@@ -337,15 +261,6 @@ export function Dashboard() {
                 </Suspense>
               )}
             </>
-          )}
-          {view === 'comparison' && (
-            <Suspense fallback={<p role="status">Loading comparison…</p>}>
-              <Comparison
-                result={result}
-                limit={resultScenario?.building_max_demand_kw}
-                stale={submitted !== JSON.stringify(editor)}
-              />
-            </Suspense>
           )}
           {whatIfVisited && <div hidden={view !== 'whatif'}><Suspense fallback={<p role="status">Loading what-if comparison…</p>}><WhatIf key={whatIfSession} modeRevision={modeRevision} mode={mode} editor={editor} onChange={setEditor} alternative={alternative} setAlternative={setAlternative} busy={busy} acquire={() => { if (inFlight.current) return false; inFlight.current = true; setBusy(true); return true }} release={() => { inFlight.current = false; setBusy(false) }} /></Suspense></div>}
           {view === 'assistant' && mode === 'joint' && <p role="status">AI actions are disabled for joint scheduling because AI explanations currently recompute EV-only results. Select EV-only to use the assistant.</p>}

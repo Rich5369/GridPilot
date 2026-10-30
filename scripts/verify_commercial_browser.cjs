@@ -1,4 +1,4 @@
-// Run unchanged backend on :8006 (CORS_ORIGINS=http://127.0.0.1:5176) and frontend on :5176.
+// Run the local backend on :8000 and frontend on :5173. External Playwright required.
 const { chromium } = require('playwright')
 const assert = require('node:assert/strict')
 const fs = require('node:fs/promises')
@@ -14,7 +14,7 @@ const near = (a, b) => assert(Math.abs(a - b) < 1e-6, `${a} != ${b}`)
       errors = []
     page.on('pageerror', (e) => errors.push(e.message))
     await page.goto(
-      process.env.GRIDPILOT_FRONTEND_URL || 'http://127.0.0.1:5176',
+      process.env.GRIDPILOT_FRONTEND_URL || 'http://127.0.0.1:5173',
     )
     await page.getByText('Backend connected', { exact: true }).waitFor()
     const nav = (name) =>
@@ -32,7 +32,7 @@ const near = (a, b) => assert(Math.abs(a - b) < 1e-6, `${a} != ${b}`)
       )
     await assertChartRendered(page)
     await page.screenshot({
-      path: 'docs/screenshots/commercial-after-desktop.png',
+      path: `${process.env.GRIDPILOT_QA_OUTPUT || 'artifacts/scenario-workspace/sources'}/commercial-after-desktop.png`,
       fullPage: true,
     })
     const chart = page.locator('.recharts-surface[role="application"]').first()
@@ -48,28 +48,12 @@ const near = (a, b) => assert(Math.abs(a - b) < 1e-6, `${a} != ${b}`)
       await assertChartRendered(page)
       await noOverflow()
       await page.screenshot({
-        path: `docs/screenshots/commercial-total-${width}.png`,
+        path: `${process.env.GRIDPILOT_QA_OUTPUT || 'artifacts/scenario-workspace/sources'}/commercial-total-${width}.png`,
         fullPage: true,
       })
     }
     await page.setViewportSize({ width: 1440, height: 1100 })
     await page.waitForTimeout(200)
-    const toggle = page.getByRole('button', {
-      name: 'Breakdown by source',
-      exact: true,
-    })
-    await toggle.focus()
-    await page.keyboard.press('Enter')
-    assert.equal(await toggle.getAttribute('aria-pressed'), 'true')
-    const box = page.getByRole('checkbox').first()
-    await box.focus()
-    await page.keyboard.press('Space')
-    assert(!(await box.isChecked()))
-    await assertChartRendered(page)
-    await page.screenshot({
-      path: 'docs/screenshots/commercial-after-breakdown.png',
-      fullPage: true,
-    })
     await nav('Scenario configuration')
     await page.locator('#current-fixed-demand-mode').selectOption('sources')
     assert(
@@ -94,7 +78,13 @@ const near = (a, b) => assert(Math.abs(a - b) < 1e-6, `${a} != ${b}`)
     await page
       .getByText('Fixed building demand preview', { exact: true })
       .waitFor()
-    await click('Breakdown by source')
+    const toggle = page.getByRole('button', { name: 'Breakdown by source', exact: true })
+    await toggle.focus(); await page.keyboard.press('Enter')
+    assert.equal(await toggle.getAttribute('aria-pressed'), 'true')
+    const box = page.getByRole('checkbox').first()
+    await box.focus(); await page.keyboard.press('Space')
+    assert(!(await box.isChecked()))
+    await page.keyboard.press('Space')
     await page.getByText('Lighting · fixed', { exact: true }).first().waitFor()
     await page.getByText('View all 24 hourly values', { exact: true }).click()
     assert.equal(await page.locator('.hourly-table tbody tr').count(), 24)
@@ -103,7 +93,7 @@ const near = (a, b) => assert(Math.abs(a - b) < 1e-6, `${a} != ${b}`)
       await assertChartRendered(page)
       await noOverflow()
       await page.screenshot({
-        path: `docs/screenshots/commercial-sources-${width}.png`,
+        path: `${process.env.GRIDPILOT_QA_OUTPUT || 'artifacts/scenario-workspace/sources'}/commercial-sources-${width}.png`,
         fullPage: true,
       })
     }
@@ -155,7 +145,7 @@ const near = (a, b) => assert(Math.abs(a - b) < 1e-6, `${a} != ${b}`)
       .waitFor()
     await assertChartRendered(page)
     await page.screenshot({
-      path: 'docs/screenshots/commercial-after-result.png',
+      path: `${process.env.GRIDPILOT_QA_OUTPUT || 'artifacts/scenario-workspace/sources'}/commercial-after-result.png`,
       fullPage: true,
     })
     await nav('Scenario configuration')
