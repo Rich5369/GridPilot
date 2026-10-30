@@ -1,0 +1,257 @@
+.operating-timeline {
+  min-width: 0;
+  padding: 24px;
+}
+.plan-proof {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  border: 1px solid #304254;
+  border-radius: 12px;
+  margin: 22px 0;
+  background: #101e2c;
+}
+.plan-proof > div {
+  display: grid;
+  gap: 8px;
+  padding: 18px;
+}
+.plan-proof small {
+  color: #a8b9cb;
+  font-size: 10px;
+  letter-spacing: 0.09em;
+}
+.plan-proof strong {
+  color: #e2eee9;
+  font-size: 14px;
+}
+.plan-proof span {
+  color: #b0c3d3;
+  font-size: 12px;
+}
+.plan-toolbar,
+.plan-switch,
+.plan-legend {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.plan-toolbar {
+  justify-content: space-between;
+  margin: 20px 0;
+}
+.plan-switch {
+  gap: 3px;
+  padding: 4px;
+  border: 1px solid #35465a;
+  border-radius: 9px;
+  background: #0d1825;
+}
+.plan-switch button {
+  background: transparent;
+  color: #b9c9d8;
+  border: 0;
+  padding: 8px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+.plan-switch button[aria-pressed="true"] {
+  background: #274a48;
+  color: #9df4d8;
+}
+.plan-switch button:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+.plan-legend {
+  color: #b8c7d6;
+  font-size: 11px;
+  gap: 18px;
+  margin: 20px 0;
+}
+.plan-legend span {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+.plan-legend i {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  background: #49d5b0;
+}
+.plan-legend .held {
+  background: #97a9d8;
+}
+.plan-legend .unavailable {
+  background: repeating-linear-gradient(135deg, #334154 0 2px, #15202d 2px 5px);
+}
+.plan-axis,
+.device-row {
+  display: grid;
+  grid-template-columns: 225px minmax(0, 1fr);
+  gap: 20px;
+}
+.plan-axis {
+  color: #a5b7c9;
+  font-size: 10px;
+  padding-bottom: 12px;
+}
+.plan-axis > div {
+  display: flex;
+  justify-content: space-between;
+}
+.device-row {
+  border-top: 1px solid #2c3b4d;
+  padding: 19px 0;
+  align-items: center;
+}
+.device-label {
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.device-label h3 {
+  margin: 0;
+  font-size: 15px;
+  color: #f0f5fc;
+}
+.device-label > span,
+.device-label small {
+  color: #aebfd0;
+  font-size: 11px;
+  line-height: 1.6;
+}
+.device-label strong {
+  color: #d8eee8;
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+.device-hours {
+  display: grid;
+  grid-template-columns: repeat(24, minmax(0, 1fr));
+  gap: 3px;
+  height: 66px;
+}
+.hour-cell {
+  position: relative;
+  padding: 0;
+  background: #1b303c;
+  border: 1px solid #304650;
+  border-radius: 3px;
+  overflow: hidden;
+  cursor: pointer;
+  min-width: 0;
+}
+.hour-cell.unavailable {
+  background: repeating-linear-gradient(135deg, #1d2a39 0 2px, #15202d 2px 6px);
+  border-color: #283749;
+}
+.hour-fill {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(0deg, #268d80, #63e4c0);
+}
+.held .hour-fill {
+  background: linear-gradient(0deg, #5d70a6, #b3c2f1);
+}
+.hour-cell:hover {
+  border-color: #e1fff6;
+}
+.operating-timeline button:focus-visible,
+.device-table summary:focus-visible {
+  outline: 2px solid #a3f7d9;
+  outline-offset: 3px;
+}
+.mobile-hour,
+.mobile-power {
+  display: none;
+}
+.device-table {
+  grid-column: 1/-1;
+  color: #b7c8d8;
+  font-size: 12px;
+  min-width: 0;
+}
+.device-table summary {
+  cursor: pointer;
+}
+.device-table table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 12px;
+  font-variant-numeric: tabular-nums;
+  table-layout: fixed;
+}
+.device-table td,
+.device-table th {
+  text-align: left;
+  border-bottom: 1px solid #304254;
+  padding: 8px 4px;
+  overflow-wrap: anywhere;
+}
+.device-table caption {
+  text-align: left;
+  padding: 8px 0;
+}
+.plan-inspector {
+  padding: 16px;
+  background: #101e2c;
+  border: 1px solid #34495b;
+  border-radius: 8px;
+  color: #c4d8e7;
+  font-size: 12px;
+  margin: 14px 0;
+  overflow-wrap: anywhere;
+}
+@media (max-width: 1100px) {
+  .plan-axis,
+  .device-row {
+    grid-template-columns: 180px minmax(0, 1fr);
+    gap: 12px;
+  }
+  .device-hours {
+    gap: 2px;
+  }
+}
+@media (max-width: 700px) {
+  .plan-proof {
+    grid-template-columns: 1fr;
+  }
+  .plan-proof > div {
+    padding: 12px 16px;
+  }
+  .plan-axis {
+    display: none;
+  }
+  .device-row {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .device-hours {
+    height: auto;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 6px;
+  }
+  .hour-cell {
+    height: 54px;
+  }
+  .hour-fill {
+    opacity: 0.35;
+  }
+  .mobile-hour,
+  .mobile-power {
+    display: block;
+    position: relative;
+    z-index: 1;
+    color: #f1f7fc;
+    font-size: 10px;
+    line-height: 1.8;
+  }
+  .device-table {
+    grid-column: 1;
+  }
+}

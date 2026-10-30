@@ -1,3 +1,4 @@
+import { validOperatingPlan, matchesSubmittedPlan } from './operatingPlan'
 import type { HealthResponse, OptimizationResult, Scenario } from '../types/api'
 
 const baseUrl = (
@@ -74,6 +75,7 @@ export function isOptimizationResult(
     !r.constraint_violations.every((v) => typeof v === 'string')
   )
     return false
+  if (!validOperatingPlan(r.operating_plan, r.feasibility_status)) return false
   if (r.feasibility_status === 'feasible')
     return (
       finite(r.optimized_electricity_cost_usd) &&
@@ -112,7 +114,7 @@ export async function optimizeScenario(
     throw new Error(
       'Optimization is not implemented yet. No calculations were performed.',
     )
-  if (!isOptimizationResult(body))
+  if (!isOptimizationResult(body) || !matchesSubmittedPlan(body, scenario, mode))
     throw new Error(
       'The backend returned an invalid optimization result. No result was accepted.',
     )
