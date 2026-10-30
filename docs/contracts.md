@@ -24,6 +24,14 @@ capacity or too much EV energy for its window) is **not** an input shape error:
 optimization reports it as infeasible with HTTP 200 and null optimized fields.
 Solver failures are separate HTTP 500/503 errors; see [Phase 3](phase-3-api.md).
 
+E2 adds optional `OptimizationResult.infeasibility_evidence`, a typed list of
+numerical necessary-condition violations or a non-localized solver proof. It
+preserves existing `constraint_violations`, aggregate metrics and E1 plans.
+See the [field contract, equations and actual JSON](structured-infeasibility-evidence.md)
+and [engineering verification/demo report](e2-engineering-readiness.md).
+The EE owner approved the shape for Richard's review; final integration review
+is pending. No frontend or Meta consumption of E2 is implied.
+
 ## Time, power and energy assumptions
 
 A scenario is one abstract 24-hour day in building-local time, with no calendar,

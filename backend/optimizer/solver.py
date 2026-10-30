@@ -7,7 +7,10 @@ from ortools.linear_solver import pywraplp
 
 from backend.models.contracts import BaselineResult, Scenario
 from backend.optimizer.constraints import (
-    equipment_window_violations, movable_equipment, schedule_violations,
+    movable_equipment, schedule_violations,
+)
+from backend.optimizer.infeasibility import (
+    InfeasibilityEvidence, analytical_evidence, select_evidence, solver_infeasible_evidence,
 )
 from backend.simulator.building import Tariff
 from backend.simulator.energy import sum_loads
@@ -31,6 +34,7 @@ class SolveOutcome:
     evaluated: BaselineResult | None = None
     reasons: list[str] = field(default_factory=list)
     warnings: list[str] = field(default_factory=list)
+    infeasibility_evidence: list[InfeasibilityEvidence] = field(default_factory=list)
 
 
 class OptimizationError(RuntimeError):
@@ -99,30 +103,9 @@ def _verify(scenario, schedules, fixed, *, optimize_flexible=False):
 
 
 def _infeasibility_diagnostics(scenario, fixed_demand, *, optimize_flexible=False):
-    reasons = equipment_window_violations(scenario)
-    fixed_label = ('immutable background/HVAC demand' if optimize_flexible
-                   else 'fixed demand including held flexible loads')
-    for h, power in enumerate(fixed_demand):
-        if power > scenario.building_max_demand_kw + PHYSICAL_TOLERANCE:
-            reasons.append(f'Hour {h}: {fixed_label} '
-                           f'({power:g} kW) exceeds site cap ({scenario.building_max_demand_kw:g} kW)')
-    # Necessary shared-capacity conditions over windows; solver handles more
-    # complex interactions. Count all movable items wholly within each window.
-    items = movable_equipment(scenario, optimize_flexible=optimize_flexible)
-    endpoints = sorted({0, 24} | {item[2] for item in items} | {item[3] for item in items})
-    for start in endpoints:
-        for end in endpoints:
-            if end <= start:
-                continue
-            required = sum(item[4] for item in items if item[2] >= start and item[3] <= end)
-            capacity = sum(max(0.0, scenario.building_max_demand_kw - fixed_demand[h])
-                           for h in range(start, end))
-            if required > capacity + PHYSICAL_TOLERANCE:
-                label = 'EVs and flexible equipment' if optimize_flexible else 'EVs'
-                capacity_label = 'shared capacity' if optimize_flexible else 'shared charging capacity'
-                reasons.append(f'Window [{start}, {end}): {label} require {required:g} kWh '
-                               f'but {capacity_label} is at most {capacity:g} kWh')
-    return reasons
+    return [item.message for item in analytical_evidence(
+        scenario, fixed_demand, optimize_flexible=optimize_flexible,
+        physical_tolerance=PHYSICAL_TOLERANCE)]
 
 
 def solve_ev_charging(scenario: Scenario, tariff: Tariff | None = None, *,
@@ -148,13 +131,16 @@ def solve_ev_charging(scenario: Scenario, tariff: Tariff | None = None, *,
     movable_keys = {item[0] for item in items}
     fixed = {key: values for key, values in baseline.items() if key not in movable_keys}
     fixed_demand = sum_loads(fixed.values())
-    diagnostics = _infeasibility_diagnostics(scenario, fixed_demand,
-                                            optimize_flexible=optimize_flexible)
+    evidence = analytical_evidence(scenario, fixed_demand,
+                                   optimize_flexible=optimize_flexible,
+                                   physical_tolerance=PHYSICAL_TOLERANCE)
+    diagnostics = [item.message for item in evidence]
     scope = ('immutable background/HVAC schedules' if optimize_flexible
              else 'fixed background/HVAC/flexible schedules')
     if diagnostics:
         outcome.status = 'infeasible'
         outcome.primary_status = 'analytic_infeasibility'
+        outcome.infeasibility_evidence = select_evidence(evidence)
         outcome.reasons = diagnostics + [f'Infeasible under the {scope}.']
         return outcome
     secondary_peak_value = None
@@ -191,6 +177,7 @@ def solve_ev_charging(scenario: Scenario, tariff: Tariff | None = None, *,
         outcome.primary_status = _status_name(status)
         if status == pywraplp.Solver.INFEASIBLE:
             outcome.status = 'infeasible'
+            outcome.infeasibility_evidence = [solver_infeasible_evidence(optimize_flexible=optimize_flexible)]
             loads = 'EV/flexible' if optimize_flexible else 'EV'
             outcome.reasons = [f'GLOP proved no {loads} schedule satisfies all windows, power limits, '
                                f'exact energies and shared site capacity under the {scope}.']

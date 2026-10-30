@@ -41,6 +41,7 @@ def optimize_scenario(scenario: Scenario, *, optimize_flexible: bool = False) ->
             optimized_peak_demand_kw=None if evaluated is None else evaluated.peak_demand_kw,
             optimized_demand_kw=None if evaluated is None else evaluated.demand_kw,
             constraint_violations=outcome.reasons, operating_plan=plan,
+            infeasibility_evidence=[item.to_dict() for item in outcome.infeasibility_evidence],
         )
     except (ValueError, KeyError, TypeError) as exc:
         raise OptimizationVerificationError(replace(
