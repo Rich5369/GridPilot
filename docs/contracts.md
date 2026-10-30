@@ -1,4 +1,4 @@
-# Preliminary energy contracts (v0.1)
+# Energy API contracts (v0.1)
 
 The source of truth is `backend/models/contracts.py`; corresponding frontend types
 are in `frontend/src/types/api.ts`. FastAPI exposes the JSON schemas at
@@ -37,11 +37,43 @@ Operating hours are metadata for future input generation; do not zero supplied
 loads outside them. EV and flexible equipment use their own explicitly supplied
 windows and are not implicitly restricted to operating hours.
 
-Provisional model: grid-side EV energy, 100% charging efficiency, no discharge,
+The dashboard can generate this fixed vector from the demo background+HVAC,
+custom combined hourly values, or summed named-source hourly values. Custom and
+named profiles **replace** the demo. Source names/editor metadata are not part
+of Scenario; each source is summed once before submission. Inputs must exclude
+EV and flexible equipment modeled separately. An aggregate response cannot
+establish optimized allocations among named fixed sources.
+
+Model assumptions: grid-side EV energy, 100% charging efficiency, no discharge,
 no solar/batteries/export, continuously adjustable and interruptible flexible
 loads. Fixed demand excludes controllable EV/flexible loads; total demand adds
 them once. HVAC thermal dynamics and minimum run times are out of scope.
-The current solver optimizes only EV charging; flexible loads retain their baseline schedule.
+The default mode optimizes EV charging and holds flexible loads at baseline.
+Explicit joint mode optimizes both EVs and eligible flexible equipment, preserving
+the fixed vector. Every movable item has nonnegative hourly power at or below
+its maximum, zero power outside its exclusive window, and exactly its requested
+energy. Total power includes all loads once and respects the site cap. Flexible
+equipment is interruptible and continuously adjustable: uninterrupted cycles,
+startup costs and minimum runtimes are not modeled. HVAC profiles remain fixed;
+there is no thermal-comfort model.
+
+## Mode selection
+
+```python
+def optimize_scenario(
+    scenario: Scenario, *, optimize_flexible: bool = False,
+) -> OptimizationResult:
+    ...
+```
+
+Omitted/False is EV-only; True enables the existing joint solver. HTTP selects
+the same mode through `POST /api/optimize?scheduling_mode=ev_only` or
+`?scheduling_mode=joint`; omission defaults to EV-only. An unknown mode returns
+HTTP 422. The request body remains exactly Scenario; mode is not a body field.
+Do not submit the detailed engineering BuildingConfig wrapper to this endpoint.
+Mode is retained with frontend submitted snapshots; it is not a new field in
+OptimizationResult. Both What-if requests use the selected mode, independently
+submitted current/alternative inputs and the same response schema.
 
 ## Independent module boundaries
 
@@ -55,7 +87,7 @@ loads. The richer `simulate_building` result adds HVAC, background schedules and
 conditional tariff components; it is an engineering-module result, not a
 FastAPI response. `POST /api/optimize` calls the existing optimizer adapter.
 
-`optimize_scenario(scenario: Scenario) -> OptimizationResult` in
+`optimize_scenario(scenario, *, optimize_flexible=False) -> OptimizationResult` in
 `backend/optimizer/interface.py` returns:
 
 | Field | Meaning |
@@ -77,6 +109,22 @@ responses use `OptimizationResult` with HTTP 200. Unresolved or unavailable solv
 responses use HTTP 503; internal solver and verification failures use HTTP 500.
 Errors use `{"detail":{"code":"...","message":"..."}}` without result fields.
 
+The Python adapter raises `OptimizationUnresolvedError`, `OptimizationSolverError`
+or `OptimizationVerificationError` for outcomes the shared feasible/infeasible
+schema cannot represent. The detailed engine retains richer solver statuses;
+HTTP `feasible` alone is not an optimality proof. Independent solver/evaluator
+checks validate item constraints and aggregate arithmetic before success. HTTP
+exposes only aggregate demand, so per-item verification requires the direct
+engineering schedules rather than an inferred decomposition.
+
+The primary shared objective is daily energy cost. After a proven optimum, a
+separate solve minimizes hourly peak while allowing $1e-7 primary-cost increase.
+Established independent comparison tolerances are 1e-6 kW/kWh and $2e-7.
+Keep full precision internally; equivalent optimal schedules need not have
+identical arrays. Baseline-versus-optimized benefits belong to each scenario.
+What-if's between-scenario difference is **alternative minus current**, only
+available when both results are feasible; failures do not manufacture savings.
+
 ## Demand charges
 
 All costs above are **daily energy-only USD**, excluding demand charges, taxes,
@@ -84,5 +132,17 @@ fixed fees, and tariffs not represented by the supplied hourly prices. Actual
 monthly demand charges need the utility tariff, billing-period peak history,
 measurement interval (often shorter than an hour), ratchets and applicable windows.
 A maximum of 24 hourly averages is not a measured billing peak. A one-day example
-cannot establish monthly bill savings. Future illustrative demand-charge estimates
-must state their assumptions separately; do not fold them into these fields.
+cannot establish monthly bill savings. The detailed BuildingConfig engine supports
+separate conditional incremental demand-charge estimates using an existing
+monthly peak. Unknown history with a nonzero rate leaves demand/full operating
+costs null; those detailed estimates must not be folded into shared fields.
+
+## Recorded acceptance and current guidance
+
+[Local joint application acceptance](joint-ee-application-acceptance.md) and
+[bounded hosted acceptance](hosted-joint-ee-acceptance.md) record real request
+bodies/modes/responses and independent numerical checks. Hosted served commits
+were not confirmed; do not equate a local reference revision with a deployed SHA.
+[README](../README.md) is the current setup/status entry point, and
+[the demo walkthrough](demo-walkthrough.md) uses the accepted named-source case.
+Older phase reports preserve their historical scope and findings.
