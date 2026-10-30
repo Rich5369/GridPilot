@@ -345,3 +345,25 @@ it.each(['custom', 'sources'])('keeps all submitted %s profile entries independe
   expect(snapshot.querySelectorAll('input')).toHaveLength(0)
   expect(container.querySelector('[data-testid="result"]')!.getAttribute('data-stale')).toBe('true')
 })
+
+it('keeps insights on submitted prices and cap across stale edits and clears on mode change', async () => {
+  await act(async () => root.render(<Dashboard />))
+  const scenario = toScenario(defaultEditor), demand = Array(24).fill(2)
+  const cost = demand.reduce((sum, value, hour) => sum + value * scenario.electricity_prices_usd_per_kwh[hour], 0)
+  fetchMock.mockResolvedValueOnce(new Response(JSON.stringify({ feasibility_status: 'feasible', baseline_electricity_cost_usd: cost, optimized_electricity_cost_usd: cost, baseline_peak_demand_kw: 2, optimized_peak_demand_kw: 2, baseline_demand_kw: demand, optimized_demand_kw: demand, constraint_violations: [] })))
+  await click('Run optimization')
+  const panel = () => container.querySelector('[aria-label="Deterministic energy insights"]')!
+  expect(panel().textContent).toContain('Optimized expenditure')
+  expect(panel().textContent).toContain('8.0% of the submitted 25 kW cap')
+  const before = panel().querySelector('.insight-periods')!.textContent
+  await click('Scenario configuration'); await input('peak', '0.99'); await input('limit', '10'); await click('Energy overview')
+  expect(panel().textContent).toContain('previous submitted inputs')
+  expect(panel().textContent).toContain('8.0% of the submitted 25 kW cap')
+  expect(panel().querySelector('.insight-periods')!.textContent).toBe(before)
+  expect(fetchMock.mock.calls.filter(([url]) => String(url).includes('/api/optimize?'))).toHaveLength(1)
+  await act(async () => {
+    const select = container.querySelector<HTMLSelectElement>('#scheduling-mode')!
+    select.value = 'joint'; select.dispatchEvent(new Event('change', { bubbles: true }))
+  })
+  expect(panel()).toBeNull()
+})

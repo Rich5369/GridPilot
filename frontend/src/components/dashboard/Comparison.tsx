@@ -48,14 +48,14 @@ export function Comparison({
             <div>
               <p className="eyebrow">{stale ? 'PREVIOUS SUBMITTED RESULT' : 'YOUR OPTIMIZATION OUTCOME'}</p>
               <h3>{result.feasibility_status !== 'feasible'
-                ? 'This scenario needs more flexibility.'
+                ? 'No feasible schedule was found.'
                 : costDifference === null ? 'Schedule calculated.'
                 : Math.abs(costDifference) < 0.005 ? 'A feasible schedule at the same energy cost.'
                 : costDifference > 0 ? `${money(costDifference)} lower energy charges for this day.`
                 : `${money(-costDifference)} higher energy charges to meet the constraints.`}</h3>
               <p>{result.feasibility_status === 'feasible'
                 ? 'Scheduling shifts when electricity is used. Lower costs do not imply lower energy consumption.'
-                : 'No schedule meets all modeled constraints. Adjust the site limit, energy needs or availability windows.'}</p>
+                : 'No schedule meets all modeled constraints. Review the backend-reported evidence below; this result does not establish a recovery strategy.'}</p>
             </div>
             <span className={result.feasibility_status === 'feasible' ? 'success' : 'warning'}>
               {result.feasibility_status === 'feasible' ? 'Feasible — reported by backend' : 'Infeasible — reported by backend'}

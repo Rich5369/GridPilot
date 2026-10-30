@@ -4,6 +4,7 @@ import type { ScenarioEditor, ScenarioField } from '../../types/dashboard'
 import type { OptimizationResult } from '../../types/api'
 import { money, profileSource, toScenario, validateEditor, feasibilityWarnings } from '../../data/demoScenario'
 import { optimizeScenario, optimizationError, OPTIMIZATION_TIMEOUT_MS, modeLabel, type SchedulingMode } from '../../services/api'
+import { EnergyInsights } from './EnergyInsights'
 import { Comparison } from './Comparison'
 
 const fields: [ScenarioField, string, string][] = [
@@ -99,6 +100,7 @@ export function WhatIf({ mode = 'ev_only', modeRevision = 0, editor, onChange, a
               <dt>Optimized total electricity consumption</dt><dd>{result.optimized_demand_kw === null ? 'Unavailable' : `${result.optimized_demand_kw.reduce((a, b) => a + b, 0).toFixed(2)} kWh`}</dd>
               <dt>Constraint violations reported by solver</dt><dd>{result.constraint_violations.length ? result.constraint_violations.join('; ') : 'None'}</dd>
             </dl>
+            <EnergyInsights scenario={toScenario(i === 0 ? editor : alternative)} result={result} stale={false} mode={mode} />
             <Comparison limit={Number((i === 0 ? editor : alternative).limit)} result={result} stale={false} />
           </>}
         </article>)}</div>

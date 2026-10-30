@@ -8,6 +8,7 @@ import {
   Zap,
 } from 'lucide-react'
 import { BackendStatus } from '../components/BackendStatus'
+import { EnergyInsights } from '../components/dashboard/EnergyInsights'
 import { ScenarioSummary } from '../components/dashboard/ScenarioSummary'
 import { ScenarioPanel } from '../components/configuration/ScenarioPanel'
 import {
@@ -223,6 +224,7 @@ export function Dashboard() {
             <Suspense fallback={<p role="status">Loading comparison…</p>}>
               <Comparison result={result} limit={resultScenario?.building_max_demand_kw} stale={stale} />
             </Suspense>
+            <EnergyInsights scenario={resultScenario} result={result} stale={stale} mode={resultMode} />
             <ScenarioSummary editor={editor} mode={mode} label="Editable draft" onEdit={() => setView('configuration')} />
             {submittedEditor && <details className="panel result-details">
               <summary>Submitted scenario &amp; result provenance</summary>
