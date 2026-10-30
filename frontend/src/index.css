@@ -859,13 +859,79 @@ button { transition: background-color 140ms ease, border-color 140ms ease; }
 .energy-insights h2 { font-size: 22px; font-weight: 650; }
 @media (max-width: 600px) { .energy-insights { padding: 20px 16px; } }
 
-.advisor details { padding: 1rem; border: 1px solid var(--border, #dce4ea); border-radius: 12px; margin-bottom: 1rem; }
-.advisor details label { display: block; margin-top: .65rem; }
-.advisor details input { display: block; width: 100%; padding: .6rem; box-sizing: border-box; }
-.advisor-history { display: grid; gap: .9rem; max-height: 32rem; overflow-y: auto; margin: 1rem 0; }
-.advisor-message { padding: 1rem 1.2rem; border-radius: 14px; background: #f0f6f7; color: #173d43; margin-right: 4%; }
-.advisor-message.user { background: #183e49; color: white; margin-left: 8%; margin-right: 0; }
-.advisor-message p { overflow-wrap: anywhere; line-height: 1.65; }
-.advisor-proposal { border: 1px solid #36897b; border-radius: 12px; padding: 1rem; margin-top: 1rem; }
-.advisor button:focus-visible, .advisor input:focus-visible, .advisor textarea:focus-visible, .advisor summary:focus-visible { outline: 3px solid #2784bd; outline-offset: 3px; }
-@media (max-width: 600px) { .advisor .section-heading { flex-wrap: wrap; } .advisor-message { margin-right: 0; } .advisor .ai-actions { flex-wrap: wrap; } }
+/* Energy Advisor presentation. */
+.advisor { max-width: 1000px; padding: 28px; }
+.advisor-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 24px; }
+.advisor-eyebrow { color: #426353; font-size: 10px; font-weight: 700; letter-spacing: .12em; }
+.advisor-header h2 { margin: 8px 0; font-size: 25px; letter-spacing: -.035em; }
+.advisor-header p { color: #52655c; font-size: 14px; line-height: 1.6; margin: 0; }
+.advisor-header .tag { max-width: 220px; font-size: 11px; line-height: 1.5; }
+.advisor-boundary { font-size: 12px; line-height: 1.7; color: #52655c; padding-bottom: 20px; border-bottom: 1px solid #dce5df; }
+.advisor-context { background: #f7f9f7; border: 1px solid #dce5df; border-radius: 12px; padding: 18px 20px; margin: 22px 0; }
+.advisor-context h3 { font-size: 14px; margin: 0; }
+.advisor-context .section-heading { gap: 10px; flex-wrap: wrap; }
+.advisor-caption { font-size: 12px; color: #52655c; line-height: 1.6; }
+.advisor-context-empty { font-size: 13px; color: #52655c; line-height: 1.7; margin: 12px 0; }
+.advisor .advisor-context-summary { display: grid; grid-template-columns: 1fr 1fr; gap: 14px 24px; margin: 18px 0; }
+.advisor .advisor-context-summary > div { display: block; min-width: 0; margin: 0; }
+.advisor-context-summary dt { text-transform: capitalize; font-size: 11px; color: #52655c; }
+.advisor-context-summary dd { margin: 4px 0 0; font-size: 14px; overflow-wrap: anywhere; }
+.advisor-provenance { display: inline-block; font-size: 10px; background: #e7eee9; color: #3e5e4c; padding: 1px 6px; border-radius: 4px; margin-left: 6px; }
+.advisor details { border-top: 1px solid #dce5df; padding-top: 12px; }
+.advisor summary { cursor: pointer; color: #245741; font-size: 13px; font-weight: 600; padding: 4px 0; }
+.advisor summary span { font-weight: 400; margin-left: 12px; }
+.advisor-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 16px; }
+.advisor-fields label { text-transform: capitalize; font-size: 12px; color: #304d3e; }
+.advisor-fields input { width: 100%; box-sizing: border-box; display: block; padding: 10px 12px; margin-top: 6px; border: 1px solid #bdcdc2; border-radius: 6px; background: white; font: inherit; }
+.advisor input::placeholder, .advisor textarea::placeholder { color: #65766c; opacity: 1; }
+.advisor-welcome { padding: 20px 0 8px; }
+.advisor-welcome h3 { margin: 0 0 8px; font-size: 20px; letter-spacing: -.02em; }
+.advisor-welcome p { font-size: 13px; color: #52655c; }
+.advisor-history { display: grid; gap: 18px; margin: 20px 0; }
+.advisor-history:empty { display: none; }
+.advisor-message { min-width: 0; padding: 20px; border: 1px solid #dce5df; border-radius: 10px; background: white; }
+.advisor-message.user { margin-left: 12%; background: #f0f4f1; border-color: #e1e7e2; }
+.advisor-message.clarification_required { border-left: 3px solid #a16b14; background: #fffcf4; }
+.advisor-message.scenario_proposal { border-left: 3px solid #39775c; }
+.advisor-message-heading { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 8px; }
+.advisor-message-heading strong { font-size: 13px; color: #234b37; }
+.advisor-message-heading span { font-size: 11px; color: #52655c; }
+.advisor-message p { white-space: pre-wrap; overflow-wrap: anywhere; font-size: 14px; line-height: 1.8; margin: 12px 0 0; color: #2f4539; }
+.advisor-evidence { margin-top: 18px; border-top: 1px solid #e0e7e2; padding-top: 14px; }
+.advisor-evidence h4 { font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: #52655c; margin: 0 0 10px; }
+.advisor-evidence p { font-size: 13px; }
+.advisor-verified { padding: 14px; margin-top: 12px; background: #edf6ef; border: 1px solid #c6ddcc; border-radius: 8px; }
+.advisor-evidence-label { font-size: 11px; font-weight: 700; color: #245741; }
+.advisor-starters { margin: 22px 0; }
+.advisor .ai-examples { gap: 8px; margin: 10px 0; }
+.advisor .ai-examples button { background: white; text-align: left; font-size: 12px; padding: 9px 12px; color: #355342; }
+.advisor .ai-examples button:hover { background: #edf3ef; border-color: #9eb9a8; }
+.advisor-composer { border-top: 1px solid #dce5df; padding-top: 22px; }
+.advisor-composer > label { font-size: 14px; font-weight: 600; color: #234b37; }
+.advisor-composer textarea { line-height: 1.7; resize: vertical; min-height: 110px; border-color: #aabfb1; }
+.advisor .ai-actions { align-items: center; gap: 10px; margin-bottom: 0; }
+.advisor-notice { padding: 14px 16px; background: #f5f7f4; border-left: 3px solid #768c7c; font-size: 13px; line-height: 1.7; }
+.advisor-proposal { border: 1px solid #8fb59e; border-top: 3px solid #39775c; border-radius: 10px; padding: 22px; margin-top: 24px; background: #fafcfb; }
+.advisor-proposal h3 { margin: 10px 0; font-size: 19px; }
+.advisor-proposal p { font-size: 13px; line-height: 1.8; }
+.advisor-proposal dl { border-block: 1px solid #dce5df; padding: 12px 0; }
+.advisor-proposal dl > div { justify-content: space-between; }
+.advisor-proposal dd { margin: 0; font-weight: 650; color: #245741; }
+.advisor-proposal button { margin: 4px 6px 4px 0; min-height: 44px; }
+.advisor button:focus-visible, .advisor input:focus-visible, .advisor textarea:focus-visible, .advisor summary:focus-visible { outline: 3px solid #26755b; outline-offset: 3px; }
+@media (max-width: 700px) {
+ .advisor { padding: 20px 16px; }
+ .advisor-header { flex-direction: column; gap: 12px; }
+ .advisor-header h2 { font-size: 22px; }
+ .advisor-header .tag { max-width: none; }
+ .advisor-context { padding: 16px; }
+ .advisor-fields, .advisor .advisor-context-summary { grid-template-columns: 1fr; }
+ .advisor-message { padding: 16px; }
+ .advisor-message.user { margin-left: 5%; }
+ .advisor .ai-examples button { min-height: 44px; }
+ .advisor-proposal { padding: 18px 16px; }
+ .advisor summary span { display: block; margin: 6px 0 0 16px; }
+}
+.advisor .advisor-proposal .run-button { background: #214e3e; color: white; border-color: #214e3e; }
+.advisor-starters.has-history { margin-block: 18px; }
+.advisor-starters.has-history .ai-examples { gap: 8px; }

@@ -86,7 +86,7 @@ it('displays HTTP 501 clearly and never claims solver success', async () => {
   expect(container.textContent).not.toContain('Backend result received')
   expect(container.textContent).toContain('No optimization result yet')
   await click('AI assistant')
-  expect(container.textContent).toContain('Verification pending')
+  expect(container.textContent).toContain('No advisor reply yet')
 })
 
 it('shows loading, prevents repeat submissions and recovers after failure', async () => {
