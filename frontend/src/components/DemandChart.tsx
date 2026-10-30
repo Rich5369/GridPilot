@@ -1,9 +1,9 @@
+import { chartAxis, chartCursor } from '../data/chartPresentation'
 import { useState } from 'react'
+import { AnalyticsTooltip, ChartLegend } from './ChartPrimitives'
 import {
-  Area,
   CartesianGrid,
   ComposedChart,
-  Legend,
   Line,
   ReferenceLine,
   ResponsiveContainer,
@@ -13,14 +13,14 @@ import {
 } from 'recharts'
 import { intervalRows, type DemandSeries } from '../data/demandChart'
 const colors = [
-  '#20dbad',
-  '#43a8ff',
-  '#edbc6a',
+  '#52d9ba',
+  '#73a9e8',
+  '#b8a780',
   '#aa8aff',
-  '#b75f69',
-  '#54838b',
-  '#69785a',
-  '#676c78',
+  '#c77f91',
+  '#6ea5b1',
+  '#a8b58a',
+  '#9da7ba',
 ]
 export function DemandChart({
   total,
@@ -72,7 +72,7 @@ export function DemandChart({
       </div>
       <p className="muted">
         {breakdown
-          ? 'Modeled or entered sources only. Hidden sources change the visible subtotal, not the building demand or limit.'
+          ? 'Modeled or entered sources only, shown as separate hourly lines. Hiding a source does not change building demand or the limit.'
           : 'Hourly average electricity demand (kW). Each step covers one full hour.'}
       </p>
       {breakdown && (
@@ -102,8 +102,20 @@ export function DemandChart({
           ))}
         </div>
       )}
+      {!breakdown && (
+        <ChartLegend
+          items={[
+            ...(baseline
+              ? [{ label: baseline.label, color: '#8292aa', dashed: true }]
+              : []),
+            { label: total.label, color: '#52d9ba' },
+            ...(fixed ? [{ label: fixed.label, color: '#73a9e8' }] : []),
+          ]}
+        />
+      )}
       <div
         className="chart"
+        role="group"
         aria-label={`${title}. Demand in kilowatts; use arrow keys in the chart or read the hourly table below.`}
       >
         <ResponsiveContainer width="100%" height="100%">
@@ -114,8 +126,8 @@ export function DemandChart({
           >
             <CartesianGrid
               vertical={false}
-              stroke="#253343"
-              strokeDasharray="3 5"
+              stroke="#ffffff0c"
+              strokeDasharray="2 6"
             />
             <XAxis
               dataKey="hour"
@@ -123,7 +135,7 @@ export function DemandChart({
               domain={[0, 24]}
               ticks={[0, 4, 8, 12, 16, 20, 24]}
               tickFormatter={(h) => `${String(h).padStart(2, '0')}:00`}
-              tick={{ fontSize: 11, fill: '#9eafc4' }}
+              tick={chartAxis}
               tickLine={false}
               axisLine={false}
               minTickGap={12}
@@ -132,62 +144,35 @@ export function DemandChart({
               unit=" kW"
               width={64}
               domain={[0, 'auto']}
-              tick={{ fontSize: 11, fill: '#9eafc4' }}
+              tick={chartAxis}
               axisLine={false}
               tickLine={false}
             />
-            <Tooltip
-              filterNull
-              labelFormatter={(h) =>
-                Number(h) === 24
-                  ? '23:00–24:00 · end of day'
-                  : `${String(h).padStart(2, '0')}:00–${String(Number(h) + 1).padStart(2, '0')}:00`
-              }
-              formatter={(v, name) => [`${Number(v).toFixed(2)} kW`, name]}
-              contentStyle={{
-                background: '#15212e',
-                border: '1px solid #3a4c60',
-                color: '#edf3fc',
-                borderRadius: 10,
-                maxWidth: 'min(320px, 80vw)',
-                fontSize: 12,
-                whiteSpace: 'normal',
-              }}
-            />
-            {!breakdown && <Legend wrapperStyle={{ fontSize: 12 }} />}
+            <Tooltip content={<AnalyticsTooltip />} cursor={chartCursor} />
             {breakdown ? (
               series.map((s) => (
-                <Area
+                <Line
                   key={s.key}
                   dataKey={s.key}
                   name={s.label}
                   type="stepAfter"
-                  stackId="sources"
                   stroke={colors[sources.indexOf(s) % colors.length]}
-                  fill={colors[sources.indexOf(s) % colors.length]}
-                  fillOpacity={0.4}
+                  strokeWidth={1.5}
+                  dot={false}
+                  activeDot={{ r: 3, stroke: '#101823', strokeWidth: 2 }}
                   isAnimationActive={false}
                 />
               ))
             ) : (
               <>
-                <Area
-                  dataKey={total.key}
-                  type="stepAfter"
-                  fill="#20dbad"
-                  fillOpacity={0.08}
-                  stroke="none"
-                  legendType="none"
-                  tooltipType="none"
-                  isAnimationActive={false}
-                />
                 {fixed && (
                   <Line
                     dataKey={fixed.key}
                     name={fixed.label}
                     type="stepAfter"
-                    stroke="#43a8ff"
+                    stroke="#73a9e8"
                     dot={false}
+                    activeDot={{ r: 3, stroke: '#101823', strokeWidth: 2 }}
                     strokeWidth={1.5}
                     isAnimationActive={false}
                   />
@@ -200,7 +185,8 @@ export function DemandChart({
                     stroke="#8292aa"
                     strokeDasharray="4 3"
                     dot={false}
-                    strokeWidth={2}
+                    activeDot={{ r: 3, stroke: '#101823', strokeWidth: 2 }}
+                    strokeWidth={1.5}
                     isAnimationActive={false}
                   />
                 )}
@@ -208,9 +194,10 @@ export function DemandChart({
                   dataKey={total.key}
                   name={total.label}
                   type="stepAfter"
-                  stroke="#20dbad"
-                  strokeWidth={2.5}
+                  stroke="#52d9ba"
+                  strokeWidth={1.8}
                   dot={false}
+                  activeDot={{ r: 3, stroke: '#101823', strokeWidth: 2 }}
                   isAnimationActive={false}
                 />
               </>
@@ -219,12 +206,12 @@ export function DemandChart({
               <ReferenceLine
                 y={limit}
                 ifOverflow="extendDomain"
-                stroke="#e9b55f"
+                stroke="#b8a780"
                 strokeDasharray="6 4"
                 label={{
                   value: `Building limit ${limit} kW`,
                   position: 'insideTopRight',
-                  fill: '#e9b55f',
+                  fill: '#b8a780',
                   fontSize: 11,
                 }}
               />
