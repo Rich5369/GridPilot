@@ -1,0 +1,18 @@
+
+> gridpilot-frontend@0.0.0 build
+> tsc -b && vite build
+
+vite v8.3.5 building client environment for production...
+transforming...
+✓ 2538 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                            0.66 kB │ gzip:   0.38 kB
+dist/assets/index-CyqeFyj5.css            59.47 kB │ gzip:  13.48 kB
+dist/assets/Comparison-D8e8e6-8.js         4.60 kB │ gzip:   1.55 kB
+dist/assets/WhatIf-D1YVPYKz.js             6.36 kB │ gzip:   2.47 kB
+dist/assets/DemandChart-bMTllBv-.js        8.62 kB │ gzip:   3.46 kB
+dist/assets/ChartPrimitives-Cv8b4uW8.js  365.17 kB │ gzip: 106.56 kB
+dist/assets/index-8TtBlU_H.js            414.99 kB │ gzip: 135.48 kB
+
+✓ built in 1.25s

@@ -4,7 +4,7 @@ import { createRoot } from 'react-dom/client'
 import { expect, it, vi } from 'vitest'
 import { EnergyAssistant } from './EnergyAssistant'
 import { defaultEditor, toScenario } from '../../data/demoScenario'
-import { apiRequest } from '../../services/api'
+import { apiRequest, ApiError } from '../../services/api'
 vi.mock('../../services/api', async importOriginal => ({ ...await importOriginal<typeof import('../../services/api')>(), apiRequest: vi.fn() }))
 Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true })
 it('requires confirmation, applies validated changes and cancels proposals', async () => {
@@ -88,6 +88,44 @@ it('keeps a proposal reviewable and disables actions when the draft changes', as
     }
     expect(change).not.toHaveBeenCalled()
     expect(compare).not.toHaveBeenCalled()
+  } finally {
+    await act(async () => root.unmount())
+    container.remove()
+  }
+})
+
+it('keeps profile, history and the draft after truncation until the user explicitly sends again', async () => {
+  const container = document.createElement('div')
+  document.body.append(container)
+  const root = createRoot(container)
+  const change = vi.fn()
+  const click = async (label: string) => { await act(async () => [...container.querySelectorAll('button')].find(b => b.textContent === label)!.click()) }
+  vi.mocked(apiRequest).mockClear()
+  const profile = { business_type: 'warehouse', employee_count: 30, consumption_and_units: null }
+  const reply = { source: 'meta', category: 'clarification_required', message: 'Please obtain measured consumption.', facts: [], profile, changes: {}, proposed_scenario: null }
+  const recovery = 'Meta AI could not finish this reply. No changes were applied. Try a shorter question or continue with manual optimization.'
+  try {
+    await act(async () => root.render(<EnergyAssistant editor={defaultEditor} onChange={change} resultScenario={null} />))
+    vi.mocked(apiRequest).mockResolvedValueOnce(reply)
+    await click('Keep peak power demand below 15 kW.')
+    await click('Send to advisor')
+    const before = container.querySelector('[role="log"]')!.textContent
+    vi.mocked(apiRequest).mockRejectedValueOnce(new ApiError(502, { detail: { code: 'ai_invalid_response', message: recovery, request_id: 'fixture-correlation' } }))
+    await click('Send to advisor')
+    expect(apiRequest).toHaveBeenCalledTimes(2)
+    expect(container.textContent).toContain(recovery)
+    expect(container.textContent).toContain('Meta unavailable · last request failed')
+    expect(container.querySelector('[role="log"]')!.textContent).toBe(before)
+    expect(container.querySelector('.advisor-context-summary')!.textContent).toContain('warehouse')
+    expect(container.querySelector('textarea')!.value).toBe('Keep peak power demand below 15 kW.')
+    expect(change).not.toHaveBeenCalled()
+    vi.mocked(apiRequest).mockResolvedValueOnce(reply)
+    await click('Send to advisor')
+    expect(apiRequest).toHaveBeenCalledTimes(3)
+    const request = JSON.parse(vi.mocked(apiRequest).mock.calls.at(-1)![1]!.body as string)
+    expect(request.profile).toEqual(profile)
+    expect(request.history).toHaveLength(2)
+    expect(request.profile.consumption_and_units).toBeNull()
   } finally {
     await act(async () => root.unmount())
     container.remove()

@@ -65,7 +65,7 @@ def mode():
         raise fail(503, 'ai_unavailable', 'Meta AI is unavailable: backend credentials are not configured. Optimization remains available.')
     return value
 
-def generate(schema: type[T], instructions: str, payload: dict, *, completion_tokens: int = 1500, request_timeout: float = 25.0) -> tuple[T, str]:
+def generate(schema: type[T], instructions: str, payload: dict, *, completion_tokens: int = 1500, request_timeout: float = 25.0, reasoning_effort: str | None = None) -> tuple[T, str]:
     source = mode()
     if source == 'mock':
         if schema.__name__ == 'Selection':
@@ -81,7 +81,7 @@ def generate(schema: type[T], instructions: str, payload: dict, *, completion_to
     from openai import OpenAI, APITimeoutError, RateLimitError, APIError
     import json
     from backend.ai.completion_diagnostics import CompletionDiagnostics
-    diagnostic = CompletionDiagnostics(schema, completion_tokens)
+    diagnostic = CompletionDiagnostics(schema, completion_tokens, reasoning_effort=reasoning_effort)
     try:
         with OpenAI(**provider_client_options()) as client:
             response = client.chat.completions.create(
@@ -90,6 +90,7 @@ def generate(schema: type[T], instructions: str, payload: dict, *, completion_to
                 response_format=response_format(schema),
                 max_completion_tokens=completion_tokens,
                 timeout=request_timeout,
+                **({'reasoning_effort': reasoning_effort} if reasoning_effort is not None else {}),
             )
         diagnostic.observe(response, safe_token)
         return diagnostic.parse(response), 'meta'
