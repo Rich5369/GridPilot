@@ -1,0 +1,44 @@
+{
+  "errors": [],
+  "cases": [
+    {
+      "version": "before",
+      "width": 1440,
+      "optimizedCost": 20.576000099999998,
+      "overflow": false
+    },
+    {
+      "version": "before",
+      "width": 768,
+      "optimizedCost": 20.576000099999998,
+      "overflow": false
+    },
+    {
+      "version": "before",
+      "width": 390,
+      "optimizedCost": 20.576000099999998,
+      "overflow": false
+    },
+    {
+      "version": "after",
+      "width": 1440,
+      "optimizedCost": 20.576000099999998,
+      "overflow": false
+    },
+    {
+      "version": "after",
+      "width": 768,
+      "optimizedCost": 20.576000099999998,
+      "overflow": false
+    },
+    {
+      "version": "after",
+      "width": 390,
+      "optimizedCost": 20.576000099999998,
+      "overflow": false
+    }
+  ],
+  "identicalSolverOutputs": true,
+  "staleSnapshotPassed": true,
+  "infeasibleUnavailablePassed": true
+}

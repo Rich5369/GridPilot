@@ -45,7 +45,7 @@ export function DemandChart({
     : baseline
       ? [baseline, total, ...(fixed ? [fixed] : [])]
       : [total, ...(fixed ? [fixed] : [])]
-  const rows = intervalRows(series)
+  const rows = intervalRows(series).slice(0, 24)
   return (
     <>
       <div
@@ -72,8 +72,8 @@ export function DemandChart({
       </div>
       <p className="muted">
         {breakdown
-          ? 'Modeled or entered sources only, shown as separate hourly lines. Hiding a source does not change building demand or the limit.'
-          : 'Hourly average electricity demand (kW). Each step covers one full hour.'}
+          ? 'Modeled or entered sources only, shown as separate hourly lines. Straight connections are visual interpolation, not subhourly readings. Hiding a source does not change building demand or the limit.'
+          : 'Hourly average electricity demand (kW). 24 hourly averages; straight connections are visual interpolation, not subhourly readings.'}
       </p>
       {breakdown && (
         <div
@@ -132,8 +132,8 @@ export function DemandChart({
             <XAxis
               dataKey="hour"
               type="number"
-              domain={[0, 24]}
-              ticks={[0, 4, 8, 12, 16, 20, 24]}
+              domain={[0, 23]}
+              ticks={[0, 4, 8, 12, 16, 20, 23]}
               tickFormatter={(h) => `${String(h).padStart(2, '0')}:00`}
               tick={chartAxis}
               tickLine={false}
@@ -155,7 +155,7 @@ export function DemandChart({
                   key={s.key}
                   dataKey={s.key}
                   name={s.label}
-                  type="stepAfter"
+                  type="linear"
                   stroke={colors[sources.indexOf(s) % colors.length]}
                   strokeWidth={1.5}
                   dot={false}
@@ -169,7 +169,7 @@ export function DemandChart({
                   <Line
                     dataKey={fixed.key}
                     name={fixed.label}
-                    type="stepAfter"
+                    type="linear"
                     stroke="#73a9e8"
                     dot={false}
                     activeDot={{ r: 3, stroke: '#101823', strokeWidth: 2 }}
@@ -181,7 +181,7 @@ export function DemandChart({
                   <Line
                     dataKey={baseline.key}
                     name={baseline.label}
-                    type="stepAfter"
+                    type="linear"
                     stroke="#8292aa"
                     strokeDasharray="4 3"
                     dot={false}
@@ -193,7 +193,7 @@ export function DemandChart({
                 <Line
                   dataKey={total.key}
                   name={total.label}
-                  type="stepAfter"
+                  type="linear"
                   stroke="#52d9ba"
                   strokeWidth={1.8}
                   dot={false}

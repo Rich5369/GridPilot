@@ -28,7 +28,7 @@ function Sparkline({
       <ResponsiveContainer width="100%" height="100%">
         <LineChart
           accessibilityLayer={false}
-          data={[...values, values[values.length - 1]].map((value, h) => ({
+          data={values.map((value, h) => ({
             value,
             baseline: comparison?.[Math.min(h, 23)],
           }))}
@@ -36,7 +36,7 @@ function Sparkline({
           {comparison && (
             <Line
               dataKey="baseline"
-              type="stepAfter"
+              type="linear"
               stroke="#8292aa"
               strokeWidth={1.2}
               strokeDasharray="3 3"
@@ -47,7 +47,7 @@ function Sparkline({
           )}
           <Line
             dataKey="value"
-            type="stepAfter"
+            type="linear"
             stroke={color}
             dot={false}
             activeDot={false}
@@ -146,9 +146,9 @@ export function CommandMetrics({
               <span>
                 {stale
                   ? 'Previous submitted scenario'
-                  : '24-hour modeled scenario'}
+                  : '24 hourly values · visual interpolation'}
               </span>
-              <span>00–24h</span>
+              <span>00–23h</span>
             </div>
           </article>
         ),
@@ -186,20 +186,18 @@ export function ScenarioAnalytics({
         ]
       : []),
   ]
-  const costRows = intervalRows(costSeries)
+  const costRows = intervalRows(costSeries).slice(0, 24)
   const rows = scenario.electricity_prices_usd_per_kwh.map((price, hour) => ({
     hour,
     price,
   }))
-  // Extend the last hourly tariff to its true 24:00 boundary.
-  const plotRows = [...rows, { hour: 24, price: rows[23].price }]
   return (
     <div className="scenario-analytics">
       <section className="panel compact-chart">
         <p className="eyebrow">{draft ? 'DRAFT INPUTS' : 'SUBMITTED INPUTS'}</p>
         <h2>Electricity tariff</h2>
         <p className="panel-subtitle">
-          24 hourly inputs · $/kWh · retail scenario tariff
+          24 hourly inputs · $/kWh · straight connections are visual interpolation; optimizer uses the exact hourly tariff
         </p>
         <div
           className="tariff-range cost-totals" role="group"
@@ -224,15 +222,15 @@ export function ScenarioAnalytics({
         <div className="analytics-chart">
           <ResponsiveContainer width="100%" height="100%">
             <LineChart
-              data={plotRows}
+              data={rows}
               margin={{ left: 0, right: 12, top: 12, bottom: 0 }}
             >
               <CartesianGrid vertical={false} stroke="#ffffff0c" />
               <XAxis
                 dataKey="hour"
                 type="number"
-                domain={[0, 24]}
-                ticks={[0, 6, 12, 18, 24]}
+                domain={[0, 23]}
+                ticks={[0, 6, 12, 18, 23]}
                 tickFormatter={(hour) => `${String(hour).padStart(2, '0')}:00`}
                 tick={chartAxis}
                 axisLine={false}
@@ -252,7 +250,7 @@ export function ScenarioAnalytics({
               <Line
                 dataKey="price"
                 name="Tariff"
-                type="stepAfter"
+                type="linear"
                 stroke="#aa8aff"
                 dot={false}
                 activeDot={{ r: 3, stroke: '#101823', strokeWidth: 2 }}
@@ -291,7 +289,7 @@ export function ScenarioAnalytics({
         <p className="eyebrow">MODELED DAILY OUTCOME</p>
         <h2>Baseline vs. optimized cost</h2>
         <p className="panel-subtitle">
-          Hourly energy cost · USD per 1-hour interval · energy only
+          Hourly energy cost · USD per 1-hour interval · straight connections are visual interpolation
         </p>
         {result ? (
           <>
@@ -332,8 +330,8 @@ export function ScenarioAnalytics({
                       <XAxis
                         dataKey="hour"
                         type="number"
-                        domain={[0, 24]}
-                        ticks={[0, 6, 12, 18, 24]}
+                        domain={[0, 23]}
+                        ticks={[0, 6, 12, 18, 23]}
                         tickFormatter={(h) =>
                           `${String(h).padStart(2, '0')}:00`
                         }
@@ -363,7 +361,7 @@ export function ScenarioAnalytics({
                           name={
                             series.key === 'baseline' ? 'Baseline' : 'Optimized'
                           }
-                          type="stepAfter"
+                          type="linear"
                           stroke={
                             series.key === 'baseline' ? '#8292aa' : '#52d9ba'
                           }
