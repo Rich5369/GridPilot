@@ -1,0 +1,8 @@
+Backend: 276 passed (one pre-existing Starlette TestClient deprecation warning).
+Frontend: 97 passed, 2 existing integration tests skipped without opt-in environment.
+TypeScript and production build: passed.
+Lint: passed; two existing CostBreakdown Fast Refresh warnings.
+Chromium: passed real local HTTP optimization, actual missing-credential unavailable response, injected conversation continuity, keyboard Tab/Enter submission, explicit Apply, session persistence across navigation, 390px mobile overflow, zero page errors.
+Screenshots show INJECTED selections labeled MOCK MODE, not real Meta output; cost comes from actual local solver.
+External Meta: see real-meta-conversation.json for demo-only verification results. No Render access verification, deployment, credential changes, or provider switch.
+Real Meta final rerun: 4/4 actual inference turns accepted. Extracted employee_count=10, missing consumption=null, monthly bill preserved, grounded daily baseline USD 80.6400, validated 15 kW proposal. Profile introduction correctly answered after prompt refinement.
