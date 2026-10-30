@@ -3,7 +3,7 @@ import os
 import logging
 import re
 from typing import TypeVar
-from pydantic import BaseModel, ValidationError
+from pydantic import BaseModel
 from fastapi import HTTPException
 from backend.ai.models import Proposal, ExplanationSelection
 
@@ -80,6 +80,8 @@ def generate(schema: type[T], instructions: str, payload: dict, *, completion_to
     # Lazy import keeps health and optimizer independent of provider setup.
     from openai import OpenAI, APITimeoutError, RateLimitError, APIError
     import json
+    from backend.ai.completion_diagnostics import CompletionDiagnostics
+    diagnostic = CompletionDiagnostics(schema, completion_tokens)
     try:
         with OpenAI(**provider_client_options()) as client:
             response = client.chat.completions.create(
@@ -89,10 +91,8 @@ def generate(schema: type[T], instructions: str, payload: dict, *, completion_to
                 max_completion_tokens=completion_tokens,
                 timeout=request_timeout,
             )
-        choice = response.choices[0]
-        if choice.finish_reason != 'stop' or choice.message.refusal:
-            raise ValueError('Incomplete or refused')
-        return schema.model_validate_json(choice.message.content or '', strict=True), 'meta'
+        diagnostic.observe(response, safe_token)
+        return diagnostic.parse(response), 'meta'
     except APITimeoutError as exc:
         log_provider_error(exc)
         raise fail(504, 'ai_timeout', 'Meta AI timed out. Try again later.') from None
@@ -102,5 +102,5 @@ def generate(schema: type[T], instructions: str, payload: dict, *, completion_to
     except APIError as exc:
         log_provider_error(exc)
         raise fail(502, 'ai_provider_error', 'Meta AI request failed upstream. Model access or provider routing may be unavailable. Optimization remains available.') from None
-    except (ValidationError, ValueError, IndexError, AttributeError):
-        raise fail(502, 'ai_invalid_response', 'Meta AI returned an invalid response. No changes were applied.') from None
+    except (ValueError, IndexError, AttributeError, TypeError):
+        diagnostic.invalid('response_processing')

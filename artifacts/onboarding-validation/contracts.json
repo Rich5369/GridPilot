@@ -1,0 +1,6 @@
+{
+  "openapi_identical_to_audited_production": true,
+  "unchanged_request_response_schemas": true,
+  "invalid_completion_error_addition": "opaque request_id detail and X-Request-ID header",
+  "live_inference_requests": 0
+}
