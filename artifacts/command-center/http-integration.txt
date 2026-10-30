@@ -1,0 +1,13 @@
+
+> gridpilot-frontend@0.0.0 test:integration
+> vitest run src/services/api.integration.test.ts
+
+
+ RUN  v5.0.5 /tmp/gridpilot-command-center/frontend
+
+
+ Test Files  1 passed (1)
+      Tests  2 passed (2)
+   Start at  18:51:45
+   Duration  343ms (tests 86%, import 7%, transform 5%, worker 2%)
+

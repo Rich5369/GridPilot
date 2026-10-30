@@ -1,0 +1,1 @@
+PASS: real EV/joint metrics, unavailable market selection, advisor collapse/error, stale/infeasible results, responsive captures. See verification.json for axe findings.

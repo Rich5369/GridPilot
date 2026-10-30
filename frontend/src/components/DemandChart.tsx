@@ -13,10 +13,10 @@ import {
 } from 'recharts'
 import { intervalRows, type DemandSeries } from '../data/demandChart'
 const colors = [
-  '#167264',
-  '#567db0',
-  '#a66f23',
-  '#8468a7',
+  '#20dbad',
+  '#43a8ff',
+  '#edbc6a',
+  '#aa8aff',
   '#b75f69',
   '#54838b',
   '#69785a',
@@ -25,11 +25,13 @@ const colors = [
 export function DemandChart({
   total,
   baseline,
+  fixed,
   sources = [],
   limit,
   title = 'Building electricity demand',
 }: {
   total: DemandSeries
+  fixed?: DemandSeries
   baseline?: DemandSeries
   sources?: DemandSeries[]
   limit?: number
@@ -41,8 +43,8 @@ export function DemandChart({
   const series = breakdown
     ? sources.filter((s) => !hidden.includes(s.key))
     : baseline
-      ? [baseline, total]
-      : [total]
+      ? [baseline, total, ...(fixed ? [fixed] : [])]
+      : [total, ...(fixed ? [fixed] : [])]
   const rows = intervalRows(series)
   return (
     <>
@@ -112,7 +114,7 @@ export function DemandChart({
           >
             <CartesianGrid
               vertical={false}
-              stroke="#e5ebe8"
+              stroke="#253343"
               strokeDasharray="3 5"
             />
             <XAxis
@@ -121,7 +123,7 @@ export function DemandChart({
               domain={[0, 24]}
               ticks={[0, 4, 8, 12, 16, 20, 24]}
               tickFormatter={(h) => `${String(h).padStart(2, '0')}:00`}
-              tick={{ fontSize: 11 }}
+              tick={{ fontSize: 11, fill: '#9eafc4' }}
               tickLine={false}
               axisLine={false}
               minTickGap={12}
@@ -130,7 +132,7 @@ export function DemandChart({
               unit=" kW"
               width={64}
               domain={[0, 'auto']}
-              tick={{ fontSize: 11 }}
+              tick={{ fontSize: 11, fill: '#9eafc4' }}
               axisLine={false}
               tickLine={false}
             />
@@ -143,6 +145,9 @@ export function DemandChart({
               }
               formatter={(v, name) => [`${Number(v).toFixed(2)} kW`, name]}
               contentStyle={{
+                background: '#15212e',
+                border: '1px solid #3a4c60',
+                color: '#edf3fc',
                 borderRadius: 10,
                 maxWidth: 'min(320px, 80vw)',
                 fontSize: 12,
@@ -169,19 +174,30 @@ export function DemandChart({
                 <Area
                   dataKey={total.key}
                   type="stepAfter"
-                  fill="#167264"
+                  fill="#20dbad"
                   fillOpacity={0.08}
                   stroke="none"
                   legendType="none"
                   tooltipType="none"
                   isAnimationActive={false}
                 />
+                {fixed && (
+                  <Line
+                    dataKey={fixed.key}
+                    name={fixed.label}
+                    type="stepAfter"
+                    stroke="#43a8ff"
+                    dot={false}
+                    strokeWidth={1.5}
+                    isAnimationActive={false}
+                  />
+                )}
                 {baseline && (
                   <Line
                     dataKey={baseline.key}
                     name={baseline.label}
                     type="stepAfter"
-                    stroke="#697789"
+                    stroke="#8292aa"
                     strokeDasharray="4 3"
                     dot={false}
                     strokeWidth={2}
@@ -192,7 +208,7 @@ export function DemandChart({
                   dataKey={total.key}
                   name={total.label}
                   type="stepAfter"
-                  stroke="#167264"
+                  stroke="#20dbad"
                   strokeWidth={2.5}
                   dot={false}
                   isAnimationActive={false}
@@ -203,12 +219,12 @@ export function DemandChart({
               <ReferenceLine
                 y={limit}
                 ifOverflow="extendDomain"
-                stroke="#a05a36"
+                stroke="#e9b55f"
                 strokeDasharray="6 4"
                 label={{
                   value: `Building limit ${limit} kW`,
                   position: 'insideTopRight',
-                  fill: '#925031',
+                  fill: '#e9b55f',
                   fontSize: 11,
                 }}
               />
