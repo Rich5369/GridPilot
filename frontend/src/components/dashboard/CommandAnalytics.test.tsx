@@ -7,8 +7,8 @@ import { MarketExplorer } from './MarketExplorer'
 import type { OptimizationResult, Scenario } from '../../types/api'
 vi.mock('recharts', () => ({
   ResponsiveContainer: () => null,
-  AreaChart: () => null,
-  Area: () => null,
+  LineChart: () => null,
+  Line: () => null,
 }))
 Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true })
 const result: OptimizationResult = {
