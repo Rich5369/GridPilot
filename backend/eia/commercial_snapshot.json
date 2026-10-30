@@ -1,0 +1,271 @@
+{
+  "source": "U.S. Energy Information Administration · Electric Power Monthly, Table 5.6.A",
+  "source_url": "https://www.eia.gov/electricity/monthly/epm_table_grapher.php?t=epmt_5_6_a",
+  "reuse_url": "https://www.eia.gov/about/copyrights_reuse.php",
+  "sector": "Commercial",
+  "units": "cents/kWh",
+  "period": "2026-08",
+  "previous_year_period": "2025-08",
+  "released_at": "2026-10-23",
+  "source_checked_at": "2026-10-30T20:37:21.023210Z",
+  "status": "available",
+  "notice": null,
+  "preliminary": true,
+  "states": [
+    {
+      "state": "Alabama",
+      "cents_per_kwh": 14.98,
+      "previous_year_cents_per_kwh": 14.53
+    },
+    {
+      "state": "Alaska",
+      "cents_per_kwh": 23.9,
+      "previous_year_cents_per_kwh": 23.09
+    },
+    {
+      "state": "Arizona",
+      "cents_per_kwh": 13.05,
+      "previous_year_cents_per_kwh": 12.98
+    },
+    {
+      "state": "Arkansas",
+      "cents_per_kwh": 11.73,
+      "previous_year_cents_per_kwh": 10.75
+    },
+    {
+      "state": "California",
+      "cents_per_kwh": 30.02,
+      "previous_year_cents_per_kwh": 29.24
+    },
+    {
+      "state": "Colorado",
+      "cents_per_kwh": 13.94,
+      "previous_year_cents_per_kwh": 13.13
+    },
+    {
+      "state": "Connecticut",
+      "cents_per_kwh": 19.29,
+      "previous_year_cents_per_kwh": 23.47
+    },
+    {
+      "state": "Delaware",
+      "cents_per_kwh": 14.5,
+      "previous_year_cents_per_kwh": 12.68
+    },
+    {
+      "state": "District of Columbia",
+      "cents_per_kwh": 23.31,
+      "previous_year_cents_per_kwh": 20.65
+    },
+    {
+      "state": "Florida",
+      "cents_per_kwh": 11.35,
+      "previous_year_cents_per_kwh": 11.43
+    },
+    {
+      "state": "Georgia",
+      "cents_per_kwh": 13.81,
+      "previous_year_cents_per_kwh": 11.16
+    },
+    {
+      "state": "Hawaii",
+      "cents_per_kwh": 43.55,
+      "previous_year_cents_per_kwh": 34.93
+    },
+    {
+      "state": "Idaho",
+      "cents_per_kwh": 10.21,
+      "previous_year_cents_per_kwh": 8.95
+    },
+    {
+      "state": "Illinois",
+      "cents_per_kwh": 14.67,
+      "previous_year_cents_per_kwh": 13.94
+    },
+    {
+      "state": "Indiana",
+      "cents_per_kwh": 13.29,
+      "previous_year_cents_per_kwh": 13.86
+    },
+    {
+      "state": "Iowa",
+      "cents_per_kwh": 14.15,
+      "previous_year_cents_per_kwh": 12.87
+    },
+    {
+      "state": "Kansas",
+      "cents_per_kwh": 12.24,
+      "previous_year_cents_per_kwh": 11.82
+    },
+    {
+      "state": "Kentucky",
+      "cents_per_kwh": 12.09,
+      "previous_year_cents_per_kwh": 11.81
+    },
+    {
+      "state": "Louisiana",
+      "cents_per_kwh": 11.09,
+      "previous_year_cents_per_kwh": 10.9
+    },
+    {
+      "state": "Maine",
+      "cents_per_kwh": 21.33,
+      "previous_year_cents_per_kwh": 21.25
+    },
+    {
+      "state": "Maryland",
+      "cents_per_kwh": 17.0,
+      "previous_year_cents_per_kwh": 15.06
+    },
+    {
+      "state": "Massachusetts",
+      "cents_per_kwh": 24.11,
+      "previous_year_cents_per_kwh": 23.15
+    },
+    {
+      "state": "Michigan",
+      "cents_per_kwh": 16.21,
+      "previous_year_cents_per_kwh": 14.85
+    },
+    {
+      "state": "Minnesota",
+      "cents_per_kwh": 13.41,
+      "previous_year_cents_per_kwh": 13.11
+    },
+    {
+      "state": "Mississippi",
+      "cents_per_kwh": 13.45,
+      "previous_year_cents_per_kwh": 12.88
+    },
+    {
+      "state": "Missouri",
+      "cents_per_kwh": 12.63,
+      "previous_year_cents_per_kwh": 12.26
+    },
+    {
+      "state": "Montana",
+      "cents_per_kwh": 13.64,
+      "previous_year_cents_per_kwh": 12.53
+    },
+    {
+      "state": "Nebraska",
+      "cents_per_kwh": 10.0,
+      "previous_year_cents_per_kwh": 9.09
+    },
+    {
+      "state": "Nevada",
+      "cents_per_kwh": 9.8,
+      "previous_year_cents_per_kwh": 10.05
+    },
+    {
+      "state": "New Hampshire",
+      "cents_per_kwh": 20.99,
+      "previous_year_cents_per_kwh": 20.43
+    },
+    {
+      "state": "New Jersey",
+      "cents_per_kwh": 18.71,
+      "previous_year_cents_per_kwh": 18.52
+    },
+    {
+      "state": "New Mexico",
+      "cents_per_kwh": 12.14,
+      "previous_year_cents_per_kwh": 12.02
+    },
+    {
+      "state": "New York",
+      "cents_per_kwh": 23.06,
+      "previous_year_cents_per_kwh": 22.33
+    },
+    {
+      "state": "North Carolina",
+      "cents_per_kwh": 10.73,
+      "previous_year_cents_per_kwh": 10.02
+    },
+    {
+      "state": "North Dakota",
+      "cents_per_kwh": 8.07,
+      "previous_year_cents_per_kwh": 7.47
+    },
+    {
+      "state": "Ohio",
+      "cents_per_kwh": 12.31,
+      "previous_year_cents_per_kwh": 11.42
+    },
+    {
+      "state": "Oklahoma",
+      "cents_per_kwh": 10.9,
+      "previous_year_cents_per_kwh": 10.0
+    },
+    {
+      "state": "Oregon",
+      "cents_per_kwh": 10.72,
+      "previous_year_cents_per_kwh": 9.84
+    },
+    {
+      "state": "Pennsylvania",
+      "cents_per_kwh": 13.93,
+      "previous_year_cents_per_kwh": 12.68
+    },
+    {
+      "state": "Rhode Island",
+      "cents_per_kwh": 23.31,
+      "previous_year_cents_per_kwh": 22.23
+    },
+    {
+      "state": "South Carolina",
+      "cents_per_kwh": 11.76,
+      "previous_year_cents_per_kwh": 11.0
+    },
+    {
+      "state": "South Dakota",
+      "cents_per_kwh": 11.71,
+      "previous_year_cents_per_kwh": 10.64
+    },
+    {
+      "state": "Tennessee",
+      "cents_per_kwh": 13.13,
+      "previous_year_cents_per_kwh": 12.86
+    },
+    {
+      "state": "Texas",
+      "cents_per_kwh": 8.96,
+      "previous_year_cents_per_kwh": 8.76
+    },
+    {
+      "state": "Utah",
+      "cents_per_kwh": 10.39,
+      "previous_year_cents_per_kwh": 10.82
+    },
+    {
+      "state": "Vermont",
+      "cents_per_kwh": 20.47,
+      "previous_year_cents_per_kwh": 19.05
+    },
+    {
+      "state": "Virginia",
+      "cents_per_kwh": 11.14,
+      "previous_year_cents_per_kwh": 9.85
+    },
+    {
+      "state": "Washington",
+      "cents_per_kwh": 11.81,
+      "previous_year_cents_per_kwh": 11.02
+    },
+    {
+      "state": "West Virginia",
+      "cents_per_kwh": 11.65,
+      "previous_year_cents_per_kwh": 11.57
+    },
+    {
+      "state": "Wisconsin",
+      "cents_per_kwh": 14.19,
+      "previous_year_cents_per_kwh": 13.6
+    },
+    {
+      "state": "Wyoming",
+      "cents_per_kwh": 10.27,
+      "previous_year_cents_per_kwh": 9.72
+    }
+  ]
+}

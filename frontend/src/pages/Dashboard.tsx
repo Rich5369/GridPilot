@@ -8,7 +8,7 @@ import {
   Sparkles,
   Zap,
 } from 'lucide-react'
-import { MarketExplorer } from '../components/dashboard/MarketExplorer'
+import { ElectricityPriceExplorer } from '../components/dashboard/ElectricityPriceExplorer'
 import {
   CommandMetrics,
   ScenarioAnalytics,
@@ -298,14 +298,14 @@ export function Dashboard() {
               stale={stale}
             />
           )}
-          {view === 'markets' && <MarketExplorer />}
+          {view === 'markets' && <ElectricityPriceExplorer />}
           <div className={view === 'overview' ? 'command-layout' : ''}>
             <div
               className={
                 view === 'assistant' ? 'advisor-main-hidden' : 'command-primary'
               }
             >
-              {view === 'overview' && <MarketExplorer />}
+              {view === 'overview' && <ElectricityPriceExplorer />}
               {(view === 'overview' || view === 'comparison') && (
                 <>
                   <Suspense fallback={<p role="status">Loading comparison…</p>}>
