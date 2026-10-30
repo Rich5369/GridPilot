@@ -1,0 +1,3 @@
+Frontend unchanged. npm test: 118 passed, 2 opt-in integration tests skipped.
+Lint passed with two existing CostBreakdown Fast Refresh warnings.
+TypeScript (tsc -b) and production Vite build passed.

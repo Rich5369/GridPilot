@@ -1,0 +1,20 @@
+{
+  "failed_request_time_eastern": "2026-10-30 18:27:27\u201318:27:48 EDT",
+  "recorded_error": {
+    "status": 502,
+    "code": "ai_invalid_response"
+  },
+  "completion_finish_reason_available": false,
+  "raw_model_output_available": false,
+  "schema_errors_available": false,
+  "user_supplied_existing_render_logs": "standard access logs only",
+  "historical_root_cause": "undetermined",
+  "new_live_inference_requests": 0,
+  "audited_409_cases": [
+    "missing result_id",
+    "nonexistent result_id",
+    "wrong scheduling mode",
+    "changed submitted inputs"
+  ],
+  "audited_422_case": "empty conversation request body"
+}

@@ -1,0 +1,18 @@
+{
+  "source": "synthetic truncated SDK completion through real local HTTP; NOT historical Meta failure",
+  "record": {
+    "category": "truncated",
+    "schema": "Selection",
+    "correlation_id": "d8ec14c8445a4aa9a0155d40a00043b9",
+    "provider_request_id": "req-local-fixture",
+    "finish_reason": "length",
+    "content_present": true,
+    "refusal_present": false,
+    "completion_token_limit": 5000,
+    "completion_tokens": null,
+    "response_status": 502,
+    "upstream_status_class": "2xx",
+    "validation_errors": [],
+    "validation_errors_truncated": false
+  }
+}
