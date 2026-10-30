@@ -124,7 +124,7 @@ whose positive path remains covered by existing injected-provider tests.
 
 ## Verification
 
-- Backend: **389 tests passed**, with one existing TestClient dependency warning.
+- Backend: **390 tests passed**, with one existing TestClient dependency warning.
 - Frontend: **118 tests passed**, two opt-in integration tests skipped.
 - Lint, TypeScript and production build passed; two existing CostBreakdown Fast
   Refresh export warnings remain.

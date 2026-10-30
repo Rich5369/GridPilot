@@ -146,4 +146,6 @@ Supported proposals ONLY for explicitly requested site cap, shared same-day dead
         # Explicit result-cost Q&A cannot introduce unsupported device causality.
         answer = cost_explanation
         keys = list(dict.fromkeys([*keys, 'cost', *(['devices'] if device_costs else [])]))
+        if result is not None and result.feasibility_status == 'infeasible' and 'constraints' not in keys:
+            keys.append('constraints')
     return ConversationResponse(category=selection.category, source=source, message=answer, facts=[facts[k] for k in keys], profile=profile, follow_up_questions=questions, missing_information=[key for key, value in profile.model_dump().items() if value is None], changes=selection.changes, proposed_scenario=scenario)

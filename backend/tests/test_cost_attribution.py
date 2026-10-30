@@ -74,3 +74,15 @@ def test_unsupported_numbers_still_rejected_for_result_question(provider):
     provider[1](answer='The equipment saved 50 percent.',fact_keys=['cost'])
     response=client.post('/api/ai/conversation',json={'request':'Explain my optimization costs.','scenario':SAMPLE})
     assert response.status_code==502
+
+
+def test_infeasible_result_explanation_keeps_actual_reasons(provider):
+    scenario=commercial();scenario['building_max_demand_kw']=0.1
+    result=client.post('/api/optimize?scheduling_mode=joint',json=scenario).json()
+    provider[1](answer='Flexible equipment caused the savings.',fact_keys=[])
+    response=client.post('/api/ai/conversation',json={'request':'Explain this optimization result.',
+        'scenario':scenario,'scheduling_mode':'joint','result_id':result['result_id']})
+    body=response.json()
+    assert response.status_code==200
+    assert 'no optimized energy-cost reduction is established' in body['message']
+    assert all(reason in ' '.join(body['facts']) for reason in result['constraint_violations'])
