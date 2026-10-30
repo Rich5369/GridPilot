@@ -46,7 +46,7 @@ export function CostBreakdown({
     <section className="panel cost-panel">
       <p className="eyebrow">COST MODEL · USD</p>
       <h2>Daily cost breakdown</h2>
-      <p className="muted">Calculated from the displayed demo profile.</p>
+      <p className="muted">Energy charges from the submitted baseline. Additional billing assumptions are entered below.</p>
       <dl className="cost-list">
         <div>
           <dt>Energy charges</dt>

@@ -82,6 +82,7 @@ const near = (actual, expected) => assert(Math.abs(actual - expected) < 1e-6, `$
     }
     const custom = await check(await optimize())
     assert.deepEqual(custom.scenario, { ...original.scenario, fixed_demand_kw: values })
+    await page.getByText('Submitted scenario & result provenance', { exact: true }).click()
     await page.getByText('Optimizer-calculated result · Submitted inputs: User-configured', { exact: false }).waitFor()
     await page.evaluate(() => scrollTo(0, 0))
     await page.screenshot({ path: `${output}/custom-result-mobile.png`, fullPage: true })
@@ -117,6 +118,7 @@ const near = (actual, expected) => assert(Math.abs(actual - expected) < 1e-6, `$
     assert.equal(await input(10).inputValue(), String(values[10]))
     const joint = await optimize(isJointOptimization)
     const jointCustom = await check(joint)
+    await page.getByText('Submitted scenario & result provenance', { exact: true }).click()
     await page.getByText('Displayed result mode: EV + flexible equipment', { exact: true }).waitFor()
     assert.deepEqual(joint.request().postDataJSON().fixed_demand_kw, values)
     await page.locator('#scheduling-mode').selectOption('ev_only')
