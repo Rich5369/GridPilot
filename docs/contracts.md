@@ -113,9 +113,29 @@ The Python adapter raises `OptimizationUnresolvedError`, `OptimizationSolverErro
 or `OptimizationVerificationError` for outcomes the shared feasible/infeasible
 schema cannot represent. The detailed engine retains richer solver statuses;
 HTTP `feasible` alone is not an optimality proof. Independent solver/evaluator
-checks validate item constraints and aggregate arithmetic before success. HTTP
-exposes only aggregate demand, so per-item verification requires the direct
-engineering schedules rather than an inferred decomposition.
+checks validate item constraints and aggregate arithmetic before success. The
+legacy demand fields remain aggregate values. The optional `operating_plan`
+extension exposes actual verified components from that same outcome, rather than
+an inferred decomposition or another solve; see the contract below.
+
+## Optional device-level operating plan (E1)
+
+`OptimizationResult.operating_plan` defaults to null for older payloads. The real
+adapter supplies an object with `scheduling_mode`, `solver_status`,
+`primary_status`, `peak_tiebreak_status`, `primary_optimum_usd`,
+`verification_status`, `warnings`, `baseline_constraint_violations` and
+`device_schedules`. Both EVs and flexible items are represented; EV-only flexible
+items are explicitly held at baseline. Proven infeasibility exposes baseline
+information but null optimized device arrays/energies. Errors still have no result.
+
+Each device carries its original `(device_type, device_id)`, scheduling role,
+required energy, exclusive availability window, maximum power, 24-hour baseline/
+optimized power arrays and corresponding delivered-energy totals. No device names
+exist in Scenario, so none are invented. Existing fields, units, mode inputs and
+their meanings do not change. [The exact candidate schema, solver-generated JSON
+and consumer instructions](device-operating-plans.md) require Richard's contract
+review before frontend timeline integration. This is locally verified E1 work;
+older hosted aggregate acceptance is not proof this extension is deployed.
 
 The primary shared objective is daily energy cost. After a proven optimum, a
 separate solve minimizes hourly peak while allowing $1e-7 primary-cost increase.

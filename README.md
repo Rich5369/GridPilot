@@ -32,6 +32,12 @@ Shared costs are daily energy-only USD; cost/peak changes do not imply reduced
 kWh or guaranteed monthly utility savings. Historical phase guides retain their
 milestone findings; this README is the current status/setup entry point.
 
+The additive [E1 operating-plan contract](docs/device-operating-plans.md) exposes
+verified individual EV/flexible schedules and solver quality from the same
+outcome as aggregate metrics. Existing aggregate consumers remain supported;
+Richard's schema review and timeline UI integration are separate follow-up.
+E1 local verification does not establish deployed device-plan support.
+
 ## Stack and prerequisites
 
 - React + TypeScript + Vite; Tailwind CSS through its Vite plugin, Recharts, Lucide React.

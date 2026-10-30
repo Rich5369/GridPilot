@@ -72,6 +72,67 @@ class BaselineResult(Contract):
     constraint_violations: list[str] = Field(default_factory=list)
 
 
+class DeviceSchedule(Contract):
+    """One configured item; arrays are hourly averages, never rounded instructions."""
+    device_id: str = Field(min_length=1)
+    device_type: Literal['ev', 'flexible']
+    scheduling_role: Literal['optimized', 'held_at_baseline']
+    required_energy_kwh: NonNegative
+    available_hours: HourWindow
+    max_power_kw: Positive
+    baseline_power_kw: HourlyDemand
+    baseline_delivered_energy_kwh: NonNegative
+    optimized_power_kw: HourlyDemand | None = None
+    optimized_delivered_energy_kwh: NonNegative | None = None
+
+    @model_validator(mode='after')
+    def consistent_energy(self) -> Self:
+        if abs(sum(self.baseline_power_kw) - self.baseline_delivered_energy_kwh) > 1e-6:
+            raise ValueError('Baseline delivered energy must match the supplied schedule')
+        if (self.optimized_power_kw is None) != (self.optimized_delivered_energy_kwh is None):
+            raise ValueError('Optimized power and delivered energy must both be present or null')
+        if self.optimized_power_kw is not None and abs(
+                sum(self.optimized_power_kw) - self.optimized_delivered_energy_kwh) > 1e-6:
+            raise ValueError('Optimized delivered energy must match the supplied schedule')
+        return self
+
+
+class OperatingPlan(Contract):
+    """Additive same-solve detail; successful verification refers to optimized loads."""
+    scheduling_mode: Literal['ev_only', 'joint']
+    solver_status: Literal['optimal', 'feasible', 'infeasible']
+    primary_status: Literal['optimal', 'feasible', 'infeasible', 'analytic_infeasibility']
+    peak_tiebreak_status: Literal['optimal', 'feasible', 'unresolved', 'not_run']
+    primary_optimum_usd: float | None = Field(default=None, allow_inf_nan=False)
+    verification_status: Literal['passed', 'unavailable']
+    warnings: list[str] = Field(default_factory=list)
+    baseline_constraint_violations: list[str] = Field(default_factory=list)
+    device_schedules: list[DeviceSchedule]
+
+    @model_validator(mode='after')
+    def consistent_quality(self) -> Self:
+        keys = [(device.device_type, device.device_id) for device in self.device_schedules]
+        if len(set(keys)) != len(keys):
+            raise ValueError('Device identities must be unique within each type')
+        if self.solver_status == 'infeasible':
+            if (self.verification_status != 'unavailable' or self.primary_optimum_usd is not None
+                    or self.primary_status not in ('infeasible', 'analytic_infeasibility')
+                    or self.peak_tiebreak_status != 'not_run'
+                    or any(d.optimized_power_kw is not None for d in self.device_schedules)):
+                raise ValueError('Infeasible plans cannot supply verified optimized schedules or optima')
+        else:
+            if self.verification_status != 'passed' or any(
+                    d.optimized_power_kw is None for d in self.device_schedules):
+                raise ValueError('Feasible plans need verified optimized schedules for every device')
+            if self.solver_status == 'optimal':
+                if self.primary_status != 'optimal' or self.primary_optimum_usd is None:
+                    raise ValueError('Optimal status requires an actual primary optimality proof')
+            elif (self.primary_status != 'feasible' or self.primary_optimum_usd is not None
+                  or self.peak_tiebreak_status != 'not_run'):
+                raise ValueError('An unproved feasible result cannot claim an optimum or peak solve')
+        return self
+
+
 class OptimizationResult(Contract):
     """Verified feasible or proven infeasible result returned by the HTTP API."""
     feasibility_status: Literal["feasible", "infeasible"]
@@ -82,6 +143,7 @@ class OptimizationResult(Contract):
     optimized_peak_demand_kw: NonNegative | None = None
     optimized_demand_kw: HourlyDemand | None = None
     constraint_violations: list[str] = Field(default_factory=list)
+    operating_plan: OperatingPlan | None = None
 
     @model_validator(mode="after")
     def consistent_result(self) -> Self:
@@ -92,6 +154,10 @@ class OptimizationResult(Contract):
                 raise ValueError("feasible results require all optimized values and no violations")
         elif any(value is not None for value in optimized) or not self.constraint_violations:
             raise ValueError("infeasible results require reasons and null optimized values")
+        if self.operating_plan is not None and (
+                (self.operating_plan.solver_status == 'infeasible')
+                != (self.feasibility_status == 'infeasible')):
+            raise ValueError('Operating plan quality must agree with aggregate feasibility')
         return self
 
 
