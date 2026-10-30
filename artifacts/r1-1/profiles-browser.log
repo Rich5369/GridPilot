@@ -1,0 +1,1 @@
+PASS: default behavior, keyboard profile selection/expansion, 24 exact values without double counting, validation, real baseline and optimized calculations, stale results, independent What-if payloads/apply/restore, real joint custom-profile optimization, infeasibility, reset, responsive layouts and no page errors.
