@@ -1,5 +1,14 @@
 # GridPilot engineering engine
 
+Current entry points include the baseline simulator, default EV-only optimizer
+and explicit joint EV/flexible-equipment mode. The shared adapter and application
+integration are complete; [local acceptance](../../docs/joint-ee-application-acceptance.md)
+and [bounded hosted acceptance](../../docs/hosted-joint-ee-acceptance.md) supersede
+older pending-integration notes below. Hosted served SHAs remain unconfirmed.
+Use [the current project README](../../README.md) for setup/status and
+[the demo walkthrough](../../docs/demo-walkthrough.md) for presentation; milestone
+reports below retain their historical measurements and limitations.
+
 A deterministic baseline simulator for a fictional small commercial office.
 No hardware, live tariff, AI, HTTP server or optimizer is required. Import from
 repository root; the package depends on Pydantic and NumPy, not FastAPI.

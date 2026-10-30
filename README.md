@@ -1,23 +1,43 @@
 # GridPilot
 
-Commercial Energy Optimization Platform — project foundation for the Meta Global
-AI Developer Hackathon 2026. A two-person team is building a dashboard and API
-alongside an independently developed energy simulator and optimizer.
+GridPilot plans one day of commercial-building electricity demand using a
+deterministic baseline simulator, OR-Tools GLOP optimizer, FastAPI and a React
+dashboard. EV-only scheduling is the default; explicit joint mode also schedules
+eligible flexible equipment. Background and HVAC remain fixed.
 
-**Current scope:** an interactive React dashboard and scenario editor, live FastAPI
-integration, an implemented EE baseline simulator, and verified OR-Tools EV
-optimization. `POST /api/optimize` returns real feasible or infeasible results.
-The overview chart still uses clearly labeled fictional demo values; optimization
-comparisons use backend results. Meta AI, a database, and backend deployment are
-not implemented. See [the Phase 3 API guide](docs/phase-3-api.md) and
-[engineering documentation](backend/simulator/README.md).
+The dashboard accepts demo, custom combined or named-source hourly fixed-demand
+profiles. Custom/named inputs replace the demo; EVs and separately modeled
+equipment are added exactly once. **Optimization** displays real backend results;
+**What-if scenarios** compares independently submitted current/alternative inputs,
+with Apply/Restore and stale-result invalidation. The **Energy overview** remains
+clearly labeled fictional demo data. Editor state is in memory, not a database.
+
+**Start here:** [engineering demo walkthrough](docs/demo-walkthrough.md),
+[API contract](docs/contracts.md), [engineering reference](backend/simulator/README.md).
+
+## Accepted behavior and public demo
+
+| Evidence | Established scope |
+| --- | --- |
+| [Local EE acceptance, PR #25](docs/joint-ee-application-acceptance.md) | Real joint dashboard/What-if; demo/custom/named profiles; constraints, charts, Apply/Restore and invalidation |
+| [Refreshed integration checks, PR #26](docs/joint-integration-audit.md) | Post-adapter local browser/API regressions |
+| [Bounded hosted EE acceptance, PR #27](docs/hosted-joint-ee-acceptance.md) | Four hosted API probes and a named-source joint dashboard/What-if workflow, independently checked |
+
+Public links recorded in the hosted report: [dashboard](https://gridpilot-weld.vercel.app)
+and [backend health](https://gridpilot-api-1tpf.onrender.com/api/health). Actual
+browser optimization requests used that backend. **Exact served frontend/backend
+commits were not confirmed**; local HEAD and build hashes are not deployment proof.
+Recorded acceptance concerns the tested scenarios, not continuous availability.
+Shared costs are daily energy-only USD; cost/peak changes do not imply reduced
+kWh or guaranteed monthly utility savings. Historical phase guides retain their
+milestone findings; this README is the current status/setup entry point.
 
 ## Stack and prerequisites
 
 - React + TypeScript + Vite; Tailwind CSS through its Vite plugin, Recharts, Lucide React.
-- Python FastAPI + Pydantic; Uvicorn; python-dotenv for backend configuration.
+- Python FastAPI + Pydantic; NumPy; OR-Tools GLOP; Uvicorn/python-dotenv.
 - Tests: pytest/httpx and Vitest/jsdom. Vite's starter includes Oxlint.
-- Git, Node.js **24 LTS** with npm, and Python **3.12+** with pip/venv recommended.
+- Git, Node.js **24** with npm, and Python **3.12+** with pip/venv recommended.
   Verified in this Linux workspace with Node 24.21.0, npm 11.19.0, Python 3.14.2,
   and Git 2.55.0. Windows instructions below have not been executed on Windows.
 
@@ -34,20 +54,20 @@ frontend/
   src/pages/            Dashboard composition
   src/services/         Configurable API client and live integration test
   src/hooks/            Health connection lifecycle and retry
-  src/types/            Preliminary shared TypeScript contracts
+  src/types/            Shared TypeScript contracts and editor types
   src/App.tsx
 backend/
   main.py               FastAPI application and CORS
   api/                  HTTP routes (CS-owned)
-  ai/                   Reserved for future Meta AI integration
+  ai/                   Server-only Meta interpretation and explanation
   models/contracts.py   Shared Pydantic contracts
   simulator/            EE-owned baseline simulator
-  optimizer/            EE-owned OR-Tools EV optimizer
-  tests/                API and contract tests
+  optimizer/            EE-owned EV/joint solver and shared adapter
+  tests/                Engineering, adapter, API and AI tests
   requirements.txt      Direct dependency compatibility ranges
   requirements-lock.txt Resolved versions from the verified environment
-sample_data/            Fictional scenario fixture
-scripts/                Live server smoke check
+sample_data/            Fictional Scenario and detailed building fixtures
+scripts/                CLI, real HTTP/browser and numerical verification tools
 docs/contracts.md      Units, assumptions and shared interfaces
 .env.example            Configuration reference
 ```
@@ -95,15 +115,17 @@ npm run dev
 Open http://localhost:5173. The backend indicator should become **Backend connected**.
 Stop the backend and press the retry icon to see **Backend offline**; restart it
 and retry to reconnect. Checking times out after five seconds. No polling is enabled.
-Run Optimization submits the scenario editor to the backend and displays the verified result.
+Select **Scenario configuration**, choose **EV-only** or **EV + flexible equipment**,
+then **Run optimization**. Genuine results appear under **Optimization**.
+Optimization and What-if need no AI credentials, hardware or live tariff feed.
 
 ### Linux / macOS / Codespaces
 
 ```bash
 python3 -m venv backend/.venv
 backend/.venv/bin/python -m pip install -r backend/requirements-lock.txt
-cp backend/.env.example backend/.env
-cp frontend/.env.example frontend/.env
+cp -n backend/.env.example backend/.env
+cp -n frontend/.env.example frontend/.env
 npm --prefix frontend ci
 backend/.venv/bin/python -m uvicorn backend.main:app --reload --port 8000
 # Separate terminal:
@@ -120,15 +142,16 @@ command. A remote host's localhost is not your browser's localhost.
 
 | File / variable | Purpose |
 | --- | --- |
-| `frontend/.env`: `VITE_API_BASE_URL` | Public backend origin, default `http://localhost:8000`; exclude `/api` |
+| `frontend/.env`: `VITE_API_BASE_URL` | Public backend origin without `/api`; development fallback `http://localhost:8000`; production requires an explicit value |
 | `frontend/.env`: `VITE_OPTIMIZATION_TIMEOUT_MS` | Optimization deadline in ms, default 45000; integer 1000–120000, invalid values fall back to default |
 | `backend/.env`: `CORS_ORIGINS` | Comma-separated allowed frontend origins; defaults to localhost and 127.0.0.1 on port 5173 |
 | Root `.env.example` | Reference only; the app does not load a root `.env` |
 
 Vite uses port 5173 with `strictPort` so it cannot silently switch to an origin
 CORS does not allow. Frontend environment values are embedded at build time:
-**never put secrets in `VITE_*` variables**. Future AI credentials belong only in
-the backend environment. No keys are needed now. CORS permits GET/POST and
+**never put secrets in `VITE_*` variables**. Optional live AI credentials belong
+only in the backend environment; optimization needs no key. The accepted hosted
+frontend used a 90000 ms optimization budget. CORS permits GET/POST and
 Content-Type without credentials; it is not authentication.
 
 Tailwind uses the [official Vite plugin setup](https://tailwindcss.com/docs/installation/using-vite).
@@ -139,10 +162,11 @@ CORS follows [FastAPI's explicit origin configuration](https://fastapi.tiangolo.
 | Endpoint | Current behavior |
 | --- | --- |
 | `GET /api/health` | 200: `{"status":"ok","project":"GridPilot"}` |
-| `POST /api/optimize` | 200: `OptimizationResult`, feasible or mathematically infeasible |
+| `POST /api/optimize` or `?scheduling_mode=ev_only` | Default EV-only; 200 `OptimizationResult` |
+| `POST /api/optimize?scheduling_mode=joint` | Joint EV/flexible equipment; same body and result schema |
 | Solver unavailable / unresolved | 503 with structured `detail.code` and `detail.message` |
 | Solver / verification / unexpected failure | 500 with a sanitized structured error; no optimization result |
-| Invalid optimization request | 422 with Pydantic validation details |
+| Invalid optimization request or mode | 422 with validation details |
 | `GET /docs` | Interactive Swagger UI |
 | `GET /openapi.json` | Machine-readable API schema |
 
@@ -154,10 +178,55 @@ Invoke-RestMethod http://localhost:8000/api/health
 curl.exe -i -X POST http://localhost:8000/api/optimize -H "Content-Type: application/json" --data-binary "@sample_data/scenario.demo.json"
 ```
 
-Read [docs/contracts.md](docs/contracts.md) before implementing simulator or
-optimizer logic. It defines the 24 one-hour intervals, kW/kWh/USD units, deadlines,
-feasibility handling and preliminary baseline policy. Costs are daily energy-only;
-actual monthly demand-charge savings require billing-period data and tariff rules.
+The body is **Scenario only**; mode is a query parameter, not a new body field.
+Do not send BuildingConfig or editor/source metadata. Named fixed sources are
+summed into `fixed_demand_kw` before submission. The Python entry point is:
+
+```python
+from backend.models.contracts import Scenario
+from backend.optimizer.interface import optimize_scenario
+
+scenario = Scenario.model_validate_json(payload_json)
+ev_only = optimize_scenario(scenario)  # Same as optimize_flexible=False
+joint = optimize_scenario(scenario, optimize_flexible=True)
+```
+
+Signature: `optimize_scenario(scenario: Scenario, *, optimize_flexible: bool = False) -> OptimizationResult`.
+Both modes share the solver, baseline policy and daily energy-only USD fields.
+Check feasibility before reading nullable optimized values. Solver failures raise
+typed exceptions rather than becoming infeasibility or zero-cost results; see
+[contracts](docs/contracts.md) for units, constraints and failure semantics.
+Detailed engineering demand-charge estimates are separate from these API costs.
+
+Existing engineering commands (repository root; substitute Windows Python path):
+
+```bash
+backend/.venv/bin/python -m backend.simulator
+backend/.venv/bin/python -m backend.optimizer
+backend/.venv/bin/python -m backend.optimizer --optimize-flexible --example joint_recovery
+```
+
+## Optional Meta integration
+
+Server-side Meta interpretation and grounded explanation are implemented. Users
+review proposed edits before Apply; applying does not run optimization. The
+engineering solver provides feasibility and numerical facts. **Joint-mode AI is
+disabled** because the current explanation path recomputes EV-only results.
+
+Live AI uses server-only `MODEL_API_KEY`; `MODEL_API_MODE` defaults to `live`.
+Code defaults are `MODEL_API_BASE_URL=https://api.meta.ai/v1` and
+`MODEL_API_MODEL=muse-spark-1.3`. Missing credentials produce an explicit AI error
+while optimization remains available. Explicit local `MODEL_API_MODE=mock` is a
+labeled fixture, rejected on Render, with no automatic live-to-mock fallback.
+
+[Phase 5](docs/phase-5-meta-api.md) records implementation/mock testing. The newer
+[Meta diagnostic report](docs/meta-render-diagnostic.md) records successful local
+status/model-list/basic inference probes on October 28, 2026, and historical
+Render access errors. Neither establishes the **current genuine hosted interpret
+→ review/apply → optimize → explain** workflow. Richard must confirm that
+separately; no current outage or hosted AI success is inferred. The newer report
+also supersedes the old startup-discovery flag. No provider requests or diagnostic
+probes are needed for the engineering demo.
 
 ## Tests and build
 
@@ -202,38 +271,23 @@ requirements rather than duplicating version ranges. To deliberately upgrade bac
 
 | Owner | Primary files and responsibilities |
 | --- | --- |
-| CS | `frontend/`, `backend/api/`, `backend/ai/`, `backend/main.py`; dashboard, API communication, future Meta AI and deployment |
-| EE | `backend/simulator/`, `backend/optimizer/`; cost calculations, electrical constraints, EV scheduling |
+| Rich5369 — CS | `frontend/`, `backend/api/`, `backend/ai/`, `backend/main.py`; application, Meta integration, browser verification and deployment |
+| shaJ46 — EE | `backend/simulator/`, `backend/optimizer/`; baseline, energy/tariffs, constraints, EV/joint scheduling, adapter and numerical verification |
 | Both | `backend/models/`, `frontend/src/types/`, `docs/contracts.md`, sample scenarios; agree on contract changes first |
 
-The EE baseline simulator and EV-only optimizer are implemented. FastAPI now calls
-`optimize_scenario` and returns the existing `OptimizationResult` contract. HVAC,
-background and flexible-equipment schedules are held fixed; only EV charging is
-optimized. Shared API costs remain daily energy-only. Meta Model API integration is implemented with explicit mock mode; authenticated
-live verification is pending. See [Phase 5 setup and Render activation](docs/phase-5-meta-api.md).
+Richard's remaining handoff is confirming actual served revisions and the genuine
+hosted Meta workflow. The team supplies final submission details and presentation
+assets. The [demo guide](docs/demo-walkthrough.md) gives a suggested 2–3 minute
+engineering segment, not official competition timing or rules. No additional EE
+feature or acceptance campaign is required to explain the recorded results.
 
-The Phase 3.5 hardening work adds a configurable optimization timeout and browser QA.
-See [the hardening and deployment guide](docs/phase-3.5-hardening.md). Next CS task:
-review deployment configuration and perform a production-origin smoke check after approval. Coordinate future equipment
-or HVAC optimization and contract extensions with EE before implementation.
-
-Use short feature branches and small pull requests:
-
-```bash
-git switch -c feat/project-foundation
-# Inspect changes, run tests/build, then stage explicit paths:
-git add README.md .gitignore .env.example frontend backend sample_data docs scripts
-git diff --cached --stat
-git commit -m "Set up GridPilot frontend and backend foundation"
-# Push only when you decide the changes are ready:
-git push -u origin feat/project-foundation
-```
-
-For subsequent work, create branches from the team's current default branch and
+Use focused branches from the team's current default branch and
 open PRs for review. Coordinate changes to contracts and lockfiles; keep EE work
 inside its owned modules to minimize conflicts. Never force-push shared branches
 or commit `.env`, virtual environments, node_modules, or build output.
 
-## Interactive dashboard (Phase 2)
+## Historical implementation guides
 
-See [the Phase 2 handoff](docs/phase-2-dashboard.md) for the implemented dashboard, demo assumptions, API adapter, verification, local startup and merge/deployment instructions.
+The [Phase 2 handoff](docs/phase-2-dashboard.md), [Phase 3 API guide](docs/phase-3-api.md)
+and later phase reports preserve implementation history. Use the current setup,
+contract and acceptance links above when their old pending-work notes differ.
