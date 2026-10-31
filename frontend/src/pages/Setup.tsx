@@ -1,3 +1,8 @@
+import { ScenarioSummary } from "../components/dashboard/ScenarioSummary";
+import { AnalysisSelect } from "../components/configuration/AnalysisSelect";
+import { HourSelect } from "../components/configuration/HourSelect";
+import { formatWindow } from "../data/time";
+import { analysisLabel, effectiveMode } from "../data/analysisOptions";
 import { useEffect, useState, type FormEvent, type ReactNode } from "react";
 import {
   ArrowRight,
@@ -15,7 +20,7 @@ import {
 } from "lucide-react";
 import { ScenarioPanel } from "../components/configuration/ScenarioPanel";
 import { profileSource, validateEditor } from "../data/demoScenario";
-import type { SchedulingMode } from "../services/api";
+
 import buildingImage from "../assets/commercial-building.webp";
 
 import type { WorkspaceSetup } from "../types/workspace";
@@ -88,7 +93,10 @@ export function Setup({
         (value.editor.opening !== draft.editor.opening ||
           value.editor.closing !== draft.editor.closing)
       )
-        next.businessContext.operating_hours = `${value.editor.opening}:00–${value.editor.closing}:00`;
+        next.businessContext.operating_hours = formatWindow(
+          value.editor.opening,
+          value.editor.closing,
+        );
     }
     setDraft(next);
     onDraftChange?.(next, step);
@@ -161,7 +169,11 @@ export function Setup({
             energy.
           </p>
         </div>
-        {entryMessage && <p className="workspace-result-notice" role="status">{entryMessage}</p>}
+        {entryMessage && (
+          <p className="workspace-result-notice" role="status">
+            {entryMessage}
+          </p>
+        )}
         <div className="setup-layout">
           <aside className="setup-intro">
             <div className="intro-copy">
@@ -275,7 +287,7 @@ export function Setup({
                         "A little context makes this workspace yours. Start with the basics.",
                         "Review the example inputs or replace them with your own hourly data.",
                         "Choose up to three priorities. Goals guide your planning, not the solver objective.",
-                        "Check your inputs, then explore your building’s energy plan.",
+                        "Check your inputs, then calculate modeled daily electricity use, costs and scheduling outcomes.",
                       ][step]
                     }
                   </p>
@@ -318,41 +330,27 @@ export function Setup({
                           </select>
                         </label>
                         <label>
-                          Opening hour
-                          <input
-                            type="number"
-                            min="0"
-                            max="23"
-                            step="1"
+                          Opening time
+                          <HourSelect
                             value={draft.editor.opening}
-                            onChange={(e) =>
+                            end={false}
+                            onChange={(value) =>
                               update({
-                                editor: {
-                                  ...draft.editor,
-                                  opening: e.target.value,
-                                },
+                                editor: { ...draft.editor, opening: value },
                               })
                             }
-                            required
                           />
                         </label>
                         <label>
-                          Closing hour
-                          <input
-                            type="number"
-                            min="1"
-                            max="24"
-                            step="1"
+                          Closing time
+                          <HourSelect
                             value={draft.editor.closing}
-                            onChange={(e) =>
+                            end={true}
+                            onChange={(value) =>
                               update({
-                                editor: {
-                                  ...draft.editor,
-                                  closing: e.target.value,
-                                },
+                                editor: { ...draft.editor, closing: value },
                               })
                             }
-                            required
                           />
                         </label>
                         <label>
@@ -387,65 +385,27 @@ export function Setup({
                         </label>
                       </div>
                       <p className="field-hint">
-                        Use whole hours in building-local time, e.g. 8–18.
-                        Business context does not generate or replace measured
-                        demand.
+                        Use whole hours in building-local time, e.g. 8:00
+                        AM–6:00 PM. End times are excluded. Overnight windows
+                        are not supported. Business context does not generate or
+                        replace measured demand.
                       </p>
-                      <fieldset className="setup-choices">
-                        <legend>Loads to include in your scenario</legend>
-                        <div>
-                          {[
-                            ["EV charging", Number(draft.editor.chargers) > 0],
-                            [
-                              "Interruptible equipment",
-                              Number(draft.editor.duration) > 0,
-                            ],
-                          ].map(([label, selected]) => (
-                            <button
-                              key={String(label)}
-                              type="button"
-                              aria-pressed={Boolean(selected)}
-                              onClick={() =>
-                                update({
-                                  editor: {
-                                    ...draft.editor,
-                                    ...(label === "EV charging"
-                                      ? { chargers: selected ? "0" : "2" }
-                                      : { duration: selected ? "0" : "2" }),
-                                  },
-                                })
-                              }
-                            >
-                              <span className="choice-box">
-                                {selected && <Check size={12} />}
-                              </span>
-                              {label}
-                            </button>
-                          ))}
-                          <span className="fixed-load-chip">
-                            <Building2 size={13} />
-                            Fixed building demand
-                          </span>
-                        </div>
-                      </fieldset>
+                      <AnalysisSelect
+                        id="setup-analysis-choice"
+                        editor={draft.editor}
+                        mode={draft.mode}
+                        onChange={(editor, mode) => update({ editor, mode })}
+                      />
                     </>
                   )}
                   {step === 1 && (
                     <div className="setup-energy">
-                      <label className="setup-mode">
-                        Scheduling mode
-                        <select
-                          value={draft.mode}
-                          onChange={(e) =>
-                            update({ mode: e.target.value as SchedulingMode })
-                          }
-                        >
-                          <option value="joint">EV + flexible equipment</option>
-                          <option value="ev_only">
-                            EV-only · hold equipment at baseline
-                          </option>
-                        </select>
-                      </label>
+                      <AnalysisSelect
+                        id="setup-analysis-choice"
+                        editor={draft.editor}
+                        mode={draft.mode}
+                        onChange={(editor, mode) => update({ editor, mode })}
+                      />
                       <p className="setup-notice">
                         <Sparkles size={16} />
                         Example demand and rates are prefilled. They are
@@ -520,15 +480,33 @@ export function Setup({
                           </dd>
                         </div>
                         <div>
+                          <dt>Operating hours</dt>
+                          <dd>
+                            {formatWindow(
+                              draft.editor.opening,
+                              draft.editor.closing,
+                            )}
+                          </dd>
+                        </div>
+                        <div>
+                          <dt>Custom equipment</dt>
+                          <dd>
+                            {draft.editor.customEquipment
+                              ? `${draft.editor.customEquipment.name} · ${draft.editor.customEquipment.kind}`
+                              : "None"}
+                          </dd>
+                        </div>
+                        <div>
                           <dt>Site power limit</dt>
                           <dd>{draft.editor.limit} kW</dd>
                         </div>
                         <div>
                           <dt>Scheduling</dt>
                           <dd>
-                            {draft.mode === "joint"
-                              ? "EV + flexible equipment"
-                              : "EV-only"}
+                            {analysisLabel(
+                              draft.editor,
+                              effectiveMode(draft.editor, draft.mode),
+                            )}
                           </dd>
                         </div>
                         <div>
@@ -538,10 +516,19 @@ export function Setup({
                           </dd>
                         </div>
                       </dl>
+                      <details className="setup-review-energy">
+                        <summary>Review exact energy inputs</summary>
+                        <ScenarioSummary
+                          editor={draft.editor}
+                          mode={effectiveMode(draft.editor, draft.mode)}
+                          label="Reviewed energy inputs"
+                        />
+                      </details>
                       <p className="setup-notice">
-                        {profileSource(draft.editor)}. No optimization has run
-                        yet. Your dashboard will show results only after you
-                        submit a scenario.
+                        {profileSource(draft.editor)}. Create workspace and
+                        calculate submits these reviewed energy inputs once to
+                        calculate modeled daily results. It does not request an
+                        AI reply.
                       </p>
                     </>
                   )}
@@ -570,7 +557,7 @@ export function Setup({
                           "Continue to energy profile",
                           "Continue to your goals",
                           "Review workspace",
-                          "Create my workspace",
+                          "Create workspace and calculate",
                         ][step]
                       }
                       <ArrowRight size={17} />

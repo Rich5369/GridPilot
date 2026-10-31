@@ -36,13 +36,30 @@ export interface SimulationResult {
   energyCostUsd: number
   peakKw: number
 }
-export type ScenarioField = keyof Omit<ScenarioEditor, 'demandProfile'>
+export type ScenarioField = keyof Omit<
+  ScenarioEditor,
+  'demandProfile' | 'analysisChoice' | 'customEquipment'
+>
 export interface DemandProfile {
   mode: 'demo' | 'custom' | 'sources'
   values: string[]
   sources?: { category: string; values: string[] }[]
 }
+export type AnalysisChoice = 'building' | 'flexible' | 'ev' | 'joint' | 'held'
+export interface CustomEquipment {
+  id: 'custom-equipment'
+  name: string
+  description: string
+  kind: 'context' | 'fixed' | 'schedulable'
+  energy: string
+  power: string
+  start: string
+  end: string
+  interruptible: boolean
+}
 export interface ScenarioEditor {
+  analysisChoice?: AnalysisChoice
+  customEquipment?: CustomEquipment
   demandProfile?: DemandProfile
   opening: string
   closing: string

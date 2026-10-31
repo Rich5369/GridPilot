@@ -32,7 +32,7 @@ export function emptyWorkspace(): WorkspaceSetup {
     employees: "",
     monthlyBill: "",
     goals: workspaceGoals.slice(0, 2),
-    editor: { ...defaultEditor },
+    editor: { ...defaultEditor, analysisChoice: "building" },
     mode: "joint",
   };
 }
@@ -85,10 +85,49 @@ function choice(value: unknown, options: readonly string[]) {
 function editor(value: unknown): boolean {
   if (
     !object(value) ||
-    !keys(value, Object.keys(defaultEditor), ["demandProfile"]) ||
+    !keys(value, Object.keys(defaultEditor), [
+      "demandProfile",
+      "analysisChoice",
+      "customEquipment",
+    ]) ||
     !Object.keys(defaultEditor).every((k) => numericDraft(value[k]))
   )
     return false;
+  if (
+    value.analysisChoice !== undefined &&
+    !choice(value.analysisChoice, [
+      "building",
+      "flexible",
+      "ev",
+      "joint",
+      "held",
+    ])
+  )
+    return false;
+  if (value.customEquipment !== undefined) {
+    const c = value.customEquipment;
+    if (
+      !object(c) ||
+      !keys(c, [
+        "id",
+        "name",
+        "description",
+        "kind",
+        "energy",
+        "power",
+        "start",
+        "end",
+        "interruptible",
+      ]) ||
+      c.id !== "custom-equipment" ||
+      !text(c.name, 100) ||
+      !text(c.description, 500) ||
+      !choice(c.kind, ["context", "fixed", "schedulable"]) ||
+      !["energy", "power", "start", "end"].every((k) => numericDraft(c[k])) ||
+      typeof c.interruptible !== "boolean"
+    )
+      return false;
+  }
   if (!Object.hasOwn(value, "demandProfile")) return true;
   const profile = value.demandProfile;
   if (

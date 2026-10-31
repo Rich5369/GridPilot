@@ -32,6 +32,7 @@ function saved(completed = false): SavedWorkspace {
       businessType: "Warehouse & logistics",
       editor: {
         ...emptyWorkspace().editor,
+        analysisChoice: "joint",
         arrival: "15",
         deadline: "22",
         limit: "17",
@@ -68,10 +69,16 @@ async function input(selector: string, value: string) {
   expect(el).toBeTruthy();
   await act(async () => {
     Object.getOwnPropertyDescriptor(
-      HTMLInputElement.prototype,
+      el.tagName === "SELECT"
+        ? HTMLSelectElement.prototype
+        : HTMLInputElement.prototype,
       "value",
     )!.set!.call(el, value);
-    el.dispatchEvent(new Event("input", { bubbles: true }));
+    el.dispatchEvent(
+      new Event(el.tagName === "SELECT" ? "change" : "input", {
+        bubbles: true,
+      }),
+    );
   });
 }
 beforeEach(() => {
@@ -127,9 +134,9 @@ it("offers Continue and persists real dashboard input/mode changes and Edit buil
   expect(host.textContent).toContain("No optimizer result has been restored");
   await click("Scenario configuration");
   await input("#limit", "19.5");
-  const select = host.querySelector<HTMLSelectElement>("#scheduling-mode")!;
+  const select = host.querySelector<HTMLSelectElement>("#analysis-choice")!;
   await act(async () => {
-    select.value = "ev_only";
+    select.value = "held";
     select.dispatchEvent(new Event("change", { bubbles: true }));
   });
   let value = JSON.parse(localStorage.getItem(WORKSPACE_KEY)!);
@@ -370,3 +377,188 @@ it("restores a dashboard section directly, handles history and Home Continue wit
     fetchMock.mock.calls.filter(([u]) => String(u).includes("/api/optimize")),
   ).toHaveLength(0);
 });
+
+function fixedResult(s: import("./types/api").Scenario) {
+  const demand = s.fixed_demand_kw;
+  const cost = demand.reduce(
+    (total, v, h) => total + v * s.electricity_prices_usd_per_kwh[h],
+    0,
+  );
+  return {
+    result_id: "setup-execution",
+    feasibility_status: "feasible",
+    baseline_electricity_cost_usd: cost,
+    optimized_electricity_cost_usd: cost,
+    baseline_peak_demand_kw: Math.max(...demand),
+    optimized_peak_demand_kw: Math.max(...demand),
+    baseline_demand_kw: demand,
+    optimized_demand_kw: demand,
+    constraint_violations: [],
+  };
+}
+it("starts exactly one event-driven setup calculation in Strict Mode and opens populated overview", async () => {
+  const value = saved();
+  value.step = 3;
+  value.workspace.editor = {
+    ...value.workspace.editor,
+    analysisChoice: "building",
+    demandProfile: { mode: "custom", values: Array(24).fill("0") },
+    offPeak: "0",
+    peak: "0",
+  };
+  seed(value);
+  let resolve!: (r: Response) => void;
+  fetchMock.mockImplementation((url: string) =>
+    String(url).includes("/api/optimize")
+      ? new Promise((r) => {
+          resolve = r;
+        })
+      : Promise.resolve(
+          new Response(JSON.stringify({ status: "ok", project: "GridPilot" })),
+        ),
+  );
+  await mount();
+  const submit = [...host.querySelectorAll("button")].find((b) =>
+    b.textContent?.includes("Create workspace and calculate"),
+  )!;
+  await act(async () => {
+    submit.click();
+    submit.click();
+  });
+  const requests = fetchMock.mock.calls.filter(([u]) =>
+    String(u).includes("/api/optimize"),
+  );
+  expect(requests).toHaveLength(1);
+  expect(location.hash).toBe("#overview");
+  expect(host.textContent).toContain("Calculating your submitted scenario");
+  const scenario = JSON.parse(requests[0][1].body);
+  expect(scenario.ev_requirements).toEqual([]);
+  expect(scenario.flexible_equipment).toEqual([]);
+  expect(scenario.fixed_demand_kw).toEqual(Array(24).fill(0));
+  expect(requests[0][0]).toContain("scheduling_mode=joint");
+  await act(async () =>
+    resolve(new Response(JSON.stringify(fixedResult(scenario)))),
+  );
+  expect(location.hash).toBe("#overview");
+  expect(host.textContent).toContain("No schedulable equipment is configured");
+  expect(host.textContent).toContain("0.0 kWh");
+  expect(host.textContent).not.toContain("Calculating your submitted scenario");
+  expect(
+    JSON.stringify(JSON.parse(localStorage.getItem(WORKSPACE_KEY)!)),
+  ).not.toContain("setup-execution");
+  expect(
+    fetchMock.mock.calls.filter(([u]) => String(u).includes("/api/ai/")),
+  ).toHaveLength(0);
+  await reopen();
+  expect(
+    fetchMock.mock.calls.filter(([u]) => String(u).includes("/api/optimize")),
+  ).toHaveLength(1);
+  expect(host.textContent).toContain("No optimizer result has been restored");
+});
+it("keeps late setup results tied to their snapshot and recalculates only on explicit Run", async () => {
+  const value = saved();
+  value.step = 3;
+  value.workspace.editor.analysisChoice = "building";
+  seed(value);
+  let resolve!: (r: Response) => void;
+  let scenario: import("./types/api").Scenario;
+  fetchMock.mockImplementation((url: string, init: RequestInit) => {
+    if (!String(url).includes("/api/optimize"))
+      return Promise.resolve(
+        new Response(JSON.stringify({ status: "ok", project: "GridPilot" })),
+      );
+    scenario = JSON.parse(init.body as string);
+    return new Promise((r) => {
+      resolve = r;
+    });
+  });
+  await mount();
+  await click("Create workspace and calculate");
+  const original = scenario!;
+  await click("Scenario configuration");
+  await input("#limit", "12");
+  await act(async () =>
+    resolve(new Response(JSON.stringify(fixedResult(original)))),
+  );
+  await click("Energy overview");
+  expect(host.textContent).toContain("Inputs changed");
+  expect(
+    host.querySelector('[aria-label="Submitted snapshot"]')!.textContent,
+  ).toContain("17 kW");
+  expect(
+    host.querySelector('[aria-label="Editable draft"]')!.textContent,
+  ).toContain("12 kW");
+  await click("Run optimization");
+  expect(scenario!.building_max_demand_kw).toBe(12);
+  await act(async () =>
+    resolve(new Response(JSON.stringify(fixedResult(scenario)))),
+  );
+  expect(
+    fetchMock.mock.calls.filter(([u]) => String(u).includes("/api/optimize")),
+  ).toHaveLength(2);
+});
+it("reports setup solver failure with preserved inputs and explicit retry, never infeasibility", async () => {
+  const value = saved();
+  value.step = 3;
+  value.workspace.editor.analysisChoice = "building";
+  seed(value);
+  fetchMock.mockImplementation(
+    async (url: string) =>
+      new Response(
+        JSON.stringify(
+          String(url).includes("/api/optimize")
+            ? { detail: { code: "unavailable" } }
+            : { status: "ok", project: "GridPilot" },
+        ),
+        { status: String(url).includes("/api/optimize") ? 503 : 200 },
+      ),
+  );
+  await mount();
+  await click("Create workspace and calculate");
+  expect(host.textContent).toContain("Feasibility was not determined");
+  expect(host.textContent).not.toContain("No feasible schedule");
+  await click("Scenario configuration");
+  expect(host.querySelector<HTMLInputElement>("#limit")!.value).toBe("17");
+  expect(
+    [...host.querySelectorAll("button")].find(
+      (b) => b.textContent?.trim() === "Run optimization",
+    )!.disabled,
+  ).toBe(false);
+});
+it.each(["mode", "leave"] as const)(
+  "does not apply a late setup reply after %s changes",
+  async (change) => {
+    const value = saved();
+    value.step = 3;
+    value.workspace.editor.analysisChoice = "building";
+    seed(value);
+    let resolve!: (r: Response) => void,
+      scenario!: import("./types/api").Scenario;
+    fetchMock.mockImplementation((url: string, init: RequestInit) => {
+      if (!String(url).includes("/api/optimize"))
+        return Promise.resolve(
+          new Response(JSON.stringify({ status: "ok", project: "GridPilot" })),
+        );
+      scenario = JSON.parse(init.body as string);
+      return new Promise((r) => {
+        resolve = r;
+      });
+    });
+    await mount();
+    await click("Create workspace and calculate");
+    if (change === "mode") await input("#analysis-choice", "ev");
+    else
+      await act(async () => {
+        history.pushState(null, "", "#home");
+        window.dispatchEvent(new HashChangeEvent("hashchange"));
+      });
+    await act(async () =>
+      resolve(new Response(JSON.stringify(fixedResult(scenario)))),
+    );
+    if (change === "leave") await click("Continue to your building");
+    expect(host.querySelector('[aria-label="Submitted snapshot"]')).toBeNull();
+    expect(
+      fetchMock.mock.calls.filter(([u]) => String(u).includes("/api/optimize")),
+    ).toHaveLength(1);
+  },
+);

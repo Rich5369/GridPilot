@@ -1,3 +1,4 @@
+import { formatWindow } from '../../data/time'
 import type { ScenarioEditor } from '../../types/dashboard'
 import {
   background,
@@ -116,8 +117,7 @@ export function DemandProfileEditor({
                 {source.values.map((value, hour) => (
                   <div className="field" key={hour}>
                     <label htmlFor={`${id}-source-${index}-${hour}`}>
-                      {String(hour).padStart(2, '0')}:00–
-                      {String(hour + 1).padStart(2, '0')}:00 (kW)
+                      {formatWindow(hour, hour + 1)} (kW)
                     </label>
                     <input
                       id={`${id}-source-${index}-${hour}`}
@@ -191,9 +191,9 @@ export function DemandProfileEditor({
         <details className="profile-hours">
           <summary>Edit 24 hourly demand values (kW)</summary>
           <p>
-            Each value is the average power during that hour. 09:00–10:00 covers
-            one hour. Switching back to demonstration keeps your custom entries
-            for this draft.
+            Each value is the average power during that hour. 9:00 AM–10:00 AM
+            covers one hour. Switching back to demonstration keeps your custom
+            entries for this draft.
           </p>
           {values.length !== 24 && (
             <p role="alert">Enter exactly 24 hourly values.</p>
@@ -201,7 +201,7 @@ export function DemandProfileEditor({
           <div className="profile-hour-grid">
             {values.map((value, hour) => {
               const hourId = `${id}-${hour}`
-              const label = `${String(hour).padStart(2, '0')}:00–${String(hour + 1).padStart(2, '0')}:00`
+              const label = formatWindow(hour, hour + 1)
               return (
                 <div className="field" key={hour}>
                   <label htmlFor={hourId}>{label} (kW)</label>

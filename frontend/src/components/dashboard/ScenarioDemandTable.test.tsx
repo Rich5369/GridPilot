@@ -7,10 +7,19 @@ import { defaultEditor } from '../../data/demoScenario'
 import type { ScenarioEditor } from '../../types/dashboard'
 Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true })
 let container: HTMLDivElement, root: Root
-beforeEach(() => { container = document.createElement('div'); root = createRoot(container) })
-afterEach(async () => { await act(async () => root.unmount()) })
+beforeEach(() => {
+  container = document.createElement('div')
+  root = createRoot(container)
+})
+afterEach(async () => {
+  await act(async () => root.unmount())
+})
 async function render(editor: ScenarioEditor) {
-  await act(async () => root.render(<ScenarioDemandTable editor={editor} label="Submitted snapshot" />))
+  await act(async () =>
+    root.render(
+      <ScenarioDemandTable editor={editor} label="Submitted snapshot" />,
+    ),
+  )
 }
 it('shows every custom entry, preserving zero and entered precision with hour and unit labels', async () => {
   const values = Array.from({ length: 24 }, (_, hour) => String(hour / 8))
@@ -18,29 +27,58 @@ it('shows every custom entry, preserving zero and entered precision with hour an
   await render({ ...defaultEditor, demandProfile: { mode: 'custom', values } })
   const rows = [...container.querySelectorAll('tbody tr')]
   expect(rows).toHaveLength(24)
-  expect(rows.map(row => row.querySelector('td')!.textContent)).toEqual(values)
-  expect(rows[0].querySelector('th')!.textContent).toBe('00:00–01:00')
-  expect(rows[23].querySelector('th')!.textContent).toBe('23:00–24:00')
-  expect(container.querySelector('caption')!.textContent).toContain('Submitted snapshot · Custom fixed-demand inputs · kW')
-  expect(container.querySelector('[role="region"]')!.getAttribute('tabindex')).toBe('0')
+  expect(rows.map((row) => row.querySelector('td')!.textContent)).toEqual(
+    values,
+  )
+  expect(rows[0].querySelector('th')!.textContent).toBe(
+    '12:00 AM–1:00 AM (end excluded)',
+  )
+  expect(rows[23].querySelector('th')!.textContent).toBe(
+    '11:00 PM–12:00 AM — end of day (end excluded)',
+  )
+  expect(container.querySelector('caption')!.textContent).toContain(
+    'Submitted snapshot · Custom fixed-demand inputs · kW',
+  )
+  expect(
+    container.querySelector('[role="region"]')!.getAttribute('tabindex'),
+  ).toBe('0')
   expect(container.querySelectorAll('tbody th[scope="row"]')).toHaveLength(24)
 })
 it('labels named sources separately and displays the submitted combined demand', async () => {
-  await render({ ...defaultEditor, demandProfile: { mode: 'sources', values: [], sources: [
-    { category: 'Lighting', values: Array(24).fill('2') },
-    { category: 'Refrigeration', values: Array(24).fill('1.25') },
-  ] } })
-  expect([...container.querySelectorAll('thead th')].map(th => th.textContent)).toEqual([
-    'Building-local hour', 'Lighting (kW)', 'Refrigeration (kW)', 'Combined fixed demand (kW)',
+  await render({
+    ...defaultEditor,
+    demandProfile: {
+      mode: 'sources',
+      values: [],
+      sources: [
+        { category: 'Lighting', values: Array(24).fill('2') },
+        { category: 'Refrigeration', values: Array(24).fill('1.25') },
+      ],
+    },
+  })
+  expect(
+    [...container.querySelectorAll('thead th')].map((th) => th.textContent),
+  ).toEqual([
+    'Building-local hour',
+    'Lighting (kW)',
+    'Refrigeration (kW)',
+    'Combined fixed demand (kW)',
   ])
   for (const row of container.querySelectorAll('tbody tr')) {
-    expect([...row.querySelectorAll('td')].map(td => td.textContent)).toEqual(['2', '1.25', '3.25'])
+    expect([...row.querySelectorAll('td')].map((td) => td.textContent)).toEqual(
+      ['2', '1.25', '3.25'],
+    )
   }
 })
 it('does not turn an incomplete draft value into a displayed zero', async () => {
-  await render({ ...defaultEditor, demandProfile: { mode: 'custom', values: Array(24).fill('') } })
+  await render({
+    ...defaultEditor,
+    demandProfile: { mode: 'custom', values: Array(24).fill('') },
+  })
   expect(container.querySelector('table')).toBeNull()
-  expect(container.textContent).toContain('unavailable until the draft profile is complete')
+  expect(container.textContent).toContain(
+    'unavailable until the draft profile is complete',
+  )
 })
 it('does not present demo defaults as custom submitted inputs', async () => {
   await render(defaultEditor)
