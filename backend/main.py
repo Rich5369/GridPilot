@@ -6,6 +6,8 @@ from contextlib import asynccontextmanager
 
 from dotenv import load_dotenv
 from fastapi import FastAPI
+from fastapi.exceptions import RequestValidationError
+from backend.api.validation import validation_error_response
 from fastapi.middleware.cors import CORSMiddleware
 
 from backend.api.routes import router
@@ -24,6 +26,7 @@ async def lifespan(app):
 
 
 app = FastAPI(title="GridPilot API", version="0.1.0", lifespan=lifespan)
+app.add_exception_handler(RequestValidationError, validation_error_response)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[origin.strip() for origin in os.getenv(

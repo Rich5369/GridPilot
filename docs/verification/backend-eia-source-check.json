@@ -1,0 +1,10 @@
+{
+  "source": "https://www.eia.gov/electricity/monthly/epm_table_grapher.php?t=epmt_5_6_a",
+  "period": "2026-08",
+  "released_at": "2026-10-23",
+  "checked_at": "2026-10-31 00:17:32.802687+00:00",
+  "areas": 51,
+  "missing": 0,
+  "snapshot_period": "2026-08",
+  "differences": []
+}
