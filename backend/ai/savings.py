@@ -80,7 +80,7 @@ async def savings_conversation(body: SavingsConversationRequest) -> SavingsConve
             'request': body.request, 'history': [t.model_dump() for t in body.history],
             'profile': body.evidence.profile.model_dump(), 'catalog': list(CATALOG.values()),
             'category_applicability': body.category_applicability,
-        })
+        }, reasoning_effort='low')
         categories = selection.categories
     except HTTPException:
         # Preserve valid calculations on provider/configuration/schema failures. No retry.

@@ -49,7 +49,7 @@ def test_exact_results_multiple_and_provenance():
 
 def test_free_text_never_becomes_calculator_input(monkeypatch):
     captured = {}
-    def select(schema, instructions, payload):
+    def select(schema, instructions, payload, **kwargs):
         captured.update(payload)
         return schema(categories=['led']), 'meta'
     monkeypatch.setattr(advisor, 'generate', select)
@@ -114,7 +114,7 @@ def test_unknown_inventory_is_investigation_not_action(monkeypatch, business):
 @pytest.mark.parametrize('business', ['office', 'warehouse', 'manufacturing'])
 def test_explicit_absent_equipment_cannot_be_selected(monkeypatch, business):
     captured = {}
-    def select(schema, instructions, payload):
+    def select(schema, instructions, payload, **kwargs):
         captured.update(payload)
         return schema(categories=['scheduling', 'refrigeration', 'led']), 'meta'
     monkeypatch.setattr(advisor, 'generate', select)
