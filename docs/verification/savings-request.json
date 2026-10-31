@@ -1,0 +1,33 @@
+{
+  "profile": {
+    "business_type": "office"
+  },
+  "location": {
+    "state": "California"
+  },
+  "measures": [
+    {
+      "id": "office-led-scenario",
+      "category": "led",
+      "load_id": "office-main-lighting",
+      "evidence_kind": "synthetic",
+      "evidence_reference": "Fictional integration example; not customer savings",
+      "fixture_count": 100,
+      "old_watts": 60.0,
+      "new_watts": 10.0,
+      "hours_per_day": 10.0,
+      "days_per_year": 250,
+      "equivalent_service_confirmed": true,
+      "installation_cost_usd": 2500.0,
+      "annual_incremental_cost_usd": 0.0,
+      "rate": {
+        "usd_per_kwh": 0.2,
+        "source": "Fictional flat-rate scenario; not a utility offering",
+        "valid_from": "2026-01-01",
+        "valid_through": "2026-12-31",
+        "customer_applicability_confirmed": true,
+        "flat_avoidable_energy_rate_confirmed": true
+      }
+    }
+  ]
+}

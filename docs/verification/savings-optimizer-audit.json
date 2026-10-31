@@ -1,0 +1,3139 @@
+{
+  "source": "synthetic engineering inputs; no measured business data; no live AI",
+  "utc": "2026-10-31T02:46:57.329151+00:00",
+  "commit": "6f4337acc9ffbdfacb23f3b5dfbdede37e0283e1",
+  "working_tree_changes": [
+    " M backend/main.py",
+    "?? backend/savings/",
+    "?? backend/tests/test_savings.py",
+    "?? docs/business-savings-engine.md",
+    "?? docs/verification/savings-optimizer-audit.json",
+    "?? docs/verification/savings-request.json",
+    "?? docs/verification/savings-response.json"
+  ],
+  "source_sha256": {
+    "backend/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "backend/ai/advisor.py": "56cb5799552c1efd76c522f068ffd7a38adbcdefa1566190def8ed4ec53498c0",
+    "backend/ai/completion_diagnostics.py": "ebd2491e1f9568b87c005165b514e2bd5789a828d96063b49c4494d688cd492c",
+    "backend/ai/cost_attribution.py": "6d106db43e153f6baa8a0d4f9ced284b1d0aba6d2834dc3ff6c2c745e1401230",
+    "backend/ai/models.py": "1faecf2700a72961daf9b07c74b1af0b975e1dcec110b63b47e9154d6f13dad2",
+    "backend/ai/proposals.py": "9669fa9af1335935759391308514516b7eb2e98901e9d2635dd5de0bab6c98b1",
+    "backend/ai/routes.py": "5df4bff3eb9dcbbefa125dfc155a66979652129597438c9a7d7584841bea1f75",
+    "backend/ai/service.py": "38648ca99987e99a74c23a25691051c187ad524f092941cd58364ea3ac16c364",
+    "backend/ai/snapshots.py": "a5db62ba2523cba770b9f7d441f8c35fd97b890e11b15a8de18b1f5c92c4b40f",
+    "backend/ai/startup_diagnostic.py": "02ce3a8aa193aca21190fe220c3e9892f213673a3e01b75491cf12267cc90cde",
+    "backend/api/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "backend/api/routes.py": "a99121cf0a7034ba0ee526e9ad32416a13d7352893eb269b2a19baf7e7478c90",
+    "backend/api/validation.py": "2419a9923036bf88155a1ffc0b098aa669ee76ac40d9dc4bcb0957278003a2e4",
+    "backend/eia/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "backend/eia/retail.py": "0a60b7e35441d5c288b79afcee586493872811c64709bfbbd53a9d598a62666d",
+    "backend/main.py": "a8c034689d25296a42092bab2a63a2cfb079f538a585a9149fc06a358e4520c3",
+    "backend/models/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "backend/models/contracts.py": "637ad9ce9171f8a2296cbbc24c5ce89343483e1f95d03c09382d0b23f07a70ea",
+    "backend/optimizer/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "backend/optimizer/__main__.py": "3b6f1aa02e6f0dd8215a607720bb029d15f41c0afcd4be88447f58f5bacec89e",
+    "backend/optimizer/constraints.py": "f20b92bd734058b5869a9ab72214f3ad5cccafcce0c1e490ac7535b34675e517",
+    "backend/optimizer/infeasibility.py": "d595c5127b4c0fd13c3aad3098659c414e4a1c5c3ca9863fdee5bc704f309521",
+    "backend/optimizer/interface.py": "0e23c3e1aaf34e6b3f305035cda4d89f5553a65847bb11aa81e2df7103e0ff0e",
+    "backend/optimizer/operating_plan.py": "4512bdf2ed38200eae943a959f2583349c1e3869672e04c2acc1109ff697a315",
+    "backend/optimizer/scheduler.py": "73266f1c9d90dfdf82d1d56f11a4e8a6a478daaf305282675f75ea299ed67783",
+    "backend/optimizer/solver.py": "ea46de7dfd80b76c36df53fdb03d57f4f7305976a5e04a6f58535cc51d161d1f",
+    "backend/savings/__init__.py": "ee4363d72e2bee5b25e7a2b07e94eaecb006a48b3fbc87c7221b161e531df607",
+    "backend/savings/calculators.py": "117c2cf8238a31446b07134dcc1f0ba973cb5c77cde1db7f2ce7a857abadf0db",
+    "backend/savings/catalog.py": "4b1507f3e8c4de25958f5436013966488fec5a2beef3a1ed3631916808800dbd",
+    "backend/savings/models.py": "3030b72bddf33648fb08469144878151f0f2577541651a872fb2e41736357188",
+    "backend/savings/routes.py": "11de09d809d6d46f2100a0dafa3bc81300ae78698aceea1a73923b48bcc454e5",
+    "backend/savings/service.py": "95d6936520d52c422dae10782413b51c8f9c143f090bf34b0b40eb11884c1fe4",
+    "backend/simulator/__init__.py": "c85a9367fe090ab45b8ed39ae7c1c293a94331ae016b8ecedd4b1ef532dfe135",
+    "backend/simulator/__main__.py": "0f1010b2876c114bfd834c3f1b42398cbd5b61a87acc4b025884ff78b519f28f",
+    "backend/simulator/building.py": "01ab7aca22d870ec42a92c32ec9931a54c21c22d13bfc63ef8a1cbba5e4a8518",
+    "backend/simulator/energy.py": "418e3baa028d1483f5dd86cdcdc5418526e49ea9a93cf9e32b1f3092bdfd8a36",
+    "backend/simulator/engine.py": "6fd64842dcc998073ae8e3ff66faa02cdf2e3d803dba22c9ebdf98db525edc38",
+    "backend/simulator/hvac.py": "56e8c5b4104ba90d9f407bd92410e2335b2c977a23eec8d0c60c857742ee2489",
+    "backend/simulator/interface.py": "d18e88e856bb46f645d4f949455b81c3b648f7f27c6fc5b8d98774b029c28e8f",
+    "backend/simulator/tariff.py": "6b67437a4db287eedf9cf0cddf0806058f652785e18f6a0ca069850185b4423c",
+    "backend/tests/test_accuracy_audit.py": "ee892956d1795d11ba896bfdca76350f76c131ee325caa246162b7a6120a99c2",
+    "backend/tests/test_advisor.py": "2d788e5472b7be926cace28a88e824e34f0a1a2224bb9b95a7a42e8b2099d479",
+    "backend/tests/test_advisor_conversations.py": "d98139a3094d87f2920ebff98b0903d9e36898209663025c9e02b4bfb2ae7739",
+    "backend/tests/test_ai.py": "561b2363c6b615dd1b1018c67d3701c99b971d404b1518aea4e9f09758eca338",
+    "backend/tests/test_api.py": "7e3e4483ead00637675e48625ab70de905d404f2ec81b0d5bc84baab2cabde95",
+    "backend/tests/test_audit_regressions.py": "c31956928a662d220067bcd6cdee5923f69c6f4b55fdb0947fc7a1f8706cfef5",
+    "backend/tests/test_completion_budget.py": "cadfbf87401f5516f2450e91ca60a4e24c7ab407b7a75d9684bd3d9b193ba94e",
+    "backend/tests/test_completion_diagnostics.py": "09efc8a8230b2e4a541c8c7ff4b818b7b3d2079e206f9ea36295cb42401e3071",
+    "backend/tests/test_cost_attribution.py": "8958842aceb3033657b8608a384faf798ba8c76e145acfc34ddda44d1e49a5f7",
+    "backend/tests/test_device_schedules.py": "0aa87d301c49f7599a0810564e3a558e541d7748a9b445dc956d76027b91f133",
+    "backend/tests/test_eia_retail.py": "8c6d38de5928c639c1eed98a1fbd56308d132b1887c54240df04d49b666f2f9f",
+    "backend/tests/test_employee_certainty.py": "745c55b2e18f5b1e931c32e2f0026e317472a311d67d6a9eaf11afcac70d0005",
+    "backend/tests/test_energy.py": "c62a548491944289f378e97e35f4b73cb1d06254d9eaff2b0065f252fe05e120",
+    "backend/tests/test_infeasibility_evidence.py": "47ebe1ef808291bea87b17b8cb55847ce46b7ac2b9278b3851f9e4fbe87140ba",
+    "backend/tests/test_joint_optimizer.py": "ea62eccc8fc3340135fc3a99d7fb6da55df40de3d843754bd4bd55a8059aa6bc",
+    "backend/tests/test_meta_smoke.py": "7749168e96722cf76afaa2009384c5ac1a6f27485a08b5181f0e8510db5c9ed9",
+    "backend/tests/test_optimizer.py": "6c3485be357933df897e60100d42c1bd0a8cdf6cef170dae2961e9b31e98e4c0",
+    "backend/tests/test_optimizer_adapter.py": "9d54add8397abff286edecb6196aee0980f14537483e49b87c8976baf63a87df",
+    "backend/tests/test_savings.py": "c4393dc085c8f6d5cd6e7c6872cb6d501e3efc9854967da916acc1cd56870374",
+    "backend/tests/test_simulator.py": "5a5ea398d1291e3266a735a7f00951f42d7bbfca3ddb1bf8d28e8fa93f823847",
+    "backend/tests/test_startup_diagnostic.py": "8531e3f7a3725fcf8f385ed34c24424e5b67d94add4ff09262d31a1555c044db",
+    "backend/tests/test_tariff.py": "e62a27505b1a35f3831b6323802441e98c3e27852ce068a25a7c057fe27368ab",
+    "backend/tests/test_what_if_acceptance.py": "3221a4c64ab847c434c3481d25ffdc95ff6913be4e832f2013b8466b24d75875",
+    "backend/verification/__init__.py": "cbfda7af2889897e6b8ba1891c30e8ef28143953995aa9358621f518f3a6fc36",
+    "backend/verification/accuracy.py": "0252e4dafd7d125738097aedc7c3ccb3e1421fe9f6aeddfb8682f4c36a81f4e0"
+  },
+  "python": "3.14.2",
+  "solver": "Glop solver v9.15.6755",
+  "schema_sha256": "1cb9d891744518a0c517c8d68df2750e93562b62d1703af34d0f8dc9a2112405",
+  "exhaustive": [
+    {
+      "seed": 0,
+      "mode": "ev_only",
+      "status": "infeasible",
+      "exact_optimum_usd": null
+    },
+    {
+      "seed": 1,
+      "mode": "ev_only",
+      "status": "infeasible",
+      "exact_optimum_usd": null
+    },
+    {
+      "seed": 2,
+      "mode": "ev_only",
+      "status": "infeasible",
+      "exact_optimum_usd": null
+    },
+    {
+      "seed": 3,
+      "mode": "ev_only",
+      "status": "infeasible",
+      "exact_optimum_usd": null
+    },
+    {
+      "seed": 4,
+      "mode": "ev_only",
+      "status": "feasible",
+      "exact_optimum_usd": "161/40"
+    },
+    {
+      "seed": 5,
+      "mode": "ev_only",
+      "status": "infeasible",
+      "exact_optimum_usd": null
+    },
+    {
+      "seed": 6,
+      "mode": "ev_only",
+      "status": "infeasible",
+      "exact_optimum_usd": null
+    },
+    {
+      "seed": 7,
+      "mode": "ev_only",
+      "status": "infeasible",
+      "exact_optimum_usd": null
+    },
+    {
+      "seed": 8,
+      "mode": "ev_only",
+      "status": "infeasible",
+      "exact_optimum_usd": null
+    },
+    {
+      "seed": 9,
+      "mode": "ev_only",
+      "status": "infeasible",
+      "exact_optimum_usd": null
+    },
+    {
+      "seed": 10,
+      "mode": "ev_only",
+      "status": "infeasible",
+      "exact_optimum_usd": null
+    },
+    {
+      "seed": 11,
+      "mode": "ev_only",
+      "status": "infeasible",
+      "exact_optimum_usd": null
+    },
+    {
+      "seed": 12,
+      "mode": "ev_only",
+      "status": "feasible",
+      "exact_optimum_usd": "381/40"
+    },
+    {
+      "seed": 13,
+      "mode": "ev_only",
+      "status": "infeasible",
+      "exact_optimum_usd": null
+    },
+    {
+      "seed": 14,
+      "mode": "ev_only",
+      "status": "infeasible",
+      "exact_optimum_usd": null
+    },
+    {
+      "seed": 15,
+      "mode": "ev_only",
+      "status": "infeasible",
+      "exact_optimum_usd": null
+    },
+    {
+      "seed": 16,
+      "mode": "ev_only",
+      "status": "infeasible",
+      "exact_optimum_usd": null
+    },
+    {
+      "seed": 17,
+      "mode": "ev_only",
+      "status": "infeasible",
+      "exact_optimum_usd": null
+    },
+    {
+      "seed": 18,
+      "mode": "ev_only",
+      "status": "infeasible",
+      "exact_optimum_usd": null
+    },
+    {
+      "seed": 19,
+      "mode": "ev_only",
+      "status": "infeasible",
+      "exact_optimum_usd": null
+    },
+    {
+      "seed": 20,
+      "mode": "ev_only",
+      "status": "infeasible",
+      "exact_optimum_usd": null
+    },
+    {
+      "seed": 21,
+      "mode": "ev_only",
+      "status": "infeasible",
+      "exact_optimum_usd": null
+    },
+    {
+      "seed": 22,
+      "mode": "ev_only",
+      "status": "infeasible",
+      "exact_optimum_usd": null
+    },
+    {
+      "seed": 23,
+      "mode": "ev_only",
+      "status": "infeasible",
+      "exact_optimum_usd": null
+    },
+    {
+      "seed": 24,
+      "mode": "ev_only",
+      "status": "infeasible",
+      "exact_optimum_usd": null
+    },
+    {
+      "seed": 25,
+      "mode": "ev_only",
+      "status": "feasible",
+      "exact_optimum_usd": "121/10"
+    },
+    {
+      "seed": 26,
+      "mode": "ev_only",
+      "status": "infeasible",
+      "exact_optimum_usd": null
+    },
+    {
+      "seed": 27,
+      "mode": "ev_only",
+      "status": "infeasible",
+      "exact_optimum_usd": null
+    },
+    {
+      "seed": 28,
+      "mode": "ev_only",
+      "status": "infeasible",
+      "exact_optimum_usd": null
+    },
+    {
+      "seed": 29,
+      "mode": "ev_only",
+      "status": "infeasible",
+      "exact_optimum_usd": null
+    },
+    {
+      "seed": 30,
+      "mode": "ev_only",
+      "status": "infeasible",
+      "exact_optimum_usd": null
+    },
+    {
+      "seed": 31,
+      "mode": "ev_only",
+      "status": "feasible",
+      "exact_optimum_usd": "47/20"
+    },
+    {
+      "seed": 32,
+      "mode": "ev_only",
+      "status": "infeasible",
+      "exact_optimum_usd": null
+    },
+    {
+      "seed": 33,
+      "mode": "ev_only",
+      "status": "infeasible",
+      "exact_optimum_usd": null
+    },
+    {
+      "seed": 34,
+      "mode": "ev_only",
+      "status": "infeasible",
+      "exact_optimum_usd": null
+    },
+    {
+      "seed": 35,
+      "mode": "ev_only",
+      "status": "infeasible",
+      "exact_optimum_usd": null
+    },
+    {
+      "seed": 36,
+      "mode": "ev_only",
+      "status": "infeasible",
+      "exact_optimum_usd": null
+    },
+    {
+      "seed": 37,
+      "mode": "ev_only",
+      "status": "infeasible",
+      "exact_optimum_usd": null
+    },
+    {
+      "seed": 38,
+      "mode": "ev_only",
+      "status": "feasible",
+      "exact_optimum_usd": "343/40"
+    },
+    {
+      "seed": 39,
+      "mode": "ev_only",
+      "status": "infeasible",
+      "exact_optimum_usd": null
+    },
+    {
+      "seed": 40,
+      "mode": "ev_only",
+      "status": "infeasible",
+      "exact_optimum_usd": null
+    },
+    {
+      "seed": 41,
+      "mode": "ev_only",
+      "status": "infeasible",
+      "exact_optimum_usd": null
+    },
+    {
+      "seed": 42,
+      "mode": "ev_only",
+      "status": "infeasible",
+      "exact_optimum_usd": null
+    },
+    {
+      "seed": 43,
+      "mode": "ev_only",
+      "status": "infeasible",
+      "exact_optimum_usd": null
+    },
+    {
+      "seed": 44,
+      "mode": "ev_only",
+      "status": "feasible",
+      "exact_optimum_usd": "13/8"
+    },
+    {
+      "seed": 45,
+      "mode": "ev_only",
+      "status": "infeasible",
+      "exact_optimum_usd": null
+    },
+    {
+      "seed": 46,
+      "mode": "ev_only",
+      "status": "infeasible",
+      "exact_optimum_usd": null
+    },
+    {
+      "seed": 47,
+      "mode": "ev_only",
+      "status": "infeasible",
+      "exact_optimum_usd": null
+    },
+    {
+      "seed": 48,
+      "mode": "ev_only",
+      "status": "infeasible",
+      "exact_optimum_usd": null
+    },
+    {
+      "seed": 49,
+      "mode": "ev_only",
+      "status": "infeasible",
+      "exact_optimum_usd": null
+    },
+    {
+      "seed": 50,
+      "mode": "ev_only",
+      "status": "feasible",
+      "exact_optimum_usd": "319/40"
+    },
+    {
+      "seed": 51,
+      "mode": "ev_only",
+      "status": "infeasible",
+      "exact_optimum_usd": null
+    },
+    {
+      "seed": 52,
+      "mode": "ev_only",
+      "status": "infeasible",
+      "exact_optimum_usd": null
+    },
+    {
+      "seed": 53,
+      "mode": "ev_only",
+      "status": "infeasible",
+      "exact_optimum_usd": null
+    },
+    {
+      "seed": 54,
+      "mode": "ev_only",
+      "status": "infeasible",
+      "exact_optimum_usd": null
+    },
+    {
+      "seed": 55,
+      "mode": "ev_only",
+      "status": "infeasible",
+      "exact_optimum_usd": null
+    },
+    {
+      "seed": 56,
+      "mode": "ev_only",
+      "status": "infeasible",
+      "exact_optimum_usd": null
+    },
+    {
+      "seed": 57,
+      "mode": "ev_only",
+      "status": "infeasible",
+      "exact_optimum_usd": null
+    },
+    {
+      "seed": 58,
+      "mode": "ev_only",
+      "status": "feasible",
+      "exact_optimum_usd": "167/20"
+    },
+    {
+      "seed": 59,
+      "mode": "ev_only",
+      "status": "infeasible",
+      "exact_optimum_usd": null
+    },
+    {
+      "seed": 60,
+      "mode": "ev_only",
+      "status": "feasible",
+      "exact_optimum_usd": "31/4"
+    },
+    {
+      "seed": 61,
+      "mode": "ev_only",
+      "status": "feasible",
+      "exact_optimum_usd": "18/5"
+    },
+    {
+      "seed": 62,
+      "mode": "ev_only",
+      "status": "feasible",
+      "exact_optimum_usd": "243/40"
+    },
+    {
+      "seed": 63,
+      "mode": "ev_only",
+      "status": "feasible",
+      "exact_optimum_usd": "5/4"
+    },
+    {
+      "seed": 64,
+      "mode": "ev_only",
+      "status": "feasible",
+      "exact_optimum_usd": "153/40"
+    },
+    {
+      "seed": 65,
+      "mode": "ev_only",
+      "status": "feasible",
+      "exact_optimum_usd": "233/40"
+    },
+    {
+      "seed": 66,
+      "mode": "ev_only",
+      "status": "feasible",
+      "exact_optimum_usd": "413/40"
+    },
+    {
+      "seed": 67,
+      "mode": "ev_only",
+      "status": "feasible",
+      "exact_optimum_usd": "61/10"
+    },
+    {
+      "seed": 68,
+      "mode": "ev_only",
+      "status": "feasible",
+      "exact_optimum_usd": "419/40"
+    },
+    {
+      "seed": 69,
+      "mode": "ev_only",
+      "status": "feasible",
+      "exact_optimum_usd": "397/40"
+    },
+    {
+      "seed": 70,
+      "mode": "ev_only",
+      "status": "feasible",
+      "exact_optimum_usd": "17/10"
+    },
+    {
+      "seed": 71,
+      "mode": "ev_only",
+      "status": "feasible",
+      "exact_optimum_usd": "211/40"
+    },
+    {
+      "seed": 72,
+      "mode": "ev_only",
+      "status": "feasible",
+      "exact_optimum_usd": "19/10"
+    },
+    {
+      "seed": 73,
+      "mode": "ev_only",
+      "status": "feasible",
+      "exact_optimum_usd": "381/40"
+    },
+    {
+      "seed": 74,
+      "mode": "ev_only",
+      "status": "feasible",
+      "exact_optimum_usd": "429/40"
+    },
+    {
+      "seed": 75,
+      "mode": "ev_only",
+      "status": "feasible",
+      "exact_optimum_usd": "33/8"
+    },
+    {
+      "seed": 76,
+      "mode": "ev_only",
+      "status": "feasible",
+      "exact_optimum_usd": "139/40"
+    },
+    {
+      "seed": 77,
+      "mode": "ev_only",
+      "status": "feasible",
+      "exact_optimum_usd": "33/20"
+    },
+    {
+      "seed": 78,
+      "mode": "ev_only",
+      "status": "feasible",
+      "exact_optimum_usd": "203/40"
+    },
+    {
+      "seed": 79,
+      "mode": "ev_only",
+      "status": "feasible",
+      "exact_optimum_usd": "11/20"
+    },
+    {
+      "seed": 80,
+      "mode": "ev_only",
+      "status": "feasible",
+      "exact_optimum_usd": "361/40"
+    },
+    {
+      "seed": 81,
+      "mode": "ev_only",
+      "status": "feasible",
+      "exact_optimum_usd": "39/8"
+    },
+    {
+      "seed": 82,
+      "mode": "ev_only",
+      "status": "feasible",
+      "exact_optimum_usd": "421/40"
+    },
+    {
+      "seed": 83,
+      "mode": "ev_only",
+      "status": "feasible",
+      "exact_optimum_usd": "17/5"
+    },
+    {
+      "seed": 84,
+      "mode": "ev_only",
+      "status": "feasible",
+      "exact_optimum_usd": "27/20"
+    },
+    {
+      "seed": 85,
+      "mode": "ev_only",
+      "status": "feasible",
+      "exact_optimum_usd": "191/20"
+    },
+    {
+      "seed": 86,
+      "mode": "ev_only",
+      "status": "feasible",
+      "exact_optimum_usd": "337/40"
+    },
+    {
+      "seed": 87,
+      "mode": "ev_only",
+      "status": "feasible",
+      "exact_optimum_usd": "89/40"
+    },
+    {
+      "seed": 88,
+      "mode": "ev_only",
+      "status": "feasible",
+      "exact_optimum_usd": "14/5"
+    },
+    {
+      "seed": 89,
+      "mode": "ev_only",
+      "status": "feasible",
+      "exact_optimum_usd": "303/40"
+    },
+    {
+      "seed": 90,
+      "mode": "ev_only",
+      "status": "feasible",
+      "exact_optimum_usd": "11/4"
+    },
+    {
+      "seed": 91,
+      "mode": "ev_only",
+      "status": "feasible",
+      "exact_optimum_usd": "31/20"
+    },
+    {
+      "seed": 92,
+      "mode": "ev_only",
+      "status": "feasible",
+      "exact_optimum_usd": "59/40"
+    },
+    {
+      "seed": 93,
+      "mode": "ev_only",
+      "status": "feasible",
+      "exact_optimum_usd": "161/40"
+    },
+    {
+      "seed": 94,
+      "mode": "ev_only",
+      "status": "feasible",
+      "exact_optimum_usd": "81/20"
+    },
+    {
+      "seed": 95,
+      "mode": "ev_only",
+      "status": "feasible",
+      "exact_optimum_usd": "37/5"
+    },
+    {
+      "seed": 96,
+      "mode": "ev_only",
+      "status": "feasible",
+      "exact_optimum_usd": "363/40"
+    },
+    {
+      "seed": 97,
+      "mode": "ev_only",
+      "status": "feasible",
+      "exact_optimum_usd": "153/40"
+    },
+    {
+      "seed": 98,
+      "mode": "ev_only",
+      "status": "feasible",
+      "exact_optimum_usd": "3/2"
+    },
+    {
+      "seed": 99,
+      "mode": "ev_only",
+      "status": "feasible",
+      "exact_optimum_usd": "163/40"
+    },
+    {
+      "seed": 0,
+      "mode": "joint",
+      "status": "infeasible",
+      "exact_optimum_usd": null
+    },
+    {
+      "seed": 1,
+      "mode": "joint",
+      "status": "infeasible",
+      "exact_optimum_usd": null
+    },
+    {
+      "seed": 2,
+      "mode": "joint",
+      "status": "infeasible",
+      "exact_optimum_usd": null
+    },
+    {
+      "seed": 3,
+      "mode": "joint",
+      "status": "infeasible",
+      "exact_optimum_usd": null
+    },
+    {
+      "seed": 4,
+      "mode": "joint",
+      "status": "feasible",
+      "exact_optimum_usd": "161/40"
+    },
+    {
+      "seed": 5,
+      "mode": "joint",
+      "status": "infeasible",
+      "exact_optimum_usd": null
+    },
+    {
+      "seed": 6,
+      "mode": "joint",
+      "status": "infeasible",
+      "exact_optimum_usd": null
+    },
+    {
+      "seed": 7,
+      "mode": "joint",
+      "status": "infeasible",
+      "exact_optimum_usd": null
+    },
+    {
+      "seed": 8,
+      "mode": "joint",
+      "status": "infeasible",
+      "exact_optimum_usd": null
+    },
+    {
+      "seed": 9,
+      "mode": "joint",
+      "status": "infeasible",
+      "exact_optimum_usd": null
+    },
+    {
+      "seed": 10,
+      "mode": "joint",
+      "status": "infeasible",
+      "exact_optimum_usd": null
+    },
+    {
+      "seed": 11,
+      "mode": "joint",
+      "status": "infeasible",
+      "exact_optimum_usd": null
+    },
+    {
+      "seed": 12,
+      "mode": "joint",
+      "status": "feasible",
+      "exact_optimum_usd": "381/40"
+    },
+    {
+      "seed": 13,
+      "mode": "joint",
+      "status": "infeasible",
+      "exact_optimum_usd": null
+    },
+    {
+      "seed": 14,
+      "mode": "joint",
+      "status": "infeasible",
+      "exact_optimum_usd": null
+    },
+    {
+      "seed": 15,
+      "mode": "joint",
+      "status": "infeasible",
+      "exact_optimum_usd": null
+    },
+    {
+      "seed": 16,
+      "mode": "joint",
+      "status": "infeasible",
+      "exact_optimum_usd": null
+    },
+    {
+      "seed": 17,
+      "mode": "joint",
+      "status": "infeasible",
+      "exact_optimum_usd": null
+    },
+    {
+      "seed": 18,
+      "mode": "joint",
+      "status": "infeasible",
+      "exact_optimum_usd": null
+    },
+    {
+      "seed": 19,
+      "mode": "joint",
+      "status": "infeasible",
+      "exact_optimum_usd": null
+    },
+    {
+      "seed": 20,
+      "mode": "joint",
+      "status": "infeasible",
+      "exact_optimum_usd": null
+    },
+    {
+      "seed": 21,
+      "mode": "joint",
+      "status": "infeasible",
+      "exact_optimum_usd": null
+    },
+    {
+      "seed": 22,
+      "mode": "joint",
+      "status": "infeasible",
+      "exact_optimum_usd": null
+    },
+    {
+      "seed": 23,
+      "mode": "joint",
+      "status": "infeasible",
+      "exact_optimum_usd": null
+    },
+    {
+      "seed": 24,
+      "mode": "joint",
+      "status": "infeasible",
+      "exact_optimum_usd": null
+    },
+    {
+      "seed": 25,
+      "mode": "joint",
+      "status": "feasible",
+      "exact_optimum_usd": "121/10"
+    },
+    {
+      "seed": 26,
+      "mode": "joint",
+      "status": "infeasible",
+      "exact_optimum_usd": null
+    },
+    {
+      "seed": 27,
+      "mode": "joint",
+      "status": "infeasible",
+      "exact_optimum_usd": null
+    },
+    {
+      "seed": 28,
+      "mode": "joint",
+      "status": "infeasible",
+      "exact_optimum_usd": null
+    },
+    {
+      "seed": 29,
+      "mode": "joint",
+      "status": "infeasible",
+      "exact_optimum_usd": null
+    },
+    {
+      "seed": 30,
+      "mode": "joint",
+      "status": "infeasible",
+      "exact_optimum_usd": null
+    },
+    {
+      "seed": 31,
+      "mode": "joint",
+      "status": "feasible",
+      "exact_optimum_usd": "93/40"
+    },
+    {
+      "seed": 32,
+      "mode": "joint",
+      "status": "infeasible",
+      "exact_optimum_usd": null
+    },
+    {
+      "seed": 33,
+      "mode": "joint",
+      "status": "infeasible",
+      "exact_optimum_usd": null
+    },
+    {
+      "seed": 34,
+      "mode": "joint",
+      "status": "infeasible",
+      "exact_optimum_usd": null
+    },
+    {
+      "seed": 35,
+      "mode": "joint",
+      "status": "infeasible",
+      "exact_optimum_usd": null
+    },
+    {
+      "seed": 36,
+      "mode": "joint",
+      "status": "infeasible",
+      "exact_optimum_usd": null
+    },
+    {
+      "seed": 37,
+      "mode": "joint",
+      "status": "infeasible",
+      "exact_optimum_usd": null
+    },
+    {
+      "seed": 38,
+      "mode": "joint",
+      "status": "feasible",
+      "exact_optimum_usd": "343/40"
+    },
+    {
+      "seed": 39,
+      "mode": "joint",
+      "status": "infeasible",
+      "exact_optimum_usd": null
+    },
+    {
+      "seed": 40,
+      "mode": "joint",
+      "status": "infeasible",
+      "exact_optimum_usd": null
+    },
+    {
+      "seed": 41,
+      "mode": "joint",
+      "status": "infeasible",
+      "exact_optimum_usd": null
+    },
+    {
+      "seed": 42,
+      "mode": "joint",
+      "status": "infeasible",
+      "exact_optimum_usd": null
+    },
+    {
+      "seed": 43,
+      "mode": "joint",
+      "status": "infeasible",
+      "exact_optimum_usd": null
+    },
+    {
+      "seed": 44,
+      "mode": "joint",
+      "status": "feasible",
+      "exact_optimum_usd": "13/8"
+    },
+    {
+      "seed": 45,
+      "mode": "joint",
+      "status": "infeasible",
+      "exact_optimum_usd": null
+    },
+    {
+      "seed": 46,
+      "mode": "joint",
+      "status": "infeasible",
+      "exact_optimum_usd": null
+    },
+    {
+      "seed": 47,
+      "mode": "joint",
+      "status": "infeasible",
+      "exact_optimum_usd": null
+    },
+    {
+      "seed": 48,
+      "mode": "joint",
+      "status": "infeasible",
+      "exact_optimum_usd": null
+    },
+    {
+      "seed": 49,
+      "mode": "joint",
+      "status": "infeasible",
+      "exact_optimum_usd": null
+    },
+    {
+      "seed": 50,
+      "mode": "joint",
+      "status": "feasible",
+      "exact_optimum_usd": "319/40"
+    },
+    {
+      "seed": 51,
+      "mode": "joint",
+      "status": "infeasible",
+      "exact_optimum_usd": null
+    },
+    {
+      "seed": 52,
+      "mode": "joint",
+      "status": "infeasible",
+      "exact_optimum_usd": null
+    },
+    {
+      "seed": 53,
+      "mode": "joint",
+      "status": "infeasible",
+      "exact_optimum_usd": null
+    },
+    {
+      "seed": 54,
+      "mode": "joint",
+      "status": "infeasible",
+      "exact_optimum_usd": null
+    },
+    {
+      "seed": 55,
+      "mode": "joint",
+      "status": "infeasible",
+      "exact_optimum_usd": null
+    },
+    {
+      "seed": 56,
+      "mode": "joint",
+      "status": "infeasible",
+      "exact_optimum_usd": null
+    },
+    {
+      "seed": 57,
+      "mode": "joint",
+      "status": "infeasible",
+      "exact_optimum_usd": null
+    },
+    {
+      "seed": 58,
+      "mode": "joint",
+      "status": "feasible",
+      "exact_optimum_usd": "167/20"
+    },
+    {
+      "seed": 59,
+      "mode": "joint",
+      "status": "infeasible",
+      "exact_optimum_usd": null
+    },
+    {
+      "seed": 60,
+      "mode": "joint",
+      "status": "feasible",
+      "exact_optimum_usd": "31/4"
+    },
+    {
+      "seed": 61,
+      "mode": "joint",
+      "status": "feasible",
+      "exact_optimum_usd": "33/20"
+    },
+    {
+      "seed": 62,
+      "mode": "joint",
+      "status": "feasible",
+      "exact_optimum_usd": "243/40"
+    },
+    {
+      "seed": 63,
+      "mode": "joint",
+      "status": "feasible",
+      "exact_optimum_usd": "5/4"
+    },
+    {
+      "seed": 64,
+      "mode": "joint",
+      "status": "feasible",
+      "exact_optimum_usd": "153/40"
+    },
+    {
+      "seed": 65,
+      "mode": "joint",
+      "status": "feasible",
+      "exact_optimum_usd": "233/40"
+    },
+    {
+      "seed": 66,
+      "mode": "joint",
+      "status": "feasible",
+      "exact_optimum_usd": "413/40"
+    },
+    {
+      "seed": 67,
+      "mode": "joint",
+      "status": "feasible",
+      "exact_optimum_usd": "61/10"
+    },
+    {
+      "seed": 68,
+      "mode": "joint",
+      "status": "feasible",
+      "exact_optimum_usd": "419/40"
+    },
+    {
+      "seed": 69,
+      "mode": "joint",
+      "status": "feasible",
+      "exact_optimum_usd": "397/40"
+    },
+    {
+      "seed": 70,
+      "mode": "joint",
+      "status": "feasible",
+      "exact_optimum_usd": "17/10"
+    },
+    {
+      "seed": 71,
+      "mode": "joint",
+      "status": "feasible",
+      "exact_optimum_usd": "211/40"
+    },
+    {
+      "seed": 72,
+      "mode": "joint",
+      "status": "feasible",
+      "exact_optimum_usd": "19/10"
+    },
+    {
+      "seed": 73,
+      "mode": "joint",
+      "status": "feasible",
+      "exact_optimum_usd": "381/40"
+    },
+    {
+      "seed": 74,
+      "mode": "joint",
+      "status": "feasible",
+      "exact_optimum_usd": "429/40"
+    },
+    {
+      "seed": 75,
+      "mode": "joint",
+      "status": "feasible",
+      "exact_optimum_usd": "33/8"
+    },
+    {
+      "seed": 76,
+      "mode": "joint",
+      "status": "feasible",
+      "exact_optimum_usd": "139/40"
+    },
+    {
+      "seed": 77,
+      "mode": "joint",
+      "status": "feasible",
+      "exact_optimum_usd": "33/20"
+    },
+    {
+      "seed": 78,
+      "mode": "joint",
+      "status": "feasible",
+      "exact_optimum_usd": "97/20"
+    },
+    {
+      "seed": 79,
+      "mode": "joint",
+      "status": "feasible",
+      "exact_optimum_usd": "11/20"
+    },
+    {
+      "seed": 80,
+      "mode": "joint",
+      "status": "feasible",
+      "exact_optimum_usd": "361/40"
+    },
+    {
+      "seed": 81,
+      "mode": "joint",
+      "status": "feasible",
+      "exact_optimum_usd": "39/8"
+    },
+    {
+      "seed": 82,
+      "mode": "joint",
+      "status": "feasible",
+      "exact_optimum_usd": "421/40"
+    },
+    {
+      "seed": 83,
+      "mode": "joint",
+      "status": "feasible",
+      "exact_optimum_usd": "17/5"
+    },
+    {
+      "seed": 84,
+      "mode": "joint",
+      "status": "feasible",
+      "exact_optimum_usd": "27/20"
+    },
+    {
+      "seed": 85,
+      "mode": "joint",
+      "status": "feasible",
+      "exact_optimum_usd": "191/20"
+    },
+    {
+      "seed": 86,
+      "mode": "joint",
+      "status": "feasible",
+      "exact_optimum_usd": "337/40"
+    },
+    {
+      "seed": 87,
+      "mode": "joint",
+      "status": "feasible",
+      "exact_optimum_usd": "89/40"
+    },
+    {
+      "seed": 88,
+      "mode": "joint",
+      "status": "feasible",
+      "exact_optimum_usd": "14/5"
+    },
+    {
+      "seed": 89,
+      "mode": "joint",
+      "status": "feasible",
+      "exact_optimum_usd": "303/40"
+    },
+    {
+      "seed": 90,
+      "mode": "joint",
+      "status": "feasible",
+      "exact_optimum_usd": "11/4"
+    },
+    {
+      "seed": 91,
+      "mode": "joint",
+      "status": "feasible",
+      "exact_optimum_usd": "31/20"
+    },
+    {
+      "seed": 92,
+      "mode": "joint",
+      "status": "feasible",
+      "exact_optimum_usd": "59/40"
+    },
+    {
+      "seed": 93,
+      "mode": "joint",
+      "status": "feasible",
+      "exact_optimum_usd": "161/40"
+    },
+    {
+      "seed": 94,
+      "mode": "joint",
+      "status": "feasible",
+      "exact_optimum_usd": "81/20"
+    },
+    {
+      "seed": 95,
+      "mode": "joint",
+      "status": "feasible",
+      "exact_optimum_usd": "37/5"
+    },
+    {
+      "seed": 96,
+      "mode": "joint",
+      "status": "feasible",
+      "exact_optimum_usd": "363/40"
+    },
+    {
+      "seed": 97,
+      "mode": "joint",
+      "status": "feasible",
+      "exact_optimum_usd": "153/40"
+    },
+    {
+      "seed": 98,
+      "mode": "joint",
+      "status": "feasible",
+      "exact_optimum_usd": "3/2"
+    },
+    {
+      "seed": 99,
+      "mode": "joint",
+      "status": "feasible",
+      "exact_optimum_usd": "163/40"
+    }
+  ],
+  "representative": [
+    {
+      "name": "joint_recovery",
+      "mode": "ev_only",
+      "scenario": {
+        "operating_hours": {
+          "start_hour": 8,
+          "end_hour": 18
+        },
+        "fixed_demand_kw": [
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "electricity_prices_usd_per_kwh": [
+          0.2,
+          0.2,
+          0.2,
+          0.2,
+          0.2,
+          0.2,
+          0.2,
+          0.2,
+          0.2,
+          0.2,
+          0.2,
+          0.2,
+          0.2,
+          0.2,
+          0.2,
+          0.2,
+          0.2,
+          0.2,
+          0.2,
+          0.2,
+          0.2,
+          0.2,
+          0.2,
+          0.2
+        ],
+        "building_max_demand_kw": 3.0,
+        "ev_requirements": [
+          {
+            "id": "a",
+            "arrival_hour": 0,
+            "deadline_hour": 1,
+            "energy_required_kwh": 2.0,
+            "max_charging_power_kw": 2.0
+          }
+        ],
+        "flexible_equipment": [
+          {
+            "id": "pump",
+            "available_hours": {
+              "start_hour": 0,
+              "end_hour": 2
+            },
+            "energy_required_kwh": 2.0,
+            "max_power_kw": 2.0
+          }
+        ]
+      },
+      "response": {
+        "result_id": null,
+        "feasibility_status": "infeasible",
+        "baseline_electricity_cost_usd": 5.6000000000000005,
+        "baseline_peak_demand_kw": 5.0,
+        "baseline_demand_kw": [
+          5.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "optimized_electricity_cost_usd": null,
+        "optimized_peak_demand_kw": null,
+        "optimized_demand_kw": null,
+        "constraint_violations": [
+          "Window [0, 1): EVs require 2 kWh but shared charging capacity is at most 0 kWh",
+          "Infeasible under the fixed background/HVAC/flexible schedules."
+        ],
+        "operating_plan": {
+          "scheduling_mode": "ev_only",
+          "solver_status": "infeasible",
+          "primary_status": "analytic_infeasibility",
+          "peak_tiebreak_status": "not_run",
+          "primary_optimum_usd": null,
+          "verification_status": "unavailable",
+          "warnings": [],
+          "baseline_constraint_violations": [
+            "Hour 0: demand 5 kW exceeds building limit 3 kW"
+          ],
+          "device_schedules": [
+            {
+              "device_id": "a",
+              "device_type": "ev",
+              "scheduling_role": "optimized",
+              "required_energy_kwh": 2.0,
+              "available_hours": {
+                "start_hour": 0,
+                "end_hour": 1
+              },
+              "max_power_kw": 2.0,
+              "baseline_power_kw": [
+                2.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0
+              ],
+              "baseline_delivered_energy_kwh": 2.0,
+              "optimized_power_kw": null,
+              "optimized_delivered_energy_kwh": null
+            },
+            {
+              "device_id": "pump",
+              "device_type": "flexible",
+              "scheduling_role": "held_at_baseline",
+              "required_energy_kwh": 2.0,
+              "available_hours": {
+                "start_hour": 0,
+                "end_hour": 2
+              },
+              "max_power_kw": 2.0,
+              "baseline_power_kw": [
+                2.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0
+              ],
+              "baseline_delivered_energy_kwh": 2.0,
+              "optimized_power_kw": null,
+              "optimized_delivered_energy_kwh": null
+            }
+          ]
+        },
+        "infeasibility_evidence": [
+          {
+            "code": "shared_window_capacity",
+            "message": "Window [0, 1): EVs require 2 kWh but shared charging capacity is at most 0 kWh",
+            "proof_source": "analytical_necessary_condition",
+            "devices": [
+              {
+                "device_type": "ev",
+                "device_id": "a"
+              }
+            ],
+            "window": {
+              "start_hour": 0,
+              "end_hour": 1
+            },
+            "required": 2.0,
+            "available": 0.0,
+            "unit": "kWh",
+            "context": {
+              "scheduling_mode": "ev_only",
+              "tolerance": 1e-06,
+              "site_limit_kw": 3.0,
+              "max_power_kw": null,
+              "immutable_fixed_power_kw": null,
+              "held_flexible_power_kw": null,
+              "immutable_fixed_energy_kwh": 1.0,
+              "held_flexible_energy_kwh": 2.0
+            }
+          }
+        ]
+      },
+      "recomputed": {
+        "baseline": {
+          "energy_kwh": 28.0,
+          "cost_usd": 5.6000000000000005,
+          "peak_kw": 5.0,
+          "hourly_cost_usd": [
+            1.0,
+            0.2,
+            0.2,
+            0.2,
+            0.2,
+            0.2,
+            0.2,
+            0.2,
+            0.2,
+            0.2,
+            0.2,
+            0.2,
+            0.2,
+            0.2,
+            0.2,
+            0.2,
+            0.2,
+            0.2,
+            0.2,
+            0.2,
+            0.2,
+            0.2,
+            0.2,
+            0.2
+          ],
+          "device_cost_usd": {
+            "ev:a": 0.4,
+            "flexible:pump": 0.4
+          }
+        }
+      }
+    },
+    {
+      "name": "joint_recovery",
+      "mode": "joint",
+      "scenario": {
+        "operating_hours": {
+          "start_hour": 8,
+          "end_hour": 18
+        },
+        "fixed_demand_kw": [
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "electricity_prices_usd_per_kwh": [
+          0.2,
+          0.2,
+          0.2,
+          0.2,
+          0.2,
+          0.2,
+          0.2,
+          0.2,
+          0.2,
+          0.2,
+          0.2,
+          0.2,
+          0.2,
+          0.2,
+          0.2,
+          0.2,
+          0.2,
+          0.2,
+          0.2,
+          0.2,
+          0.2,
+          0.2,
+          0.2,
+          0.2
+        ],
+        "building_max_demand_kw": 3.0,
+        "ev_requirements": [
+          {
+            "id": "a",
+            "arrival_hour": 0,
+            "deadline_hour": 1,
+            "energy_required_kwh": 2.0,
+            "max_charging_power_kw": 2.0
+          }
+        ],
+        "flexible_equipment": [
+          {
+            "id": "pump",
+            "available_hours": {
+              "start_hour": 0,
+              "end_hour": 2
+            },
+            "energy_required_kwh": 2.0,
+            "max_power_kw": 2.0
+          }
+        ]
+      },
+      "response": {
+        "result_id": null,
+        "feasibility_status": "feasible",
+        "baseline_electricity_cost_usd": 5.6000000000000005,
+        "baseline_peak_demand_kw": 5.0,
+        "baseline_demand_kw": [
+          5.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "optimized_electricity_cost_usd": 5.6000000000000005,
+        "optimized_peak_demand_kw": 3.0,
+        "optimized_demand_kw": [
+          3.0,
+          3.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "constraint_violations": [],
+        "operating_plan": {
+          "scheduling_mode": "joint",
+          "solver_status": "optimal",
+          "primary_status": "optimal",
+          "peak_tiebreak_status": "optimal",
+          "primary_optimum_usd": 5.600000000000001,
+          "verification_status": "passed",
+          "warnings": [],
+          "baseline_constraint_violations": [
+            "Hour 0: demand 5 kW exceeds building limit 3 kW"
+          ],
+          "device_schedules": [
+            {
+              "device_id": "a",
+              "device_type": "ev",
+              "scheduling_role": "optimized",
+              "required_energy_kwh": 2.0,
+              "available_hours": {
+                "start_hour": 0,
+                "end_hour": 1
+              },
+              "max_power_kw": 2.0,
+              "baseline_power_kw": [
+                2.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0
+              ],
+              "baseline_delivered_energy_kwh": 2.0,
+              "optimized_power_kw": [
+                2.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0
+              ],
+              "optimized_delivered_energy_kwh": 2.0
+            },
+            {
+              "device_id": "pump",
+              "device_type": "flexible",
+              "scheduling_role": "optimized",
+              "required_energy_kwh": 2.0,
+              "available_hours": {
+                "start_hour": 0,
+                "end_hour": 2
+              },
+              "max_power_kw": 2.0,
+              "baseline_power_kw": [
+                2.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0
+              ],
+              "baseline_delivered_energy_kwh": 2.0,
+              "optimized_power_kw": [
+                0.0,
+                2.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0
+              ],
+              "optimized_delivered_energy_kwh": 2.0
+            }
+          ]
+        },
+        "infeasibility_evidence": []
+      },
+      "recomputed": {
+        "baseline": {
+          "energy_kwh": 28.0,
+          "cost_usd": 5.6000000000000005,
+          "peak_kw": 5.0,
+          "hourly_cost_usd": [
+            1.0,
+            0.2,
+            0.2,
+            0.2,
+            0.2,
+            0.2,
+            0.2,
+            0.2,
+            0.2,
+            0.2,
+            0.2,
+            0.2,
+            0.2,
+            0.2,
+            0.2,
+            0.2,
+            0.2,
+            0.2,
+            0.2,
+            0.2,
+            0.2,
+            0.2,
+            0.2,
+            0.2
+          ],
+          "device_cost_usd": {
+            "ev:a": 0.4,
+            "flexible:pump": 0.4
+          }
+        },
+        "optimized": {
+          "energy_kwh": 28.0,
+          "cost_usd": 5.6000000000000005,
+          "peak_kw": 3.0,
+          "hourly_cost_usd": [
+            0.6000000000000001,
+            0.6000000000000001,
+            0.2,
+            0.2,
+            0.2,
+            0.2,
+            0.2,
+            0.2,
+            0.2,
+            0.2,
+            0.2,
+            0.2,
+            0.2,
+            0.2,
+            0.2,
+            0.2,
+            0.2,
+            0.2,
+            0.2,
+            0.2,
+            0.2,
+            0.2,
+            0.2,
+            0.2
+          ],
+          "device_cost_usd": {
+            "ev:a": 0.4,
+            "flexible:pump": 0.4
+          }
+        },
+        "cost_difference_usd": 0.0,
+        "cost_difference_percent": 0.0
+      }
+    },
+    {
+      "name": "joint_price_shift",
+      "mode": "ev_only",
+      "scenario": {
+        "operating_hours": {
+          "start_hour": 8,
+          "end_hour": 18
+        },
+        "fixed_demand_kw": [
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "electricity_prices_usd_per_kwh": [
+          0.4,
+          0.1,
+          0.3,
+          0.3,
+          0.3,
+          0.3,
+          0.3,
+          0.3,
+          0.3,
+          0.3,
+          0.3,
+          0.3,
+          0.3,
+          0.3,
+          0.3,
+          0.3,
+          0.3,
+          0.3,
+          0.3,
+          0.3,
+          0.3,
+          0.3,
+          0.3,
+          0.3
+        ],
+        "building_max_demand_kw": 3.0,
+        "ev_requirements": [],
+        "flexible_equipment": [
+          {
+            "id": "pump",
+            "available_hours": {
+              "start_hour": 0,
+              "end_hour": 2
+            },
+            "energy_required_kwh": 2.0,
+            "max_power_kw": 2.0
+          }
+        ]
+      },
+      "response": {
+        "result_id": null,
+        "feasibility_status": "feasible",
+        "baseline_electricity_cost_usd": 7.9,
+        "baseline_peak_demand_kw": 3.0,
+        "baseline_demand_kw": [
+          3.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "optimized_electricity_cost_usd": 7.9,
+        "optimized_peak_demand_kw": 3.0,
+        "optimized_demand_kw": [
+          3.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "constraint_violations": [],
+        "operating_plan": {
+          "scheduling_mode": "ev_only",
+          "solver_status": "optimal",
+          "primary_status": "optimal",
+          "peak_tiebreak_status": "optimal",
+          "primary_optimum_usd": 7.899999999999997,
+          "verification_status": "passed",
+          "warnings": [],
+          "baseline_constraint_violations": [],
+          "device_schedules": [
+            {
+              "device_id": "pump",
+              "device_type": "flexible",
+              "scheduling_role": "held_at_baseline",
+              "required_energy_kwh": 2.0,
+              "available_hours": {
+                "start_hour": 0,
+                "end_hour": 2
+              },
+              "max_power_kw": 2.0,
+              "baseline_power_kw": [
+                2.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0
+              ],
+              "baseline_delivered_energy_kwh": 2.0,
+              "optimized_power_kw": [
+                2.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0
+              ],
+              "optimized_delivered_energy_kwh": 2.0
+            }
+          ]
+        },
+        "infeasibility_evidence": []
+      },
+      "recomputed": {
+        "baseline": {
+          "energy_kwh": 26.0,
+          "cost_usd": 7.9,
+          "peak_kw": 3.0,
+          "hourly_cost_usd": [
+            1.2000000000000002,
+            0.1,
+            0.3,
+            0.3,
+            0.3,
+            0.3,
+            0.3,
+            0.3,
+            0.3,
+            0.3,
+            0.3,
+            0.3,
+            0.3,
+            0.3,
+            0.3,
+            0.3,
+            0.3,
+            0.3,
+            0.3,
+            0.3,
+            0.3,
+            0.3,
+            0.3,
+            0.3
+          ],
+          "device_cost_usd": {
+            "flexible:pump": 0.8
+          }
+        },
+        "optimized": {
+          "energy_kwh": 26.0,
+          "cost_usd": 7.9,
+          "peak_kw": 3.0,
+          "hourly_cost_usd": [
+            1.2000000000000002,
+            0.1,
+            0.3,
+            0.3,
+            0.3,
+            0.3,
+            0.3,
+            0.3,
+            0.3,
+            0.3,
+            0.3,
+            0.3,
+            0.3,
+            0.3,
+            0.3,
+            0.3,
+            0.3,
+            0.3,
+            0.3,
+            0.3,
+            0.3,
+            0.3,
+            0.3,
+            0.3
+          ],
+          "device_cost_usd": {
+            "flexible:pump": 0.8
+          }
+        },
+        "cost_difference_usd": 0.0,
+        "cost_difference_percent": 0.0
+      }
+    },
+    {
+      "name": "joint_price_shift",
+      "mode": "joint",
+      "scenario": {
+        "operating_hours": {
+          "start_hour": 8,
+          "end_hour": 18
+        },
+        "fixed_demand_kw": [
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "electricity_prices_usd_per_kwh": [
+          0.4,
+          0.1,
+          0.3,
+          0.3,
+          0.3,
+          0.3,
+          0.3,
+          0.3,
+          0.3,
+          0.3,
+          0.3,
+          0.3,
+          0.3,
+          0.3,
+          0.3,
+          0.3,
+          0.3,
+          0.3,
+          0.3,
+          0.3,
+          0.3,
+          0.3,
+          0.3,
+          0.3
+        ],
+        "building_max_demand_kw": 3.0,
+        "ev_requirements": [],
+        "flexible_equipment": [
+          {
+            "id": "pump",
+            "available_hours": {
+              "start_hour": 0,
+              "end_hour": 2
+            },
+            "energy_required_kwh": 2.0,
+            "max_power_kw": 2.0
+          }
+        ]
+      },
+      "response": {
+        "result_id": null,
+        "feasibility_status": "feasible",
+        "baseline_electricity_cost_usd": 7.9,
+        "baseline_peak_demand_kw": 3.0,
+        "baseline_demand_kw": [
+          3.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "optimized_electricity_cost_usd": 7.3000001,
+        "optimized_peak_demand_kw": 2.999999666666665,
+        "optimized_demand_kw": [
+          1.000000333333335,
+          2.999999666666665,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "constraint_violations": [],
+        "operating_plan": {
+          "scheduling_mode": "joint",
+          "solver_status": "optimal",
+          "primary_status": "optimal",
+          "peak_tiebreak_status": "optimal",
+          "primary_optimum_usd": 7.299999999999997,
+          "verification_status": "passed",
+          "warnings": [],
+          "baseline_constraint_violations": [],
+          "device_schedules": [
+            {
+              "device_id": "pump",
+              "device_type": "flexible",
+              "scheduling_role": "optimized",
+              "required_energy_kwh": 2.0,
+              "available_hours": {
+                "start_hour": 0,
+                "end_hour": 2
+              },
+              "max_power_kw": 2.0,
+              "baseline_power_kw": [
+                2.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0
+              ],
+              "baseline_delivered_energy_kwh": 2.0,
+              "optimized_power_kw": [
+                3.333333349342382e-07,
+                1.999999666666665,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0
+              ],
+              "optimized_delivered_energy_kwh": 2.0
+            }
+          ]
+        },
+        "infeasibility_evidence": []
+      },
+      "recomputed": {
+        "baseline": {
+          "energy_kwh": 26.0,
+          "cost_usd": 7.9,
+          "peak_kw": 3.0,
+          "hourly_cost_usd": [
+            1.2000000000000002,
+            0.1,
+            0.3,
+            0.3,
+            0.3,
+            0.3,
+            0.3,
+            0.3,
+            0.3,
+            0.3,
+            0.3,
+            0.3,
+            0.3,
+            0.3,
+            0.3,
+            0.3,
+            0.3,
+            0.3,
+            0.3,
+            0.3,
+            0.3,
+            0.3,
+            0.3,
+            0.3
+          ],
+          "device_cost_usd": {
+            "flexible:pump": 0.8
+          }
+        },
+        "optimized": {
+          "energy_kwh": 26.0,
+          "cost_usd": 7.3000001,
+          "peak_kw": 2.999999666666665,
+          "hourly_cost_usd": [
+            0.400000133333334,
+            0.2999999666666665,
+            0.3,
+            0.3,
+            0.3,
+            0.3,
+            0.3,
+            0.3,
+            0.3,
+            0.3,
+            0.3,
+            0.3,
+            0.3,
+            0.3,
+            0.3,
+            0.3,
+            0.3,
+            0.3,
+            0.3,
+            0.3,
+            0.3,
+            0.3,
+            0.3,
+            0.3
+          ],
+          "device_cost_usd": {
+            "flexible:pump": 0.2000001000000005
+          }
+        },
+        "cost_difference_usd": 0.5999999000000003,
+        "cost_difference_percent": 7.594935443037977
+      }
+    },
+    {
+      "name": "joint_infeasible",
+      "mode": "ev_only",
+      "scenario": {
+        "operating_hours": {
+          "start_hour": 8,
+          "end_hour": 18
+        },
+        "fixed_demand_kw": [
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "electricity_prices_usd_per_kwh": [
+          0.2,
+          0.2,
+          0.2,
+          0.2,
+          0.2,
+          0.2,
+          0.2,
+          0.2,
+          0.2,
+          0.2,
+          0.2,
+          0.2,
+          0.2,
+          0.2,
+          0.2,
+          0.2,
+          0.2,
+          0.2,
+          0.2,
+          0.2,
+          0.2,
+          0.2,
+          0.2,
+          0.2
+        ],
+        "building_max_demand_kw": 3.0,
+        "ev_requirements": [
+          {
+            "id": "a",
+            "arrival_hour": 0,
+            "deadline_hour": 2,
+            "energy_required_kwh": 3.0,
+            "max_charging_power_kw": 2.0
+          }
+        ],
+        "flexible_equipment": [
+          {
+            "id": "pump",
+            "available_hours": {
+              "start_hour": 0,
+              "end_hour": 2
+            },
+            "energy_required_kwh": 2.0,
+            "max_power_kw": 2.0
+          }
+        ]
+      },
+      "response": {
+        "result_id": null,
+        "feasibility_status": "infeasible",
+        "baseline_electricity_cost_usd": 5.800000000000001,
+        "baseline_peak_demand_kw": 5.0,
+        "baseline_demand_kw": [
+          5.0,
+          2.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "optimized_electricity_cost_usd": null,
+        "optimized_peak_demand_kw": null,
+        "optimized_demand_kw": null,
+        "constraint_violations": [
+          "Window [0, 2): EVs require 3 kWh but shared charging capacity is at most 2 kWh",
+          "Infeasible under the fixed background/HVAC/flexible schedules."
+        ],
+        "operating_plan": {
+          "scheduling_mode": "ev_only",
+          "solver_status": "infeasible",
+          "primary_status": "analytic_infeasibility",
+          "peak_tiebreak_status": "not_run",
+          "primary_optimum_usd": null,
+          "verification_status": "unavailable",
+          "warnings": [],
+          "baseline_constraint_violations": [
+            "Hour 0: demand 5 kW exceeds building limit 3 kW"
+          ],
+          "device_schedules": [
+            {
+              "device_id": "a",
+              "device_type": "ev",
+              "scheduling_role": "optimized",
+              "required_energy_kwh": 3.0,
+              "available_hours": {
+                "start_hour": 0,
+                "end_hour": 2
+              },
+              "max_power_kw": 2.0,
+              "baseline_power_kw": [
+                2.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0
+              ],
+              "baseline_delivered_energy_kwh": 3.0,
+              "optimized_power_kw": null,
+              "optimized_delivered_energy_kwh": null
+            },
+            {
+              "device_id": "pump",
+              "device_type": "flexible",
+              "scheduling_role": "held_at_baseline",
+              "required_energy_kwh": 2.0,
+              "available_hours": {
+                "start_hour": 0,
+                "end_hour": 2
+              },
+              "max_power_kw": 2.0,
+              "baseline_power_kw": [
+                2.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0
+              ],
+              "baseline_delivered_energy_kwh": 2.0,
+              "optimized_power_kw": null,
+              "optimized_delivered_energy_kwh": null
+            }
+          ]
+        },
+        "infeasibility_evidence": [
+          {
+            "code": "shared_window_capacity",
+            "message": "Window [0, 2): EVs require 3 kWh but shared charging capacity is at most 2 kWh",
+            "proof_source": "analytical_necessary_condition",
+            "devices": [
+              {
+                "device_type": "ev",
+                "device_id": "a"
+              }
+            ],
+            "window": {
+              "start_hour": 0,
+              "end_hour": 2
+            },
+            "required": 3.0,
+            "available": 2.0,
+            "unit": "kWh",
+            "context": {
+              "scheduling_mode": "ev_only",
+              "tolerance": 1e-06,
+              "site_limit_kw": 3.0,
+              "max_power_kw": null,
+              "immutable_fixed_power_kw": null,
+              "held_flexible_power_kw": null,
+              "immutable_fixed_energy_kwh": 2.0,
+              "held_flexible_energy_kwh": 2.0
+            }
+          }
+        ]
+      },
+      "recomputed": {
+        "baseline": {
+          "energy_kwh": 29.0,
+          "cost_usd": 5.800000000000001,
+          "peak_kw": 5.0,
+          "hourly_cost_usd": [
+            1.0,
+            0.4,
+            0.2,
+            0.2,
+            0.2,
+            0.2,
+            0.2,
+            0.2,
+            0.2,
+            0.2,
+            0.2,
+            0.2,
+            0.2,
+            0.2,
+            0.2,
+            0.2,
+            0.2,
+            0.2,
+            0.2,
+            0.2,
+            0.2,
+            0.2,
+            0.2,
+            0.2
+          ],
+          "device_cost_usd": {
+            "ev:a": 0.6000000000000001,
+            "flexible:pump": 0.4
+          }
+        }
+      }
+    },
+    {
+      "name": "joint_infeasible",
+      "mode": "joint",
+      "scenario": {
+        "operating_hours": {
+          "start_hour": 8,
+          "end_hour": 18
+        },
+        "fixed_demand_kw": [
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "electricity_prices_usd_per_kwh": [
+          0.2,
+          0.2,
+          0.2,
+          0.2,
+          0.2,
+          0.2,
+          0.2,
+          0.2,
+          0.2,
+          0.2,
+          0.2,
+          0.2,
+          0.2,
+          0.2,
+          0.2,
+          0.2,
+          0.2,
+          0.2,
+          0.2,
+          0.2,
+          0.2,
+          0.2,
+          0.2,
+          0.2
+        ],
+        "building_max_demand_kw": 3.0,
+        "ev_requirements": [
+          {
+            "id": "a",
+            "arrival_hour": 0,
+            "deadline_hour": 2,
+            "energy_required_kwh": 3.0,
+            "max_charging_power_kw": 2.0
+          }
+        ],
+        "flexible_equipment": [
+          {
+            "id": "pump",
+            "available_hours": {
+              "start_hour": 0,
+              "end_hour": 2
+            },
+            "energy_required_kwh": 2.0,
+            "max_power_kw": 2.0
+          }
+        ]
+      },
+      "response": {
+        "result_id": null,
+        "feasibility_status": "infeasible",
+        "baseline_electricity_cost_usd": 5.800000000000001,
+        "baseline_peak_demand_kw": 5.0,
+        "baseline_demand_kw": [
+          5.0,
+          2.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "optimized_electricity_cost_usd": null,
+        "optimized_peak_demand_kw": null,
+        "optimized_demand_kw": null,
+        "constraint_violations": [
+          "Window [0, 2): EVs and flexible equipment require 5 kWh but shared capacity is at most 4 kWh",
+          "Infeasible under the immutable background/HVAC schedules."
+        ],
+        "operating_plan": {
+          "scheduling_mode": "joint",
+          "solver_status": "infeasible",
+          "primary_status": "analytic_infeasibility",
+          "peak_tiebreak_status": "not_run",
+          "primary_optimum_usd": null,
+          "verification_status": "unavailable",
+          "warnings": [],
+          "baseline_constraint_violations": [
+            "Hour 0: demand 5 kW exceeds building limit 3 kW"
+          ],
+          "device_schedules": [
+            {
+              "device_id": "a",
+              "device_type": "ev",
+              "scheduling_role": "optimized",
+              "required_energy_kwh": 3.0,
+              "available_hours": {
+                "start_hour": 0,
+                "end_hour": 2
+              },
+              "max_power_kw": 2.0,
+              "baseline_power_kw": [
+                2.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0
+              ],
+              "baseline_delivered_energy_kwh": 3.0,
+              "optimized_power_kw": null,
+              "optimized_delivered_energy_kwh": null
+            },
+            {
+              "device_id": "pump",
+              "device_type": "flexible",
+              "scheduling_role": "optimized",
+              "required_energy_kwh": 2.0,
+              "available_hours": {
+                "start_hour": 0,
+                "end_hour": 2
+              },
+              "max_power_kw": 2.0,
+              "baseline_power_kw": [
+                2.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0
+              ],
+              "baseline_delivered_energy_kwh": 2.0,
+              "optimized_power_kw": null,
+              "optimized_delivered_energy_kwh": null
+            }
+          ]
+        },
+        "infeasibility_evidence": [
+          {
+            "code": "shared_window_capacity",
+            "message": "Window [0, 2): EVs and flexible equipment require 5 kWh but shared capacity is at most 4 kWh",
+            "proof_source": "analytical_necessary_condition",
+            "devices": [
+              {
+                "device_type": "ev",
+                "device_id": "a"
+              },
+              {
+                "device_type": "flexible",
+                "device_id": "pump"
+              }
+            ],
+            "window": {
+              "start_hour": 0,
+              "end_hour": 2
+            },
+            "required": 5.0,
+            "available": 4.0,
+            "unit": "kWh",
+            "context": {
+              "scheduling_mode": "joint",
+              "tolerance": 1e-06,
+              "site_limit_kw": 3.0,
+              "max_power_kw": null,
+              "immutable_fixed_power_kw": null,
+              "held_flexible_power_kw": null,
+              "immutable_fixed_energy_kwh": 2.0,
+              "held_flexible_energy_kwh": 0.0
+            }
+          }
+        ]
+      },
+      "recomputed": {
+        "baseline": {
+          "energy_kwh": 29.0,
+          "cost_usd": 5.800000000000001,
+          "peak_kw": 5.0,
+          "hourly_cost_usd": [
+            1.0,
+            0.4,
+            0.2,
+            0.2,
+            0.2,
+            0.2,
+            0.2,
+            0.2,
+            0.2,
+            0.2,
+            0.2,
+            0.2,
+            0.2,
+            0.2,
+            0.2,
+            0.2,
+            0.2,
+            0.2,
+            0.2,
+            0.2,
+            0.2,
+            0.2,
+            0.2,
+            0.2
+          ],
+          "device_cost_usd": {
+            "ev:a": 0.6000000000000001,
+            "flexible:pump": 0.4
+          }
+        }
+      }
+    }
+  ],
+  "stress": [
+    {
+      "ev_count": 10,
+      "flexible_count": 5,
+      "mode": "ev_only",
+      "status": "feasible",
+      "seconds": 0.06880446600007417,
+      "optimized_peak_kw": 1.625
+    },
+    {
+      "ev_count": 10,
+      "flexible_count": 5,
+      "mode": "joint",
+      "status": "feasible",
+      "seconds": 0.07874609400005284,
+      "optimized_peak_kw": 1.078125
+    },
+    {
+      "ev_count": 100,
+      "flexible_count": 50,
+      "mode": "ev_only",
+      "status": "infeasible",
+      "seconds": 0.12910697200004506,
+      "optimized_peak_kw": null
+    },
+    {
+      "ev_count": 100,
+      "flexible_count": 50,
+      "mode": "joint",
+      "status": "feasible",
+      "seconds": 0.44531342999994195,
+      "optimized_peak_kw": 1.7812500000000002
+    },
+    {
+      "ev_count": 300,
+      "flexible_count": 150,
+      "mode": "ev_only",
+      "status": "infeasible",
+      "seconds": 0.36882162400002017,
+      "optimized_peak_kw": null
+    },
+    {
+      "ev_count": 300,
+      "flexible_count": 150,
+      "mode": "joint",
+      "status": "feasible",
+      "seconds": 0.9528755769999862,
+      "optimized_peak_kw": 3.34375
+    }
+  ],
+  "http": [],
+  "live_meta_requests": 0,
+  "summary": {
+    "exhaustive_cases": 200,
+    "classifications": {
+      "infeasible": 104,
+      "feasible": 96
+    },
+    "representative_cases": 6,
+    "stress_cases": 6,
+    "http_cases": 0,
+    "status": "PASS"
+  }
+}

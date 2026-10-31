@@ -40,3 +40,6 @@ app.include_router(router)
 
 from backend.ai.routes import router as ai_router
 app.include_router(ai_router)
+
+from backend.savings.routes import router as savings_router
+app.include_router(savings_router)
