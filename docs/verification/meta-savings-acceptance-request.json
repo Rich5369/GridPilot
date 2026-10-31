@@ -1,0 +1,40 @@
+{
+  "request": "We are a fictional small warehouse with conventional lighting, open weekdays 8 am to 5 pm. We have no EVs, EV chargers, interruptible flexible loads, refrigeration or compressed air. Which relevant electricity opportunities should we investigate? Our actual tariff is unknown. Main-area fixture wattages and device runtime have not been measured. The pilot-bay structured measurements below are a separate fictional, confirmed example; preserve those exact inputs. Please ask for missing evidence before estimating money.",
+  "evidence": {
+    "profile": {
+      "business_type": "small warehouse",
+      "operating_hours": "Weekdays 8 am to 5 pm; device runtime not established",
+      "equipment": "Conventional lighting; no EVs, EV chargers, flexible loads, refrigeration or compressed air",
+      "goals": "Evidence-backed electricity savings; tariff unknown"
+    },
+    "measures": [
+      {
+        "id": "main-lighting",
+        "category": "led",
+        "load_id": "main-area-fixtures",
+        "evidence_kind": "synthetic",
+        "evidence_reference": "Fictional warehouse; wattages and equipment runtime unknown",
+        "fixture_count": 80
+      },
+      {
+        "id": "pilot-lighting",
+        "category": "led",
+        "load_id": "separate-pilot-bay-fixtures",
+        "evidence_kind": "synthetic",
+        "evidence_reference": "Fictional confirmed pilot comparison: 20 fixtures, 60 W to equivalent 10 W, measured runtime 8 h/day for 250 days",
+        "fixture_count": 20,
+        "old_watts": 60,
+        "new_watts": 10,
+        "hours_per_day": 8,
+        "days_per_year": 250,
+        "equivalent_service_confirmed": true
+      }
+    ]
+  },
+  "category_applicability": {
+    "scheduling": false,
+    "refrigeration": false,
+    "compressed_air": false,
+    "led": true
+  }
+}

@@ -1,38 +1,43 @@
-# Savings Advisor backend handoff
+# Savings Advisor backend integration and acceptance
 
-## Release assessment
+The deterministic Savings Engine (#48) is already on main. This integration brings #49's conversation endpoint onto main, adds explicit equipment-applicability safeguards, and fixes local mock-provider fallback. All financial calculators and OR-Tools mathematics are unchanged. No frontend changes, deployment, production configuration changes or paid inference are included.
 
-PR #48 was OPEN at review on October 30, 2026 (America/New_York), head `67537a0`. Latest fetched main was `6f4337a`. Reported checks: Vercel Preview Comments, gridpilot preview, and gridpilot-frontend preview all successful. No backend CI check was reported. Recommendation: merge only after reviewing the offline backend and independent numerical validation and accepting the limitations below. Do not treat preview success as backend production acceptance.
+## Endpoint contracts
 
-Reviewed all savings contracts, six calculator branches, evidence/rate/safety gates, ranking, catalog, API registration and hand-checked tests. Decimal calculations retain unrounded net for payback; money is rounded to cents for presentation. Missing rate, annual incremental expense, or upfront expense correctly leaves the dependent values null. Negative savings remain negative; nonpositive net has no payback. No blocking arithmetic defect identified within the supported standalone models.
+| Method and path | Request | Response |
+| --- | --- | --- |
+| `GET /api/savings/catalog` | None | `version: "1"`, `categories`: 16 category descriptors with eligibility, evidence requirements, methods, sources and numerical support |
+| `POST /api/savings/recommendations` | `SavingsRequest`: optional `profile`, `location`, `measures` (max 100) | `SavingsResponse`: `version`, nullable `benchmark`, `location_notice`, `recommendations`, `portfolio_savings_usd: null`, `warnings` |
+| `POST /api/ai/savings/conversation` | Required `request` (1–2000 characters); optional `history` (max 12 user/assistant turns, 1–3000 characters each), `evidence: SavingsRequest`, `category_applicability` | `source: "meta" or "deterministic_fallback"`, `message`, `selected_categories`, `facts`, `follow_up_questions`, `savings: SavingsResponse` |
 
-Review caveats: overlap warnings only detect shared caller-supplied load IDs. Different IDs do not establish independence, especially for LED replacements and lighting controls on the same fixtures. All estimates remain standalone, and portfolio total stays null. Very small positive net can round to zero cents while payback uses positive unrounded net; do not reconstruct payback from displayed cents. Caller-attested measured evidence can be labeled quantified, but is never independently audited. Six calculator categories are supported; solar, HVAC, demand tariffs and other catalog entries remain investigations.
+OpenAPI (`GET /openapi.json`) defines exact field types, limits, required fields and recommendation properties. The conversation requires no optimizer Scenario. Existing `/api/ai/conversation`, `/api/ai/interpret`, `/api/ai/explain`, and `/api/optimize` remain available. Use the existing exact-result conversation to discuss retained daily optimization results.
 
-PR #48 is unmerged, so approved-deployment acceptance is pending. Render serving revision has not been verified. No deployment/restart or production acceptance claim is made. After an approved merge/deployment, inspect the Render deployment commit against the merge SHA, then check catalog, the synthetic recommendations fixture, missing-rate/cost variants, and original optimizer HTTP endpoints. Do not infer serving revision from frontend preview status. No paid inference was performed.
+`SavingsRequest` reuses the existing optional BusinessProfile (business type, employee count, hours, bill/consumption descriptions, equipment, goals, restrictions). Location accepts full U.S. state name, ZIP, city, utility and rate-plan metadata. ZIP alone is not geocoded; utility/rate-plan text is not verified. State is needed for the historical EIA benchmark, never for calculating a customer tariff.
 
-## Additive Advisor endpoint
+Measures require `id`, `category`, `load_id`, `evidence_kind`, `evidence_reference`. IDs must be unique. Evidence kinds: `user_entered`, `measured`, `synthetic`, `engineering_assumption`. Savings contracts reject unknown fields, nonfinite numbers, numeric strings and boolean-as-number values. No model-generated numbers enter measures.
 
-`POST /api/ai/savings/conversation` accepts:
+## Equipment relevance
 
-- `request`: required user text, 1–2000 characters.
-- `history`: optional, up to 12 existing user/assistant turns (each 1–3000 characters).
-- `evidence`: optional existing `SavingsRequest`: `profile`, `location`, and up to 100 `measures`.
+`category_applicability` is an optional map from catalog category identifiers to strict booleans. Set a category false only after the caller confirms it is inapplicable. False categories are excluded from conversation selections, facts and questions, and marked `not_applicable` in nested recommendations. This also applies on deterministic fallback. A category exclusion conflicting with a measure whose `applicable` is not false returns 422; correct/confirm the conflict instead of silently losing financial evidence.
 
-Existing `/api/ai/conversation`, `/api/ai/interpret`, `/api/ai/explain`, and optimizer paths are unchanged. Use the savings conversation endpoint for business opportunities without requiring an optimizer Scenario. Continue to use the existing exact-result conversation for scheduling outcomes; never turn standalone annual estimates into explanations of a retained daily execution.
+For example, `{"scheduling": false, "refrigeration": false}` means the caller confirms no eligible flexible scheduling equipment and no refrigeration. **No EVs alone is insufficient to exclude scheduling:** confirmed non-EV flexible loads may still qualify. Do not populate false entries merely from business type. A true entry confirms caller-reported applicability only; it supplies no wattage, runtime, rate or safety evidence and cannot create calculated savings.
 
-Meta receives the question, history, profile and catalog, and returns only validated category identifiers. Category selection is a possible investigation, not equipment ownership or confirmed applicability. Caller measures are always included even if Meta omits their category. It cannot submit numeric inputs, change evidence, write financial prose, or supply results. Validated measures feed the existing engine directly, once per request. Provider/configuration/invalid-output HTTP errors fall back to caller measures or a labeled starting list; no retry or inference result is fabricated. Existing Meta configuration is reused unchanged.
+Unknown applicability may remain selected as an **investigation only**. Its facts and questions explicitly ask for equipment confirmation before action. Free-text statements guide Meta's selection but are not converted into authoritative inventory or measurements; collect explicit exclusions into `category_applicability` for a deterministic exclusion. Business profile and assistant history never establish measured data. If the model selects an irrelevant unknown category anyway, the response still frames it as an unconfirmed investigation, not an investment recommendation.
 
-No free-text quantities are automatically extracted. A conversational answer such as “we have lamps running all day” must be collected/confirmed in structured fields before calculation. This deliberate boundary avoids invented inputs and assistant-history laundering. The existing Advisor business-profile extraction and quote safeguards remain unchanged; callers can reuse that returned profile here.
+Caller measures remain included even if Meta omits their category. Measures with `applicable: false` remain unquantified/not applicable; a category consisting only of excluded measures is omitted from selections. One excluded load does not suppress another valid load in the same category. Valid structured calculations and provenance are preserved exactly.
 
-Example request (synthetic):
+## Example request and expected response
+
+Synthetic conversation request with an explicit absence of scheduling equipment and a separately confirmed lighting scenario:
 
 ```json
 {
-  "request": "How could our office reduce electricity costs?",
+  "request": "How can our fictional warehouse reduce electricity expenses? No EVs or flexible equipment; our tariff is unknown.",
+  "category_applicability": {"scheduling": false, "led": true},
   "evidence": {
-    "profile": {"business_type": "office", "equipment": "lighting"},
+    "profile": {"business_type": "warehouse", "equipment": "conventional lighting; no EVs or flexible equipment"},
     "measures": [{
-      "id": "lights", "category": "led", "load_id": "office-lighting",
+      "id": "lights", "category": "led", "load_id": "warehouse-lighting",
       "evidence_kind": "synthetic", "evidence_reference": "fictional handoff fixture",
       "fixture_count": 100, "old_watts": 60, "new_watts": 10,
       "hours_per_day": 10, "days_per_year": 250,
@@ -43,53 +48,56 @@ Example request (synthetic):
 }
 ```
 
-Response shape (excerpt; selected categories depend on Meta, explicit measures are always included):
+Response excerpt (other categories depend on provider selection):
 
 ```json
 {
   "source": "meta",
   "selected_categories": ["led"],
   "facts": ["lights [scenario_estimate; unverified caller scenario]: annual energy reduction 12500.0 kWh/year; annual gross energy-charge savings unknown; annual net savings unknown; upfront cost 2500.0 USD; simple payback unknown."],
-  "follow_up_questions": ["For LED lighting replacement (lights), can you provide or confirm: rate: current customer-specific flat avoidable USD/kWh energy rate?"],
-  "savings": {
-    "version": "1",
-    "portfolio_savings_usd": null,
-    "recommendations": []
-  }
+  "follow_up_questions": ["Investigation only: for LED lighting replacement (lights), provide or confirm: rate: current customer-specific flat avoidable USD/kWh energy rate?"],
+  "savings": {"version": "1", "portfolio_savings_usd": null}
 }
 ```
 
-The excerpt omits `message` and the full recommendations, benchmark, notices and warnings for brevity. Actual `savings.recommendations` includes the supplied measure and guidance for every other category. `selected_categories` identifies which are relevant to the conversation; `facts` and questions cover those categories. `source: deterministic_fallback` means Meta was unavailable; calculations still come from the same deterministic engine.
+The excerpt omits the full message, recommendations, benchmark, notices and warnings. `savings.recommendations` contains supplied measures and catalog guidance for remaining categories; it is not a personalized recommendation list. Use `selected_categories`, applicability, calculation status and questions together, and hide `not_applicable` from recommended investments.
 
-Add a customer-attested rate with `usd_per_kwh`, `source`, ISO `valid_from` and `valid_through`, and both `customer_applicability_confirmed` and `flat_avoidable_energy_rate_confirmed` true. If current, a synthetic 0.20 USD/kWh rate gives 2500 USD/year gross, 2500 net, 1 year simple payback. If not effective today or confirmations are absent, monetary values stay unknown. Actual rate evidence must come from the customer tariff; never copy the EIA state average.
+Adding a current fictional customer rate of .20 USD/kWh produces exactly 12,500 kWh/year, $2,500 gross/net annual energy-charge savings and one-year simple payback. The rate object requires `usd_per_kwh`, `source`, ISO `valid_from` and `valid_through`, `customer_applicability_confirmed: true`, `flat_avoidable_energy_rate_confirmed: true`. An expired/future/unconfirmed rate leaves money null. Never use a state EIA benchmark as this rate. Re-evaluate date validity when replaying fixtures.
 
-## Existing savings API and onboarding reuse
+For a non-AI form, submit the `evidence` object directly to `/api/savings/recommendations`. `category_applicability` belongs to the conversation request, not the deterministic request. Deterministic-only callers can use per-measure `applicable: false` and should treat catalog-only entries as unconfirmed investigations. Complete existing fixtures: [request](verification/savings-request.json), [response](verification/savings-response.json); calculator details: [engine guide](business-savings-engine.md).
 
-`GET /api/savings/catalog`: version and 16 category descriptors with required/optional inputs, supported models and sources.
+## Missing inputs, status and financial provenance
 
-`POST /api/savings/recommendations`: accepts the `evidence` object above directly, without Meta. Use this route for calculation forms and retries that should not invoke paid inference. See [complete existing request](verification/savings-request.json), [complete response](verification/savings-response.json), and [engine contract guide](business-savings-engine.md). OpenAPI is authoritative for field types and bounds. Invalid structured input returns 422; correct the fields and resubmit. An unknown benchmark is independent of valid equipment calculations.
-
-Reuse the existing business type, employees, operating-hours description, bill/consumption descriptions, equipment, goals and restrictions as unverified profile context. Do not convert free-text business hours into device runtime, monthly spend into tariff, or optimizer demo equipment into business inventory. Existing profile fields cannot establish structured measurements. Location is separate: full U.S. state name for EIA; ZIP syntax alone is insufficient.
-
-Each measure requires `id`, `category`, `load_id`, `evidence_kind` and `evidence_reference`. Ask for:
-
-| Calculator | Additional evidence |
+| Calculator | Required evidence |
 | --- | --- |
-| LED | Fixture count, old/new watts, daily hours, annual days, equivalent service confirmation |
-| Lighting controls / shutdown | Connected kW, existing and avoidable daily hours, annual days, safe-to-switch-off true, essential-service false |
-| Office | Device count, active/low-power watts, existing and avoidable daily hours, annual days, same safety confirmations |
-| Motor / refrigeration | Before/after annual kWh and equivalent service confirmation |
+| LED | Fixture count, old/new watts, daily equipment runtime, annual days, equivalent-service confirmation |
+| Lighting controls / shutdown | Connected kW, existing/avoidable daily hours, annual days, safe-to-switch-off true, essential-service false |
+| Office | Device count, active/low-power watts, existing/avoidable daily hours, annual days and the same safety confirmations |
+| Motor / refrigeration | Comparable before/after annual kWh and equivalent-service confirmation |
 
-All financial models additionally need a current applicable flat avoidable customer energy rate, explicit annual incremental cost (zero only when asserted), and upfront cost for payback. Ask investigation-specific questions from `missing_information` for unsupported categories; those fields are guidance, not additional accepted Measure properties.
+Customer rate enables gross monetary savings. Explicit annual incremental cost (zero only if confirmed) enables net savings. Upfront cost enables payback/ROI. Unknowns remain null, never zero. Opening hours do not automatically establish device runtime; monthly spend does not establish USD/kWh. Reuse onboarding context, then ask the caller to confirm each structured measurement, applicability, safety flag, tariff and cost.
 
-## Display and next actions
+`quantified` means complete caller-reported measured energy evidence, not an independent audit. `scenario_estimate` means a hypothetical/user-entered energy scenario. Both can still have unknown financial results. `needs_data` requests missing evidence; `not_applicable` must not be promoted as an investment. Preserve `provenance`, `inputs_used`, `confidence`, assumptions, missing information, next action and warnings.
 
-Render null as “Unknown — more information needed”, never zero. Display annual kWh, gross energy charges avoided, net annual savings and simple payback separately. Keep original response numbers; do not let generated prose rewrite them. Show `calculation_status`, `confidence`, `provenance`, `assumptions`, `missing_information`, `next_action`, and warnings. `quantified` means caller-reported measured inputs; `scenario_estimate` means a hypothetical/user-entered estimate. Neither guarantees actual future savings. `needs_data` and unsupported solar/HVAC models belong in investigations. `not_applicable` must not be displayed as a recommended investment.
+Meta selects categories only. The server calculates numerical results with the existing deterministic engine. `facts` are formatted from those results; generated prose cannot overwrite them. Gross energy charges avoided, net annual savings and payback are separate quantities. Payback uses unrounded positive net; do not reconstruct it from cents. EIA is historical regional public data, separate from customer rates. No total portfolio savings is returned. Never sum standalone measures, even with distinct IDs; shared load IDs trigger overlap warnings. LED and controls on the same fixtures require combined modeling before claiming a total.
 
-Surface historical benchmark period, source, freshness and notice separately from customer tariff. Ask whether LED and controls concern the same fixtures and use the same load ID when they do. Even different load IDs never authorize automatic summation. Use the safety questions before suggesting switching anything off. Present next actions as validating evidence, collecting bills/runtime data, or seeking an appropriate professional assessment.
+Solar, HVAC, envelope, demand charges, full alternative tariff comparisons and compressed air remain unquantified investigations. Scheduling reuses the existing validated Scenario/optimizer API and hourly customer prices. It does not create annual savings here. No new financial modules or provider integrations are included.
 
-This endpoint is additive: the teammate must wire it into the frontend conversation flow. No frontend integration or paid live Meta acceptance is claimed by this backend change.
+## Provider failures and errors
 
-## Validation for this integration
+`source: meta` establishes genuine provider category selection, not model-generated financial advice. `source: deterministic_fallback` means provider/configuration/output failure; the message explicitly begins “Meta unavailable; using deterministic guidance.” Show this prominently. A 200 response alone does not prove genuine Meta success. Valid structured calculations remain available on fallback; provider details are not exposed. No automatic inference retries occur.
 
-Offline full backend regression: **720 passed** (one existing Starlette/httpx deprecation warning), including ten new integration cases. Independent optimizer audit: **200 exact rational oracle cases** (96 feasible, 104 infeasible), six representative and six stress cases, all passed. No production HTTP or paid Meta calls. Python compilation and whitespace checks passed. Audit artifact: `/tmp/gridpilot-meta-savings-audit.json` in the review workspace; it is not a production result.
+Local mock mode previously attempted to construct CategorySelection from a Proposal fixture and raised an uncaught validation error (HTTP 500 on `/api/ai/savings/conversation`). The adapter now rejects conversational CategorySelection in mock mode with the existing 503 unavailable error, which this endpoint converts into labeled deterministic fallback. Render rejects mock mode earlier in configuration validation and follows the same fallback contract; no mock result is presented as Meta. Only the existing HTTPException boundary is caught, not arbitrary application exceptions.
+
+HTTP 422: display field errors, preserve inputs and request correction. Network/5xx: retain form state and show service unavailable. EIA failure may remove a benchmark while valid equipment calculations continue. Retry calculations through the non-AI endpoint; avoid automatic paid AI retries.
+
+## Post-merge production acceptance (requires approval)
+
+1. After approved merge/deployment, read Render's actual **Live** deployment SHA, repository/branch and timestamps. Confirm the serving commit contains both engine and conversation changes; frontend preview success and a configured branch are insufficient.
+2. Inspect existing sanitized provider diagnostics and production configuration without triggering probes. Confirm intended live mode, endpoint/model, credential presence and installed versions. Read `MODEL_API_DIAGNOSTIC_ON_STARTUP` before deployment: setting it to 1 invokes an existing inference probe. Do not enable it or change provider settings without approval.
+3. Non-AI HTTP checks: health, 16-category catalog and public OpenAPI. POST the fictional LED evidence above with an effective fictional rate: expect 12,500 kWh, $2,500 gross/net and one-year payback. Remove rate: money/payback null; benchmark cannot substitute. Remove runtime/wattage: dependent energy/money null. Invalid/nonfinite inputs must return 422.
+4. Replay representative feasible/infeasible original `/api/optimize` requests and independently verify costs/constraints. Compare public contracts to the handoff/OpenAPI.
+5. Only with separate explicit authorization, send **one** POST `/api/ai/savings/conversation` using [the prepared fictional warehouse request](verification/meta-savings-acceptance-request.json). No automatic retries. This request has no EV/flexible equipment, no customer rate, partly unknown main lighting and a known separate pilot measure. Expect no scheduling selection, exactly **2,000 kWh/year** for the pilot, unknown main-lighting kWh, null money/payback for both, and missing-data questions. Profile opening hours must not fill unknown device runtime.
+6. Require `source: meta`; fallback is a failed genuine-provider acceptance check, even if calculations are correct. Reject invented financial numbers, inferred measurements or unsupported HVAC/solar estimates. Record serving SHA and sanitized request/result evidence. This live request has **not** been executed by this integration work.
+
+The backend remains subject to caller evidence quality. Free-text relevance cannot be guaranteed without confirmed applicability; frontend collection/display must honor the rules above. Render serving revision and genuine production Meta acceptance remain pending. No merge or deployment is authorized by this document.

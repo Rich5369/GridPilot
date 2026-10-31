@@ -97,3 +97,117 @@ def test_model_cannot_return_invented_inputs():
     from pydantic import ValidationError
     with pytest.raises(ValidationError):
         advisor.CategorySelection.model_validate({'categories': ['led'], 'old_watts': 60.})
+
+
+@pytest.mark.parametrize('business', ['office', 'warehouse', 'manufacturing'])
+def test_unknown_inventory_is_investigation_not_action(monkeypatch, business):
+    monkeypatch.setattr(advisor, 'generate', lambda *a, **k: (
+        advisor.CategorySelection(categories=['scheduling', 'refrigeration', 'motor']), 'meta'))
+    result = run(evidence={'profile': {'business_type': business}})
+    assert result.selected_categories == ['scheduling', 'refrigeration', 'motor']
+    assert all(f.startswith('Investigation only; equipment applicability unconfirmed.') for f in result.facts)
+    assert all('first confirm equipment applicability' in q for q in result.follow_up_questions)
+    assert all(r.annual_kwh_saved is None for r in result.savings.recommendations)
+    assert all(r.applicability == 'possible' for r in result.savings.recommendations)
+
+
+@pytest.mark.parametrize('business', ['office', 'warehouse', 'manufacturing'])
+def test_explicit_absent_equipment_cannot_be_selected(monkeypatch, business):
+    captured = {}
+    def select(schema, instructions, payload):
+        captured.update(payload)
+        return schema(categories=['scheduling', 'refrigeration', 'led']), 'meta'
+    monkeypatch.setattr(advisor, 'generate', select)
+    result = run(request='No EVs, flexible loads or refrigeration. Help with lighting.',
+        evidence={'profile': {'business_type': business, 'equipment': 'lighting only; no EVs, flexible loads or refrigeration'}},
+        category_applicability={'scheduling': False, 'refrigeration': False})
+    assert result.selected_categories == ['led']
+    assert captured['category_applicability'] == {'scheduling': False, 'refrigeration': False}
+    assert 'scheduling' not in ' '.join(result.facts + result.follow_up_questions)
+    for r in result.savings.recommendations:
+        if r.category in ('scheduling', 'refrigeration'):
+            assert r.applicability == r.calculation_status == 'not_applicable'
+            assert r.annual_net_savings_usd is None
+            assert not r.missing_information
+
+
+def test_no_evs_does_not_suppress_confirmed_non_ev_flexible_loads(monkeypatch):
+    monkeypatch.setattr(advisor, 'generate', lambda *a, **k: (
+        advisor.CategorySelection(categories=['scheduling', 'motor']), 'meta'))
+    result = run(request='No EVs; we have safely interruptible flexible production loads.',
+        category_applicability={'scheduling': True},
+        evidence={'profile': {'business_type': 'manufacturing', 'equipment': 'flexible production loads; no EVs'}})
+    assert 'scheduling' in result.selected_categories
+    assert any('catalog:scheduling' in f and not f.startswith('Investigation only; equipment applicability unconfirmed.') for f in result.facts)
+    assert all(r.annual_net_savings_usd is None for r in result.savings.recommendations)
+
+
+def test_measure_exclusion_and_conflicting_category_are_validated():
+    result = run([BASE | {'applicable': False}])
+    assert 'led' not in result.selected_categories
+    client = TestClient(app)
+    r = client.post('/api/ai/savings/conversation', json={
+        'request': 'Help', 'evidence': {'measures': [BASE]},
+        'category_applicability': {'led': False}})
+    assert r.status_code == 422
+    r = client.post('/api/ai/savings/conversation', json={
+        'request': 'Help', 'category_applicability': {'scheduling': 'false'}})
+    assert r.status_code == 422
+
+
+def test_confirmed_applicability_does_not_supply_measurements():
+    result = run(category_applicability={'led': True})
+    led = next(r for r in result.savings.recommendations if r.category == 'led')
+    assert led.calculation_status == 'needs_data'
+    assert led.annual_kwh_saved is led.annual_net_savings_usd is None
+    assert any('fixture_count' in q for q in result.follow_up_questions)
+
+
+@pytest.mark.parametrize('render', ['false', 'true'])
+def test_real_mock_adapter_returns_labeled_fallback_without_inference(monkeypatch, render):
+    from backend.ai.service import generate
+    monkeypatch.setattr(advisor, 'generate', generate)
+    monkeypatch.setenv('MODEL_API_MODE', 'mock')
+    monkeypatch.setenv('RENDER', render)
+    def forbidden(*a, **k):
+        pytest.fail('Mock/configuration fallback must not construct a provider client')
+    monkeypatch.setattr('openai.OpenAI', forbidden)
+    response = TestClient(app).post('/api/ai/savings/conversation', json={
+        'request': 'Help our warehouse reduce costs',
+        'evidence': {'measures': [BASE]},
+        'category_applicability': {'scheduling': False}})
+    assert response.status_code == 200
+    result = response.json()
+    assert result['source'] == 'deterministic_fallback'
+    assert result['message'].startswith('Meta unavailable; using deterministic guidance.')
+    assert 'scheduling' not in result['selected_categories']
+    assert next(r for r in result['savings']['recommendations'] if r['id'] == 'test')['annual_net_savings_usd'] == 2500
+
+
+def test_fallback_starter_categories_respect_exclusions(monkeypatch):
+    def fail(*a, **k):
+        raise HTTPException(503, 'unavailable')
+    monkeypatch.setattr(advisor, 'generate', fail)
+    result = run(category_applicability={c: False for c in ('led', 'shutdown', 'hvac_schedule', 'tariff_comparison')})
+    assert result.selected_categories == []
+    assert result.facts == result.follow_up_questions == []
+    assert result.source == 'deterministic_fallback'
+
+
+def test_free_text_absence_is_not_converted_to_inventory(monkeypatch):
+    monkeypatch.setattr(advisor, 'generate', lambda *a, **k: (
+        advisor.CategorySelection(categories=['scheduling']), 'meta'))
+    result = run(request='Our office has no EVs. Other equipment is unknown.')
+    assert result.facts[0].startswith('Investigation only; equipment applicability unconfirmed.')
+    assert 'first confirm equipment applicability' in result.follow_up_questions[0]
+    assert all(r.annual_net_savings_usd is None for r in result.savings.recommendations)
+
+
+def test_one_excluded_measure_does_not_suppress_valid_same_category():
+    result = run([BASE, BASE | {'id': 'excluded-load', 'applicable': False}])
+    assert 'led' in result.selected_categories
+    actual = {r.id: r for r in result.savings.recommendations}
+    assert actual['test'].annual_kwh_saved == 12500
+    assert actual['test'].annual_net_savings_usd == 2500
+    assert actual['test'].provenance['reference'] == BASE['evidence_reference']
+    assert actual['excluded-load'].calculation_status == 'not_applicable'
