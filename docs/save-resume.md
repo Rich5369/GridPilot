@@ -44,8 +44,7 @@ It retains:
   independently of conversation text or solver results. Explicit setup edits update
   corresponding context fields without discarding unrelated equipment/restrictions.
 
-Partial setup returns to the exact step. Completed setup returns to the approved
-homepage with **Continue to your building** and **Edit building**. Editing a created
+Partial setup returns to the exact step. At the homepage, completed setup offers **Continue to your building** and **Edit building**. Editing a created
 building reopens step 1 with its latest inputs; finishing setup marks it complete
 again. Continue never runs optimization. New inputs remain subject to the existing
 engineering validation; persistence does not change solver feasibility semantics.
@@ -64,7 +63,12 @@ asks the user to run optimization explicitly. A stored input is never evidence
 that the backend retains a previous execution. The existing result ID/cache and
 same-response E1 checks still govern new runs and advisor explanations.
 
-Conversation transcripts, pending AI proposals, navigation position, What-if
+Dashboard section links now use URL hashes (see [frontend completion](frontend-completion.md));
+refreshing a completed building’s direct section link restores that section with
+inputs only. Homepage entry still provides Continue. URL navigation is independent
+of saved workspace contents.
+
+Conversation transcripts, pending AI proposals, What-if
 alternative drafts/comparison results and extra billing-estimate widget state
 remain session-only. The current main building scenario is saved; this is not a
 project/session-history archive. Setup business metadata and editable advisor

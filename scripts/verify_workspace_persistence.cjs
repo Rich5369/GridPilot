@@ -7,7 +7,7 @@ const path = require("node:path");
 const assert = require("node:assert/strict");
 const { execFileSync } = require("node:child_process");
 const url = process.env.GRIDPILOT_FRONTEND_URL || "http://127.0.0.1:5294";
-const output = "artifacts/save-resume";
+const output = process.env.GRIDPILOT_OUTPUT || "artifacts/save-resume";
 const key = "gridpilot.building-workspace";
 const profileDir = fs.mkdtempSync(
   path.join(os.tmpdir(), "gridpilot-save-resume-"),
@@ -19,7 +19,7 @@ const report = {
     encoding: "utf8",
   }).trim(),
   implementation:
-    "Save/resume working tree before review commit; baseRevision is not deployment/implementation provenance",
+    "Frontend source committed at baseRevision; local production build, not a deployed revision. QA tooling and documentation were uncommitted.",
   checks: [],
   requests: [],
   errors: [],
@@ -202,7 +202,7 @@ async function nav(name) {
     await page.locator("#limit").fill("19.25");
     await page.locator("#scheduling-mode").selectOption("ev_only");
     await page.reload();
-    await click("Continue to your building");
+    await page.getByText("Building inputs restored.", { exact: false }).waitFor();
     await nav("Scenario configuration");
     assert.equal(await page.locator("#limit").inputValue(), "19.25");
     assert.equal(
@@ -352,6 +352,7 @@ async function nav(name) {
       "demo",
     );
     await d.reload();
+    await d.getByRole("link", {name:"Home",exact:true}).click();
     await d
       .getByText("Demonstration workspace · synthetic inputs", { exact: true })
       .waitFor();
