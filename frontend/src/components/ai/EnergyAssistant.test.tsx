@@ -131,3 +131,45 @@ it('keeps profile, history and the draft after truncation until the user explici
     container.remove()
   }
 })
+
+it('preserves profile corrections made while an advisor reply is pending', async () => {
+  const container = document.createElement('div'), root = createRoot(container)
+  document.body.append(container)
+  const persist = vi.fn(), change = vi.fn()
+  let resolve!: (value: unknown) => void
+  vi.mocked(apiRequest).mockReset()
+  vi.mocked(apiRequest).mockImplementationOnce(() => new Promise(r => { resolve = r }))
+  try {
+    await act(async () => root.render(<EnergyAssistant editor={defaultEditor} onChange={change} resultScenario={null} initialProfile={{employee_count: 10}} onProfileChange={persist} schedulingMode="joint" resultId="same-execution" />))
+    const click = async (text: string) => act(async () => [...container.querySelectorAll('button')].find(b=>b.textContent===text)!.click())
+    await click('Keep peak power demand below 15 kW.')
+    await click('Send to advisor')
+    const input = container.querySelector<HTMLInputElement>('input[type=number]')!
+    await act(async () => {
+      Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,'value')!.set!.call(input,'43')
+      input.dispatchEvent(new Event('input',{bubbles:true}))
+    })
+    await act(async () => resolve({source:'mock',category:'answer',message:'Fixture only',facts:[],profile:{employee_count:10,business_type:'Warehouse'},changes:{},proposed_scenario:null}))
+    expect(input.value).toBe('43')
+    expect(persist).toHaveBeenLastCalledWith({employee_count:43,business_type:'Warehouse'})
+    expect(container.textContent).toContain('User edited')
+    expect(change).not.toHaveBeenCalled()
+    const body=JSON.parse(vi.mocked(apiRequest).mock.calls.at(-1)![1]!.body as string)
+    expect(body.profile.employee_count).toBe(10)
+    expect(body.scheduling_mode).toBe('joint')
+    expect(body.result_id).toBe('same-execution')
+  } finally { await act(async()=>root.unmount()); container.remove() }
+})
+it('does not write a late reply into the saved workspace after leaving the dashboard',async()=>{
+  const container=document.createElement('div'),root=createRoot(container),persist=vi.fn()
+  document.body.append(container)
+  let resolve!: (value:unknown)=>void
+  vi.mocked(apiRequest).mockReset().mockImplementationOnce(()=>new Promise(r=>{resolve=r}))
+  await act(async()=>root.render(<EnergyAssistant editor={defaultEditor} onChange={vi.fn()} resultScenario={null} onProfileChange={persist}/>))
+  for(const label of ['Keep peak power demand below 15 kW.','Send to advisor'])await act(async()=>[...container.querySelectorAll('button')].find(b=>b.textContent===label)!.click())
+  expect(resolve).toBeTypeOf('function')
+  await act(async()=>root.unmount())
+  await act(async()=>resolve({source:'mock',category:'answer',message:'Late reply',profile:{employee_count:10},changes:{},proposed_scenario:null}))
+  expect(persist).not.toHaveBeenCalled()
+  container.remove()
+})

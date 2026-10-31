@@ -10,7 +10,7 @@ profiles. Custom/named inputs replace the demo; EVs and separately modeled
 equipment are added exactly once. **Optimization** displays real backend results;
 **What-if scenarios** compares independently submitted current/alternative inputs,
 with Apply/Restore and stale-result invalidation. The **Energy overview** remains
-clearly labeled fictional demo data. Editor state is in memory, not a database.
+clearly labeled fictional demo data. Building inputs support validated browser-local [Save and Resume](docs/save-resume.md); optimizer results stay session-only. No account or cross-device storage is provided.
 
 **Start here:** [engineering demo walkthrough](docs/demo-walkthrough.md),
 [API contract](docs/contracts.md), [engineering reference](backend/simulator/README.md).
@@ -277,9 +277,13 @@ requirements rather than duplicating version ranges. To deliberately upgrade bac
 
 | Owner | Primary files and responsibilities |
 | --- | --- |
-| Rich5369 — CS | `frontend/`, `backend/api/`, `backend/ai/`, `backend/main.py`; application, Meta integration, browser verification and deployment |
-| shaJ46 — EE | `backend/simulator/`, `backend/optimizer/`; baseline, energy/tariffs, constraints, EV/joint scheduling, adapter and numerical verification |
+| shaJ46 | `frontend/`; landing/onboarding, dashboard/charts/design, browser integration and frontend testing |
+| Rich5369 (Richard) | `backend/`; APIs, optimization mathematics, pricing/data accuracy, validation/reliability and Meta provider integration |
 | Both | `backend/models/`, `frontend/src/types/`, `docs/contracts.md`, sample scenarios; agree on contract changes first |
+
+This division supersedes the earlier EE/CS implementation split. See the
+[frontend completion report](docs/frontend-completion.md) for current behavior,
+local verification and account/backend dependencies.
 
 Richard's remaining handoff is confirming actual served revisions and the genuine
 hosted Meta workflow. The team supplies final submission details and presentation
@@ -288,8 +292,8 @@ engineering segment, not official competition timing or rules. No additional EE
 feature or acceptance campaign is required to explain the recorded results.
 
 Use focused branches from the team's current default branch and
-open PRs for review. Coordinate changes to contracts and lockfiles; keep EE work
-inside its owned modules to minimize conflicts. Never force-push shared branches
+open PRs for review. Coordinate changes to contracts and lockfiles; keep changes
+inside the agreed owned modules to minimize conflicts. Never force-push shared branches
 or commit `.env`, virtual environments, node_modules, or build output.
 
 ## Historical implementation guides

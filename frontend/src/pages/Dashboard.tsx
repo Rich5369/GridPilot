@@ -1,5 +1,5 @@
 import { OperatingTimeline } from '../components/dashboard/OperatingTimeline'
-import { lazy, Suspense, useRef, useState } from 'react'
+import { lazy, Suspense, useRef, useState, type ReactNode } from 'react'
 import {
   Building2,
   Globe2,
@@ -37,6 +37,7 @@ import {
   modeLabel,
   type SchedulingMode,
 } from '../services/api'
+import type { DashboardView } from '../services/navigation'
 import type { ScenarioEditor } from '../types/dashboard'
 import type { Scenario, OptimizationResult } from '../types/api'
 const DemandChart = lazy(() =>
@@ -64,7 +65,14 @@ const views = [
   { id: 'assistant', label: 'AI assistant', icon: Sparkles },
   { id: 'markets', label: 'Electricity markets', icon: Globe2 },
 ] as const
-export function Dashboard({ initialEditor, initialMode = 'ev_only', workspaceName = 'Scenario workspace', businessProfile, onSetup }: {
+export function Dashboard({ initialEditor, initialMode = 'ev_only', workspaceName = 'Scenario workspace', businessProfile, onSetup, workspaceControls, onInputsChange, onBusinessContextChange, businessContextLabel, selectedView, onNavigate, resumed = false }: {
+  selectedView?: DashboardView
+  onNavigate?: (view: DashboardView) => void
+  onBusinessContextChange?: (profile: Record<string, string | number | null>) => void
+  businessContextLabel?: string
+  workspaceControls?: ReactNode
+  onInputsChange?: (editor: ScenarioEditor, mode: SchedulingMode) => void
+  resumed?: boolean
   initialEditor?: ScenarioEditor
   initialMode?: SchedulingMode
   workspaceName?: string
@@ -77,12 +85,17 @@ export function Dashboard({ initialEditor, initialMode = 'ev_only', workspaceNam
   const [resultMode, setResultMode] = useState<SchedulingMode>(initialMode)
   const [billingInputs, setBillingInputs] = useState(defaultBillingInputs)
   const [appliedBilling, setAppliedBilling] = useState(defaultBillingInputs)
-  const [view, setView] = useState<string>('overview')
-  const [editor, setEditor] = useState({ ...(initialEditor ?? defaultEditor) })
+  const [localView, setLocalView] = useState<DashboardView>('overview')
+  const view = selectedView ?? localView
+  function setView(next: DashboardView) { setLocalView(next); onNavigate?.(next) }
+  const [editor, setEditorState] = useState({ ...(initialEditor ?? defaultEditor) })
+  function setEditor(next: ScenarioEditor) {
+    setEditorState(next)
+    onInputsChange?.(next, mode)
+  }
   const [alternative, setAlternative] = useState<ScenarioEditor | null>(null)
   // An AI handoff starts a new comparison and captures the current Restore snapshot.
   const [whatIfSession, setWhatIfSession] = useState(0)
-  const [whatIfVisited, setWhatIfVisited] = useState(false)
   const [result, setResult] = useState<OptimizationResult | null>(null)
   const [submitted, setSubmitted] = useState('')
   const [resultScenario, setResultScenario] = useState<Scenario | null>(null)
@@ -119,14 +132,14 @@ export function Dashboard({ initialEditor, initialMode = 'ev_only', workspaceNam
   }
   return (
     <div className="app-shell">
-      <a className="skip-link" href="#overview">
+      <a className="skip-link" href="#workspace-main" onClick={e => { e.preventDefault(); document.getElementById("workspace-main")?.focus() }}>
         Skip to main content
       </a>
       <aside className="sidebar">
         <a
           className="brand"
           href="#overview"
-          onClick={() => setView('overview')}
+          onClick={e => { e.preventDefault(); setView('overview') }}
         >
           <span className="brand-icon">
             <Zap size={23} fill="currentColor" />
@@ -149,7 +162,6 @@ export function Dashboard({ initialEditor, initialMode = 'ev_only', workspaceNam
               aria-current={view === id ? 'page' : undefined}
               onClick={() => {
                 setView(id)
-                if (id === 'whatif') setWhatIfVisited(true)
               }}
             >
               <Icon size={18} />
@@ -184,9 +196,10 @@ export function Dashboard({ initialEditor, initialMode = 'ev_only', workspaceNam
             Workspace <span className="breadcrumb">/</span>
             <strong>{views.find((v) => v.id === view)?.label}</strong>
           </span>
-          <div className="topbar-actions">{onSetup && <button className="secondary" onClick={() => onSetup(editor, mode)}>Business setup</button>}<BackendStatus /></div>
+          <div className="topbar-actions">{onNavigate && <a className="secondary home-link" href="#home">Home</a>}{onSetup && <button className="secondary" onClick={() => onSetup(editor, mode)}>Edit building</button>}{workspaceControls}<BackendStatus /></div>
         </header>
-        <main id="overview" tabIndex={-1}>
+        <main id="workspace-main" tabIndex={-1}>
+          {resumed && !result && <p className="workspace-result-notice" role="status">Building inputs restored. No optimizer result has been restored. Run optimization explicitly to calculate a new schedule.</p>}
           <div className="page-heading">
             <div>
               <p className="eyebrow">GRIDPILOT / ENERGY INTELLIGENCE</p>
@@ -239,7 +252,6 @@ export function Dashboard({ initialEditor, initialMode = 'ev_only', workspaceNam
               <button
                 className="secondary"
                 onClick={() => {
-                  setWhatIfVisited(true)
                   setView('whatif')
                 }}
               >
@@ -257,6 +269,7 @@ export function Dashboard({ initialEditor, initialMode = 'ev_only', workspaceNam
                 modeVersion.current += 1
                 setModeRevision(modeVersion.current)
                 setMode(event.target.value as SchedulingMode)
+                onInputsChange?.(editor, event.target.value as SchedulingMode)
                 setResult(null)
                 setResultScenario(null)
                 setMessage(
@@ -456,7 +469,7 @@ export function Dashboard({ initialEditor, initialMode = 'ev_only', workspaceNam
                   )}
                 </>
               )}
-              {whatIfVisited && (
+              {(
                 <div hidden={view !== 'whatif'}>
                   <Suspense
                     fallback={<p role="status">Loading what-if comparison…</p>}
@@ -503,7 +516,6 @@ export function Dashboard({ initialEditor, initialMode = 'ev_only', workspaceNam
                       onCompareProposal={(next) => {
                         setWhatIfSession((session) => session + 1)
                         setAlternative(next)
-                        setWhatIfVisited(true)
                         setView('whatif')
                       }}
                       editor={editor}
@@ -511,6 +523,8 @@ export function Dashboard({ initialEditor, initialMode = 'ev_only', workspaceNam
                       resultScenario={resultScenario}
                       resultId={result?.result_id}
                       initialProfile={businessProfile}
+                      onProfileChange={onBusinessContextChange}
+                      initialProfileLabel={businessContextLabel}
                     />
                   </div>
                 }

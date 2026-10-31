@@ -1,3 +1,4 @@
+import { InfeasibilityDetails } from './InfeasibilityDetails'
 import { DemandChart } from '../DemandChart'
 import { GitCompareArrows } from 'lucide-react'
 import type { OptimizationResult } from '../../types/api'
@@ -151,13 +152,7 @@ export function Comparison({
             One day · USD · Energy charges only, excluding fixed and demand
             charges. Positive differences indicate reductions.
           </p>
-          {result.constraint_violations.length > 0 && (
-            <ul className="violations">
-              {result.constraint_violations.map((v, i) => (
-                <li key={i}>{v}</li>
-              ))}
-            </ul>
-          )}
+          <InfeasibilityDetails result={result} stale={stale} />
           <DemandChart
             title="Baseline versus optimized demand"
             limit={limit}
