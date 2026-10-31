@@ -1,0 +1,11 @@
+{
+  "revision": "89f20fb68aadf65346034bcf6fa25c7e463d2071",
+  "endpoint": "/api/ai/savings/conversation",
+  "provider": "injected synchronous 250ms sleep; no network",
+  "expected_timer_seconds": 0.02,
+  "observed_timer_seconds": 0.25247354400016775,
+  "request_duration_seconds": 0.2523673659998167,
+  "provider_calls": 1,
+  "provider_default_timeout_seconds": 25,
+  "live_meta_requests": 0
+}

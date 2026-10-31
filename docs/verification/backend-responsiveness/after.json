@@ -1,0 +1,10 @@
+{
+  "base_revision": "89f20fb68aadf65346034bcf6fa25c7e463d2071",
+  "correction": "await run_in_threadpool(generate, ...)",
+  "provider": "injected synchronous 250ms sleep; no network",
+  "expected_timer_seconds": 0.02,
+  "observed_timer_seconds": 0.023007789000075718,
+  "request_duration_seconds": 0.2736134039996614,
+  "provider_calls": 1,
+  "live_meta_requests": 0
+}

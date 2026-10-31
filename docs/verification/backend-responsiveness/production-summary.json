@@ -1,0 +1,126 @@
+{
+  "checked_at_utc": "2026-10-31T15:11:57.139771+00:00",
+  "deployment_evidence": {
+    "source": "User direct Render service overview observation in this session",
+    "service": "gridpilot-api",
+    "branch": "main",
+    "status": "Live",
+    "serving_commit": "99268894c60e833a814e4d737dcdcd5ac9000f32",
+    "deployment_id": null,
+    "service_id": null,
+    "deployment_timestamp": null,
+    "independently_read_control_plane": false
+  },
+  "live_meta_requests": 0,
+  "retries": 0,
+  "results": [
+    {
+      "name": "health",
+      "path": "/api/health",
+      "status": 200,
+      "outcome": "PASS",
+      "duration_seconds": 33.21714596699985
+    },
+    {
+      "name": "catalog",
+      "path": "/api/savings/catalog",
+      "status": 200,
+      "outcome": "PASS",
+      "duration_seconds": 0.03113385400047264
+    },
+    {
+      "name": "office_unknown",
+      "path": "/api/savings/recommendations",
+      "status": 200,
+      "outcome": "PASS",
+      "duration_seconds": 0.02956586799973593
+    },
+    {
+      "name": "office_complete_led",
+      "path": "/api/savings/recommendations",
+      "status": 200,
+      "outcome": "PASS",
+      "duration_seconds": 0.03711251999993692
+    },
+    {
+      "name": "warehouse_unknown",
+      "path": "/api/savings/recommendations",
+      "status": 200,
+      "outcome": "PASS",
+      "duration_seconds": 0.041060504000597575
+    },
+    {
+      "name": "warehouse_complete_led",
+      "path": "/api/savings/recommendations",
+      "status": 200,
+      "outcome": "PASS",
+      "duration_seconds": 0.03961401900050987
+    },
+    {
+      "name": "missing_rate_with_florida_benchmark",
+      "path": "/api/savings/recommendations",
+      "status": 200,
+      "outcome": "PASS",
+      "duration_seconds": 0.8537218980000034
+    },
+    {
+      "name": "missing_annual_expense",
+      "path": "/api/savings/recommendations",
+      "status": 200,
+      "outcome": "PASS",
+      "duration_seconds": 0.028127438999945298
+    },
+    {
+      "name": "missing_old_watts",
+      "path": "/api/savings/recommendations",
+      "status": 200,
+      "outcome": "PASS",
+      "duration_seconds": 0.0256450249999034
+    },
+    {
+      "name": "overlapping_measures",
+      "path": "/api/savings/recommendations",
+      "status": 200,
+      "outcome": "PASS",
+      "duration_seconds": 0.031631933000426216
+    },
+    {
+      "name": "excluded_led_measure",
+      "path": "/api/savings/recommendations",
+      "status": 200,
+      "outcome": "PASS",
+      "duration_seconds": 0.02607979799995519
+    },
+    {
+      "name": "boolean_count",
+      "path": "/api/savings/recommendations",
+      "status": 422,
+      "outcome": "PASS",
+      "duration_seconds": 0.04062196599988965
+    },
+    {
+      "name": "fixed_no_ev",
+      "path": "/api/optimize",
+      "status": 200,
+      "outcome": "PASS",
+      "duration_seconds": 0.11860973900002136
+    },
+    {
+      "name": "flexible_no_ev",
+      "path": "/api/optimize",
+      "status": 200,
+      "outcome": "PASS",
+      "duration_seconds": 0.056756169000436785
+    },
+    {
+      "name": "fixed_infeasible",
+      "path": "/api/optimize",
+      "status": 200,
+      "outcome": "PASS",
+      "duration_seconds": 0.24054745600005845
+    }
+  ],
+  "passed": 15,
+  "total": 15,
+  "full_evidence_location": "artifacts/backend-responsiveness-2026-10-31/production-checks.json (original workspace; synthetic requests/responses)"
+}

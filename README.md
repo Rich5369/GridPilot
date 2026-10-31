@@ -1,6 +1,13 @@
 # GridPilot
 
-GridPilot plans one day of commercial-building electricity demand using a
+GridPilot is a commercial electricity cost advisor. Its deterministic business
+savings backend calculates supported annual energy and financial scenarios from
+explicit evidence; Meta selects investigation categories, while calculators
+remain authoritative. The [savings integration guide](docs/meta-savings-integration.md)
+is the canonical backend handoff. The frontend savings journey and genuine
+post-PR #51 production Meta acceptance remain release gates.
+
+GridPilot also plans one day of commercial-building electricity demand using a
 deterministic baseline simulator, OR-Tools GLOP optimizer, FastAPI and a React
 dashboard. EV-only scheduling is the default; explicit joint mode also schedules
 eligible flexible equipment. Background and HVAC remain fixed.
@@ -34,9 +41,9 @@ milestone findings; this README is the current status/setup entry point.
 
 The additive [E1 operating-plan contract](docs/device-operating-plans.md) exposes
 verified individual EV/flexible schedules and solver quality from the same
-outcome as aggregate metrics. Existing aggregate consumers remain supported;
-Richard's schema review and timeline UI integration are separate follow-up.
-E1 local verification does not establish deployed device-plan support.
+outcome as aggregate metrics. The timeline UI consumes this contract; existing
+aggregate consumers remain supported. Local verification alone does not identify
+the currently serving backend revision.
 
 ## Stack and prerequisites
 
@@ -216,8 +223,9 @@ backend/.venv/bin/python -m backend.optimizer --optimize-flexible --example join
 
 Server-side Meta interpretation and grounded explanation are implemented. Users
 review proposed edits before Apply; applying does not run optimization. The
-engineering solver provides feasibility and numerical facts. **Joint-mode AI is
-disabled** because the current explanation path recomputes EV-only results.
+engineering solver provides feasibility and numerical facts. Explanations support
+EV-only and joint mode using the exact retained result ID; an unavailable result
+requires an explicit new optimization rather than silently recomputing it.
 
 Live AI uses server-only `MODEL_API_KEY`; `MODEL_API_MODE` defaults to `live`.
 Code defaults are `MODEL_API_BASE_URL=https://api.meta.ai/v1` and
