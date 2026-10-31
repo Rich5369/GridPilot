@@ -1,5 +1,6 @@
 """Meta selects investigations; only caller-validated evidence reaches calculators."""
 from fastapi import HTTPException
+from starlette.concurrency import run_in_threadpool
 from pydantic import Field, model_validator
 from typing import Literal
 from backend.ai.advisor import Turn
@@ -76,7 +77,9 @@ async def savings_conversation(body: SavingsConversationRequest) -> SavingsConve
             r.next_action = 'Excluded by caller; revisit only if equipment applicability changes.'
     source = 'meta'
     try:
-        selection, source = generate(CategorySelection, INSTRUCTIONS, {
+        # The synchronous SDK may wait on network I/O; keep this worker's event
+        # loop available for health, calculations and other concurrent requests.
+        selection, source = await run_in_threadpool(generate, CategorySelection, INSTRUCTIONS, {
             'request': body.request, 'history': [t.model_dump() for t in body.history],
             'profile': body.evidence.profile.model_dump(), 'catalog': list(CATALOG.values()),
             'category_applicability': body.category_applicability,

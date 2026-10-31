@@ -1,0 +1,15 @@
+{
+  "main_sha": "89f20fb68aadf65346034bcf6fa25c7e463d2071",
+  "backend_tests_passed": 747,
+  "new_concurrency_tests_fail_on_main": 2,
+  "new_concurrency_tests_pass_after_fix": 2,
+  "optimizer_oracle_cases": 200,
+  "optimizer_representative_cases": 6,
+  "optimizer_stress_cases": 6,
+  "openapi_unchanged": true,
+  "warehouse_acceptance_fixtures_equal": true,
+  "live_meta_requests": 0,
+  "production_post_checks": "pending verified Render deployment identity",
+  "render_deployment_id": null,
+  "render_serving_sha": null
+}
