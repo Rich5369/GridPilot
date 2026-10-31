@@ -152,8 +152,13 @@ class RetailService:
                         previous = self.cache
                         # The saved release is also available across cold starts.
                         if previous is None:
-                            previous = RetailPrices.model_validate_json(self.snapshot_path.read_text())
-                        if fresh.released_at < previous.released_at or fresh.period < previous.period:
+                            try:
+                                previous = RetailPrices.model_validate_json(self.snapshot_path.read_text())
+                            except (OSError, ValueError):
+                                # A valid provider release does not depend on an
+                                # optional saved asset being readable/valid.
+                                previous = None
+                        if previous is not None and (fresh.released_at < previous.released_at or fresh.period < previous.period):
                             raise ValueError('Provider report regressed')
                         self.cache = fresh
                     except (TimeoutError, httpx.HTTPError, ValueError, TypeError, KeyError, AttributeError, IndexError, OverflowError):

@@ -77,7 +77,12 @@ def grounded_profile(body, selection):
         if value is None or value == merged[key]:
             continue
         quote = selection.profile_evidence.get(key, '')
-        if not quote or quote.casefold() not in user_text.casefold() or str(value).casefold() not in quote.casefold():
+        supported = str(value).casefold() in quote.casefold()
+        if key == 'employee_count':
+            # A count must be a complete numeral, not 30 inside 300 or 30.5.
+            # Keep exact user excerpts; do not infer or round employee counts.
+            supported = re.search(r'(?<![\w.,+\-])' + str(value) + r'(?!\w|[.,]\d)', quote) is not None
+        if not quote or quote.casefold() not in user_text.casefold() or not supported:
             raise fail(502, 'ai_invalid_response', 'Meta returned business details without user evidence. No changes were applied.')
         merged[key] = value
     return BusinessProfile.model_validate(merged)
