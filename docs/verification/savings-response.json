@@ -1,0 +1,814 @@
+{
+  "version": "1",
+  "benchmark": {
+    "state": "California",
+    "sector": "COM",
+    "currency": "USD",
+    "unit": "USD/kWh",
+    "average_retail_price": 0.3002,
+    "period": "2026-08",
+    "source": "U.S. Energy Information Administration · Electric Power Monthly, Table 5.6.A",
+    "source_url": "https://www.eia.gov/electricity/monthly/epm_table_grapher.php?t=epmt_5_6_a",
+    "retrieved_at": "2026-10-30T20:37:21.023210+00:00",
+    "released_at": "2026-10-23",
+    "freshness": "available",
+    "provenance": "historical_public_data",
+    "notice": "Historical regional average; never used as a customer tariff or savings rate."
+  },
+  "location_notice": "50 states and D.C. State names validated; ZIP is syntax-checked only. City, utility and rate plan are unverified caller metadata. No address, utility, tariff or climate is inferred.",
+  "recommendations": [
+    {
+      "id": "office-led-scenario",
+      "category": "led",
+      "title": "LED lighting replacement",
+      "explanation": "Existing lighting with an equivalent replacement",
+      "applicability": "confirmed",
+      "calculation_status": "scenario_estimate",
+      "annual_kwh_saved": 12500.0,
+      "annual_energy_charge_savings_usd": 2500.0,
+      "annual_net_savings_usd": 2500.0,
+      "upfront_cost_usd": 2500.0,
+      "simple_payback_years": 1.0,
+      "annual_simple_roi_percent": 100.0,
+      "confidence": "unverified caller scenario",
+      "provenance": {
+        "kind": "synthetic",
+        "reference": "Fictional integration example; not customer savings",
+        "load_id": "office-main-lighting",
+        "rate_source": "Fictional flat-rate scenario; not a utility offering"
+      },
+      "inputs_used": {
+        "id": "office-led-scenario",
+        "category": "led",
+        "load_id": "office-main-lighting",
+        "evidence_kind": "synthetic",
+        "evidence_reference": "Fictional integration example; not customer savings",
+        "rate": {
+          "usd_per_kwh": 0.2,
+          "source": "Fictional flat-rate scenario; not a utility offering",
+          "valid_from": "2026-01-01",
+          "valid_through": "2026-12-31",
+          "customer_applicability_confirmed": true,
+          "flat_avoidable_energy_rate_confirmed": true
+        },
+        "installation_cost_usd": 2500.0,
+        "annual_incremental_cost_usd": 0.0,
+        "fixture_count": 100,
+        "old_watts": 60.0,
+        "new_watts": 10.0,
+        "hours_per_day": 10.0,
+        "days_per_year": 250,
+        "equivalent_service_confirmed": true
+      },
+      "assumptions": [
+        "Standalone estimate against supplied baseline. Do not sum overlapping measures.",
+        "Energy charges only; no demand, fixed-charge, tax, incentive or escalation savings assumed.",
+        "Evidence and customer applicability are caller attestations; not independently audited.",
+        "Annual projection holds the supplied operating schedule and current flat rate constant; future rates are unknown.",
+        "Installation cost is caller-supplied net upfront cost; no incentives or tax benefits inferred."
+      ],
+      "calculation_method": "fixture_count * (old_watts - new_watts) / 1000 * hours_per_day * days_per_year; gross USD = kWh * customer USD/kWh; net = gross - annual incremental cost; payback = upfront/net when net > 0; annual simple ROI = net/upfront * 100 when upfront > 0",
+      "missing_information": [],
+      "sources": [
+        "https://www.energy.gov/energysaver/led-lighting"
+      ],
+      "next_action": "Validate baseline, equivalent service and costs before implementation.",
+      "priority_group": "financial",
+      "priority_reason": "Positive documented net benefit; measured evidence precedes scenarios, then annual net savings and payback."
+    },
+    {
+      "id": "catalog:benchmark",
+      "category": "benchmark",
+      "title": "Commercial electricity benchmark",
+      "explanation": "Compare actual bill context with the historical state benchmark; another state price is not an available tariff.",
+      "applicability": "possible",
+      "calculation_status": "needs_data",
+      "annual_kwh_saved": null,
+      "annual_energy_charge_savings_usd": null,
+      "annual_net_savings_usd": null,
+      "upfront_cost_usd": null,
+      "simple_payback_years": null,
+      "annual_simple_roi_percent": null,
+      "confidence": "unverified caller scenario",
+      "provenance": {
+        "kind": "user_entered",
+        "reference": "No category-specific evidence supplied",
+        "load_id": "unknown",
+        "rate_source": null
+      },
+      "inputs_used": {
+        "id": "catalog:benchmark",
+        "category": "benchmark",
+        "load_id": "unknown",
+        "evidence_kind": "user_entered",
+        "evidence_reference": "No category-specific evidence supplied"
+      },
+      "assumptions": [
+        "Standalone estimate against supplied baseline. Do not sum overlapping measures.",
+        "Energy charges only; no demand, fixed-charge, tax, incentive or escalation savings assumed.",
+        "Evidence and customer applicability are caller attestations; not independently audited.",
+        "Annual projection holds the supplied operating schedule and current flat rate constant; future rates are unknown.",
+        "Installation cost is caller-supplied net upfront cost; no incentives or tax benefits inferred."
+      ],
+      "calculation_method": "Investigation only; no numerical model in v1; gross USD = kWh * customer USD/kWh; net = gross - annual incremental cost; payback = upfront/net when net > 0; annual simple ROI = net/upfront * 100 when upfront > 0",
+      "missing_information": [],
+      "sources": [
+        "https://www.eia.gov/electricity/monthly/epm_table_grapher.php?t=epmt_5_6_a"
+      ],
+      "next_action": "Review benchmark dates and actual energy charges; do not infer savings from the difference.",
+      "priority_group": "investigation",
+      "priority_reason": "Missing evidence or nonpositive benefit; no positive savings presumed."
+    },
+    {
+      "id": "catalog:compressed_air",
+      "category": "compressed_air",
+      "title": "Investigate compressed-air leaks",
+      "explanation": "Business using compressed air",
+      "applicability": "possible",
+      "calculation_status": "needs_data",
+      "annual_kwh_saved": null,
+      "annual_energy_charge_savings_usd": null,
+      "annual_net_savings_usd": null,
+      "upfront_cost_usd": null,
+      "simple_payback_years": null,
+      "annual_simple_roi_percent": null,
+      "confidence": "unverified caller scenario",
+      "provenance": {
+        "kind": "user_entered",
+        "reference": "No category-specific evidence supplied",
+        "load_id": "unknown",
+        "rate_source": null
+      },
+      "inputs_used": {
+        "id": "catalog:compressed_air",
+        "category": "compressed_air",
+        "load_id": "unknown",
+        "evidence_kind": "user_entered",
+        "evidence_reference": "No category-specific evidence supplied"
+      },
+      "assumptions": [
+        "Standalone estimate against supplied baseline. Do not sum overlapping measures.",
+        "Energy charges only; no demand, fixed-charge, tax, incentive or escalation savings assumed.",
+        "Evidence and customer applicability are caller attestations; not independently audited.",
+        "Annual projection holds the supplied operating schedule and current flat rate constant; future rates are unknown.",
+        "Installation cost is caller-supplied net upfront cost; no incentives or tax benefits inferred."
+      ],
+      "calculation_method": "Investigation only; no numerical model in v1; gross USD = kWh * customer USD/kWh; net = gross - annual incremental cost; payback = upfront/net when net > 0; annual simple ROI = net/upfront * 100 when upfront > 0",
+      "missing_information": [
+        "measured leak flow and compressor performance",
+        "runtime",
+        "safe process constraints"
+      ],
+      "sources": [
+        "https://www.energy.gov/femp/energy-efficient-products-and-energy-saving-technologies"
+      ],
+      "next_action": "Provide: measured leak flow and compressor performance; runtime; safe process constraints",
+      "priority_group": "investigation",
+      "priority_reason": "Missing evidence or nonpositive benefit; no positive savings presumed."
+    },
+    {
+      "id": "catalog:demand",
+      "category": "demand",
+      "title": "Investigate demand-charge reduction",
+      "explanation": "Customer billed for demand",
+      "applicability": "possible",
+      "calculation_status": "needs_data",
+      "annual_kwh_saved": null,
+      "annual_energy_charge_savings_usd": null,
+      "annual_net_savings_usd": null,
+      "upfront_cost_usd": null,
+      "simple_payback_years": null,
+      "annual_simple_roi_percent": null,
+      "confidence": "unverified caller scenario",
+      "provenance": {
+        "kind": "user_entered",
+        "reference": "No category-specific evidence supplied",
+        "load_id": "unknown",
+        "rate_source": null
+      },
+      "inputs_used": {
+        "id": "catalog:demand",
+        "category": "demand",
+        "load_id": "unknown",
+        "evidence_kind": "user_entered",
+        "evidence_reference": "No category-specific evidence supplied"
+      },
+      "assumptions": [
+        "Standalone estimate against supplied baseline. Do not sum overlapping measures.",
+        "Energy charges only; no demand, fixed-charge, tax, incentive or escalation savings assumed.",
+        "Evidence and customer applicability are caller attestations; not independently audited.",
+        "Annual projection holds the supplied operating schedule and current flat rate constant; future rates are unknown.",
+        "Installation cost is caller-supplied net upfront cost; no incentives or tax benefits inferred."
+      ],
+      "calculation_method": "Investigation only; no numerical model in v1; gross USD = kWh * customer USD/kWh; net = gross - annual incremental cost; payback = upfront/net when net > 0; annual simple ROI = net/upfront * 100 when upfront > 0",
+      "missing_information": [
+        "applicable demand tariff",
+        "billing interval data",
+        "ratchets, minimums, periods and billing history"
+      ],
+      "sources": [
+        "https://apps.openei.org/services/doc/rest/util_rates/"
+      ],
+      "next_action": "Provide: applicable demand tariff; billing interval data; ratchets, minimums, periods and billing history",
+      "priority_group": "investigation",
+      "priority_reason": "Missing evidence or nonpositive benefit; no positive savings presumed."
+    },
+    {
+      "id": "catalog:envelope",
+      "category": "envelope",
+      "title": "Insulation and air sealing assessment",
+      "explanation": "Business with conditioned building envelope",
+      "applicability": "possible",
+      "calculation_status": "needs_data",
+      "annual_kwh_saved": null,
+      "annual_energy_charge_savings_usd": null,
+      "annual_net_savings_usd": null,
+      "upfront_cost_usd": null,
+      "simple_payback_years": null,
+      "annual_simple_roi_percent": null,
+      "confidence": "unverified caller scenario",
+      "provenance": {
+        "kind": "user_entered",
+        "reference": "No category-specific evidence supplied",
+        "load_id": "unknown",
+        "rate_source": null
+      },
+      "inputs_used": {
+        "id": "catalog:envelope",
+        "category": "envelope",
+        "load_id": "unknown",
+        "evidence_kind": "user_entered",
+        "evidence_reference": "No category-specific evidence supplied"
+      },
+      "assumptions": [
+        "Standalone estimate against supplied baseline. Do not sum overlapping measures.",
+        "Energy charges only; no demand, fixed-charge, tax, incentive or escalation savings assumed.",
+        "Evidence and customer applicability are caller attestations; not independently audited.",
+        "Annual projection holds the supplied operating schedule and current flat rate constant; future rates are unknown.",
+        "Installation cost is caller-supplied net upfront cost; no incentives or tax benefits inferred."
+      ],
+      "calculation_method": "Investigation only; no numerical model in v1; gross USD = kWh * customer USD/kWh; net = gross - annual incremental cost; payback = upfront/net when net > 0; annual simple ROI = net/upfront * 100 when upfront > 0",
+      "missing_information": [
+        "audit",
+        "envelope condition",
+        "ventilation, humidity and moisture constraints",
+        "validated building model"
+      ],
+      "sources": [
+        "https://www.energy.gov/femp/energy-efficient-products-and-energy-saving-technologies"
+      ],
+      "next_action": "Provide: audit; envelope condition; ventilation, humidity and moisture constraints; validated building model",
+      "priority_group": "investigation",
+      "priority_reason": "Missing evidence or nonpositive benefit; no positive savings presumed."
+    },
+    {
+      "id": "catalog:hvac_maintenance",
+      "category": "hvac_maintenance",
+      "title": "Investigate HVAC maintenance",
+      "explanation": "Business with HVAC equipment",
+      "applicability": "possible",
+      "calculation_status": "needs_data",
+      "annual_kwh_saved": null,
+      "annual_energy_charge_savings_usd": null,
+      "annual_net_savings_usd": null,
+      "upfront_cost_usd": null,
+      "simple_payback_years": null,
+      "annual_simple_roi_percent": null,
+      "confidence": "unverified caller scenario",
+      "provenance": {
+        "kind": "user_entered",
+        "reference": "No category-specific evidence supplied",
+        "load_id": "unknown",
+        "rate_source": null
+      },
+      "inputs_used": {
+        "id": "catalog:hvac_maintenance",
+        "category": "hvac_maintenance",
+        "load_id": "unknown",
+        "evidence_kind": "user_entered",
+        "evidence_reference": "No category-specific evidence supplied"
+      },
+      "assumptions": [
+        "Standalone estimate against supplied baseline. Do not sum overlapping measures.",
+        "Energy charges only; no demand, fixed-charge, tax, incentive or escalation savings assumed.",
+        "Evidence and customer applicability are caller attestations; not independently audited.",
+        "Annual projection holds the supplied operating schedule and current flat rate constant; future rates are unknown.",
+        "Installation cost is caller-supplied net upfront cost; no incentives or tax benefits inferred."
+      ],
+      "calculation_method": "Investigation only; no numerical model in v1; gross USD = kWh * customer USD/kWh; net = gross - annual incremental cost; payback = upfront/net when net > 0; annual simple ROI = net/upfront * 100 when upfront > 0",
+      "missing_information": [
+        "equipment inventory",
+        "maintenance history",
+        "professional inspection",
+        "measured performance"
+      ],
+      "sources": [
+        "https://www.energy.gov/femp/energy-efficient-products-and-energy-saving-technologies"
+      ],
+      "next_action": "Provide: equipment inventory; maintenance history; professional inspection; measured performance",
+      "priority_group": "investigation",
+      "priority_reason": "Missing evidence or nonpositive benefit; no positive savings presumed."
+    },
+    {
+      "id": "catalog:hvac_schedule",
+      "category": "hvac_schedule",
+      "title": "Review HVAC operating schedules",
+      "explanation": "HVAC runs outside occupancy or process needs",
+      "applicability": "possible",
+      "calculation_status": "needs_data",
+      "annual_kwh_saved": null,
+      "annual_energy_charge_savings_usd": null,
+      "annual_net_savings_usd": null,
+      "upfront_cost_usd": null,
+      "simple_payback_years": null,
+      "annual_simple_roi_percent": null,
+      "confidence": "unverified caller scenario",
+      "provenance": {
+        "kind": "user_entered",
+        "reference": "No category-specific evidence supplied",
+        "load_id": "unknown",
+        "rate_source": null
+      },
+      "inputs_used": {
+        "id": "catalog:hvac_schedule",
+        "category": "hvac_schedule",
+        "load_id": "unknown",
+        "evidence_kind": "user_entered",
+        "evidence_reference": "No category-specific evidence supplied"
+      },
+      "assumptions": [
+        "Standalone estimate against supplied baseline. Do not sum overlapping measures.",
+        "Energy charges only; no demand, fixed-charge, tax, incentive or escalation savings assumed.",
+        "Evidence and customer applicability are caller attestations; not independently audited.",
+        "Annual projection holds the supplied operating schedule and current flat rate constant; future rates are unknown.",
+        "Installation cost is caller-supplied net upfront cost; no incentives or tax benefits inferred."
+      ],
+      "calculation_method": "Investigation only; no numerical model in v1; gross USD = kWh * customer USD/kWh; net = gross - annual incremental cost; payback = upfront/net when net > 0; annual simple ROI = net/upfront * 100 when upfront > 0",
+      "missing_information": [
+        "occupancy and HVAC schedule",
+        "ventilation and process constraints",
+        "measured baseline or validated model"
+      ],
+      "sources": [
+        "https://www.ncei.noaa.gov/products/land-based-station/us-climate-normals"
+      ],
+      "next_action": "Provide: occupancy and HVAC schedule; ventilation and process constraints; measured baseline or validated model",
+      "priority_group": "investigation",
+      "priority_reason": "Missing evidence or nonpositive benefit; no positive savings presumed."
+    },
+    {
+      "id": "catalog:hvac_setpoints",
+      "category": "hvac_setpoints",
+      "title": "Review HVAC setpoints",
+      "explanation": "Business with conditioned spaces",
+      "applicability": "possible",
+      "calculation_status": "needs_data",
+      "annual_kwh_saved": null,
+      "annual_energy_charge_savings_usd": null,
+      "annual_net_savings_usd": null,
+      "upfront_cost_usd": null,
+      "simple_payback_years": null,
+      "annual_simple_roi_percent": null,
+      "confidence": "unverified caller scenario",
+      "provenance": {
+        "kind": "user_entered",
+        "reference": "No category-specific evidence supplied",
+        "load_id": "unknown",
+        "rate_source": null
+      },
+      "inputs_used": {
+        "id": "catalog:hvac_setpoints",
+        "category": "hvac_setpoints",
+        "load_id": "unknown",
+        "evidence_kind": "user_entered",
+        "evidence_reference": "No category-specific evidence supplied"
+      },
+      "assumptions": [
+        "Standalone estimate against supplied baseline. Do not sum overlapping measures.",
+        "Energy charges only; no demand, fixed-charge, tax, incentive or escalation savings assumed.",
+        "Evidence and customer applicability are caller attestations; not independently audited.",
+        "Annual projection holds the supplied operating schedule and current flat rate constant; future rates are unknown.",
+        "Installation cost is caller-supplied net upfront cost; no incentives or tax benefits inferred."
+      ],
+      "calculation_method": "Investigation only; no numerical model in v1; gross USD = kWh * customer USD/kWh; net = gross - annual incremental cost; payback = upfront/net when net > 0; annual simple ROI = net/upfront * 100 when upfront > 0",
+      "missing_information": [
+        "equipment and occupancy",
+        "comfort, humidity, ventilation, inventory and freeze constraints",
+        "measured before/after data or validated model"
+      ],
+      "sources": [
+        "https://www.ncei.noaa.gov/products/land-based-station/us-climate-normals"
+      ],
+      "next_action": "Provide: equipment and occupancy; comfort, humidity, ventilation, inventory and freeze constraints; measured before/after data or validated model",
+      "priority_group": "investigation",
+      "priority_reason": "Missing evidence or nonpositive benefit; no positive savings presumed."
+    },
+    {
+      "id": "catalog:lighting_controls",
+      "category": "lighting_controls",
+      "title": "Lighting occupancy controls",
+      "explanation": "Lighting operating in unoccupied spaces",
+      "applicability": "possible",
+      "calculation_status": "needs_data",
+      "annual_kwh_saved": null,
+      "annual_energy_charge_savings_usd": null,
+      "annual_net_savings_usd": null,
+      "upfront_cost_usd": null,
+      "simple_payback_years": null,
+      "annual_simple_roi_percent": null,
+      "confidence": "unverified caller scenario",
+      "provenance": {
+        "kind": "user_entered",
+        "reference": "No category-specific evidence supplied",
+        "load_id": "unknown",
+        "rate_source": null
+      },
+      "inputs_used": {
+        "id": "catalog:lighting_controls",
+        "category": "lighting_controls",
+        "load_id": "unknown",
+        "evidence_kind": "user_entered",
+        "evidence_reference": "No category-specific evidence supplied"
+      },
+      "assumptions": [
+        "Standalone estimate against supplied baseline. Do not sum overlapping measures.",
+        "Energy charges only; no demand, fixed-charge, tax, incentive or escalation savings assumed.",
+        "Evidence and customer applicability are caller attestations; not independently audited.",
+        "Annual projection holds the supplied operating schedule and current flat rate constant; future rates are unknown.",
+        "Installation cost is caller-supplied net upfront cost; no incentives or tax benefits inferred."
+      ],
+      "calculation_method": "connected_load_kw * avoidable_hours_per_day * days_per_year; gross USD = kWh * customer USD/kWh; net = gross - annual incremental cost; payback = upfront/net when net > 0; annual simple ROI = net/upfront * 100 when upfront > 0",
+      "missing_information": [
+        "connected_load_kw",
+        "existing_hours_per_day",
+        "avoidable_hours_per_day",
+        "days_per_year",
+        "safe_to_switch_off",
+        "essential_service",
+        "safe_to_switch_off must be explicitly true",
+        "Confirm essential_service is false; never interrupt critical refrigeration, security, ventilation or safety equipment"
+      ],
+      "sources": [
+        "https://www.energy.gov/femp/energy-efficient-products-and-energy-saving-technologies"
+      ],
+      "next_action": "Provide: connected_load_kw; existing_hours_per_day; avoidable_hours_per_day; days_per_year; safe_to_switch_off; essential_service; safe_to_switch_off must be explicitly true; Confirm essential_service is false; never interrupt critical refrigeration, security, ventilation or safety equipment",
+      "priority_group": "investigation",
+      "priority_reason": "Missing evidence or nonpositive benefit; no positive savings presumed."
+    },
+    {
+      "id": "catalog:motor",
+      "category": "motor",
+      "title": "Compare motor/system consumption",
+      "explanation": "Business using motors or driven systems",
+      "applicability": "possible",
+      "calculation_status": "needs_data",
+      "annual_kwh_saved": null,
+      "annual_energy_charge_savings_usd": null,
+      "annual_net_savings_usd": null,
+      "upfront_cost_usd": null,
+      "simple_payback_years": null,
+      "annual_simple_roi_percent": null,
+      "confidence": "unverified caller scenario",
+      "provenance": {
+        "kind": "user_entered",
+        "reference": "No category-specific evidence supplied",
+        "load_id": "unknown",
+        "rate_source": null
+      },
+      "inputs_used": {
+        "id": "catalog:motor",
+        "category": "motor",
+        "load_id": "unknown",
+        "evidence_kind": "user_entered",
+        "evidence_reference": "No category-specific evidence supplied"
+      },
+      "assumptions": [
+        "Standalone estimate against supplied baseline. Do not sum overlapping measures.",
+        "Energy charges only; no demand, fixed-charge, tax, incentive or escalation savings assumed.",
+        "Evidence and customer applicability are caller attestations; not independently audited.",
+        "Annual projection holds the supplied operating schedule and current flat rate constant; future rates are unknown.",
+        "Installation cost is caller-supplied net upfront cost; no incentives or tax benefits inferred."
+      ],
+      "calculation_method": "before_annual_kwh - after_annual_kwh; gross USD = kWh * customer USD/kWh; net = gross - annual incremental cost; payback = upfront/net when net > 0; annual simple ROI = net/upfront * 100 when upfront > 0",
+      "missing_information": [
+        "before_annual_kwh",
+        "after_annual_kwh",
+        "equivalent_service_confirmed",
+        "equivalent_service_confirmed must be explicitly true"
+      ],
+      "sources": [
+        "https://www.energy.gov/femp/energy-efficient-products-and-energy-saving-technologies"
+      ],
+      "next_action": "Provide: before_annual_kwh; after_annual_kwh; equivalent_service_confirmed; equivalent_service_confirmed must be explicitly true",
+      "priority_group": "investigation",
+      "priority_reason": "Missing evidence or nonpositive benefit; no positive savings presumed."
+    },
+    {
+      "id": "catalog:office",
+      "category": "office",
+      "title": "Office equipment power management",
+      "explanation": "Business with nonessential office devices",
+      "applicability": "possible",
+      "calculation_status": "needs_data",
+      "annual_kwh_saved": null,
+      "annual_energy_charge_savings_usd": null,
+      "annual_net_savings_usd": null,
+      "upfront_cost_usd": null,
+      "simple_payback_years": null,
+      "annual_simple_roi_percent": null,
+      "confidence": "unverified caller scenario",
+      "provenance": {
+        "kind": "user_entered",
+        "reference": "No category-specific evidence supplied",
+        "load_id": "unknown",
+        "rate_source": null
+      },
+      "inputs_used": {
+        "id": "catalog:office",
+        "category": "office",
+        "load_id": "unknown",
+        "evidence_kind": "user_entered",
+        "evidence_reference": "No category-specific evidence supplied"
+      },
+      "assumptions": [
+        "Standalone estimate against supplied baseline. Do not sum overlapping measures.",
+        "Energy charges only; no demand, fixed-charge, tax, incentive or escalation savings assumed.",
+        "Evidence and customer applicability are caller attestations; not independently audited.",
+        "Annual projection holds the supplied operating schedule and current flat rate constant; future rates are unknown.",
+        "Installation cost is caller-supplied net upfront cost; no incentives or tax benefits inferred."
+      ],
+      "calculation_method": "device_count * (active_watts - low_power_watts) / 1000 * avoidable_hours_per_day * days_per_year; gross USD = kWh * customer USD/kWh; net = gross - annual incremental cost; payback = upfront/net when net > 0; annual simple ROI = net/upfront * 100 when upfront > 0",
+      "missing_information": [
+        "device_count",
+        "active_watts",
+        "low_power_watts",
+        "existing_hours_per_day",
+        "avoidable_hours_per_day",
+        "days_per_year",
+        "safe_to_switch_off",
+        "essential_service",
+        "safe_to_switch_off must be explicitly true",
+        "Confirm essential_service is false; never interrupt critical refrigeration, security, ventilation or safety equipment"
+      ],
+      "sources": [
+        "https://www.energy.gov/femp/energy-efficient-products-and-energy-saving-technologies"
+      ],
+      "next_action": "Provide: device_count; active_watts; low_power_watts; existing_hours_per_day; avoidable_hours_per_day; days_per_year; safe_to_switch_off; essential_service; safe_to_switch_off must be explicitly true; Confirm essential_service is false; never interrupt critical refrigeration, security, ventilation or safety equipment",
+      "priority_group": "investigation",
+      "priority_reason": "Missing evidence or nonpositive benefit; no positive savings presumed."
+    },
+    {
+      "id": "catalog:refrigeration",
+      "category": "refrigeration",
+      "title": "Compare refrigeration consumption",
+      "explanation": "Business using commercial refrigeration",
+      "applicability": "possible",
+      "calculation_status": "needs_data",
+      "annual_kwh_saved": null,
+      "annual_energy_charge_savings_usd": null,
+      "annual_net_savings_usd": null,
+      "upfront_cost_usd": null,
+      "simple_payback_years": null,
+      "annual_simple_roi_percent": null,
+      "confidence": "unverified caller scenario",
+      "provenance": {
+        "kind": "user_entered",
+        "reference": "No category-specific evidence supplied",
+        "load_id": "unknown",
+        "rate_source": null
+      },
+      "inputs_used": {
+        "id": "catalog:refrigeration",
+        "category": "refrigeration",
+        "load_id": "unknown",
+        "evidence_kind": "user_entered",
+        "evidence_reference": "No category-specific evidence supplied"
+      },
+      "assumptions": [
+        "Standalone estimate against supplied baseline. Do not sum overlapping measures.",
+        "Energy charges only; no demand, fixed-charge, tax, incentive or escalation savings assumed.",
+        "Evidence and customer applicability are caller attestations; not independently audited.",
+        "Annual projection holds the supplied operating schedule and current flat rate constant; future rates are unknown.",
+        "Installation cost is caller-supplied net upfront cost; no incentives or tax benefits inferred."
+      ],
+      "calculation_method": "before_annual_kwh - after_annual_kwh; gross USD = kWh * customer USD/kWh; net = gross - annual incremental cost; payback = upfront/net when net > 0; annual simple ROI = net/upfront * 100 when upfront > 0",
+      "missing_information": [
+        "before_annual_kwh",
+        "after_annual_kwh",
+        "equivalent_service_confirmed",
+        "equivalent_service_confirmed must be explicitly true"
+      ],
+      "sources": [
+        "https://www.energy.gov/femp/energy-efficient-products-and-energy-saving-technologies"
+      ],
+      "next_action": "Provide: before_annual_kwh; after_annual_kwh; equivalent_service_confirmed; equivalent_service_confirmed must be explicitly true",
+      "priority_group": "investigation",
+      "priority_reason": "Missing evidence or nonpositive benefit; no positive savings presumed."
+    },
+    {
+      "id": "catalog:scheduling",
+      "category": "scheduling",
+      "title": "EV and flexible-load scheduling",
+      "explanation": "Business with interruptible flexible loads or EVs",
+      "applicability": "possible",
+      "calculation_status": "needs_data",
+      "annual_kwh_saved": null,
+      "annual_energy_charge_savings_usd": null,
+      "annual_net_savings_usd": null,
+      "upfront_cost_usd": null,
+      "simple_payback_years": null,
+      "annual_simple_roi_percent": null,
+      "confidence": "unverified caller scenario",
+      "provenance": {
+        "kind": "user_entered",
+        "reference": "No category-specific evidence supplied",
+        "load_id": "unknown",
+        "rate_source": null
+      },
+      "inputs_used": {
+        "id": "catalog:scheduling",
+        "category": "scheduling",
+        "load_id": "unknown",
+        "evidence_kind": "user_entered",
+        "evidence_reference": "No category-specific evidence supplied"
+      },
+      "assumptions": [
+        "Standalone estimate against supplied baseline. Do not sum overlapping measures.",
+        "Energy charges only; no demand, fixed-charge, tax, incentive or escalation savings assumed.",
+        "Evidence and customer applicability are caller attestations; not independently audited.",
+        "Annual projection holds the supplied operating schedule and current flat rate constant; future rates are unknown.",
+        "Installation cost is caller-supplied net upfront cost; no incentives or tax benefits inferred."
+      ],
+      "calculation_method": "Investigation only; no numerical model in v1; gross USD = kWh * customer USD/kWh; net = gross - annual incremental cost; payback = upfront/net when net > 0; annual simple ROI = net/upfront * 100 when upfront > 0",
+      "missing_information": [
+        "validated Scenario",
+        "customer hourly tariff",
+        "equipment windows and safety constraints",
+        "POST /api/optimize"
+      ],
+      "sources": [
+        "https://www.energy.gov/femp/energy-efficient-products-and-energy-saving-technologies"
+      ],
+      "next_action": "Provide: validated Scenario; customer hourly tariff; equipment windows and safety constraints; POST /api/optimize",
+      "priority_group": "investigation",
+      "priority_reason": "Missing evidence or nonpositive benefit; no positive savings presumed."
+    },
+    {
+      "id": "catalog:shutdown",
+      "category": "shutdown",
+      "title": "After-hours equipment shutdown",
+      "explanation": "Nonessential equipment running unnecessarily",
+      "applicability": "possible",
+      "calculation_status": "needs_data",
+      "annual_kwh_saved": null,
+      "annual_energy_charge_savings_usd": null,
+      "annual_net_savings_usd": null,
+      "upfront_cost_usd": null,
+      "simple_payback_years": null,
+      "annual_simple_roi_percent": null,
+      "confidence": "unverified caller scenario",
+      "provenance": {
+        "kind": "user_entered",
+        "reference": "No category-specific evidence supplied",
+        "load_id": "unknown",
+        "rate_source": null
+      },
+      "inputs_used": {
+        "id": "catalog:shutdown",
+        "category": "shutdown",
+        "load_id": "unknown",
+        "evidence_kind": "user_entered",
+        "evidence_reference": "No category-specific evidence supplied"
+      },
+      "assumptions": [
+        "Standalone estimate against supplied baseline. Do not sum overlapping measures.",
+        "Energy charges only; no demand, fixed-charge, tax, incentive or escalation savings assumed.",
+        "Evidence and customer applicability are caller attestations; not independently audited.",
+        "Annual projection holds the supplied operating schedule and current flat rate constant; future rates are unknown.",
+        "Installation cost is caller-supplied net upfront cost; no incentives or tax benefits inferred."
+      ],
+      "calculation_method": "connected_load_kw * avoidable_hours_per_day * days_per_year; gross USD = kWh * customer USD/kWh; net = gross - annual incremental cost; payback = upfront/net when net > 0; annual simple ROI = net/upfront * 100 when upfront > 0",
+      "missing_information": [
+        "connected_load_kw",
+        "existing_hours_per_day",
+        "avoidable_hours_per_day",
+        "days_per_year",
+        "safe_to_switch_off",
+        "essential_service",
+        "safe_to_switch_off must be explicitly true",
+        "Confirm essential_service is false; never interrupt critical refrigeration, security, ventilation or safety equipment"
+      ],
+      "sources": [
+        "https://www.energy.gov/femp/energy-efficient-products-and-energy-saving-technologies"
+      ],
+      "next_action": "Provide: connected_load_kw; existing_hours_per_day; avoidable_hours_per_day; days_per_year; safe_to_switch_off; essential_service; safe_to_switch_off must be explicitly true; Confirm essential_service is false; never interrupt critical refrigeration, security, ventilation or safety equipment",
+      "priority_group": "investigation",
+      "priority_reason": "Missing evidence or nonpositive benefit; no positive savings presumed."
+    },
+    {
+      "id": "catalog:solar",
+      "category": "solar",
+      "title": "Rooftop solar feasibility",
+      "explanation": "Business with roof access or site control",
+      "applicability": "possible",
+      "calculation_status": "needs_data",
+      "annual_kwh_saved": null,
+      "annual_energy_charge_savings_usd": null,
+      "annual_net_savings_usd": null,
+      "upfront_cost_usd": null,
+      "simple_payback_years": null,
+      "annual_simple_roi_percent": null,
+      "confidence": "unverified caller scenario",
+      "provenance": {
+        "kind": "user_entered",
+        "reference": "No category-specific evidence supplied",
+        "load_id": "unknown",
+        "rate_source": null
+      },
+      "inputs_used": {
+        "id": "catalog:solar",
+        "category": "solar",
+        "load_id": "unknown",
+        "evidence_kind": "user_entered",
+        "evidence_reference": "No category-specific evidence supplied"
+      },
+      "assumptions": [
+        "Standalone estimate against supplied baseline. Do not sum overlapping measures.",
+        "Energy charges only; no demand, fixed-charge, tax, incentive or escalation savings assumed.",
+        "Evidence and customer applicability are caller attestations; not independently audited.",
+        "Annual projection holds the supplied operating schedule and current flat rate constant; future rates are unknown.",
+        "Installation cost is caller-supplied net upfront cost; no incentives or tax benefits inferred."
+      ],
+      "calculation_method": "Investigation only; no numerical model in v1; gross USD = kWh * customer USD/kWh; net = gross - annual incremental cost; payback = upfront/net when net > 0; annual simple ROI = net/upfront * 100 when upfront > 0",
+      "missing_information": [
+        "validated site",
+        "roof assessment",
+        "capacity, tilt, azimuth, losses",
+        "generation model",
+        "interval consumption",
+        "tariff and export rules",
+        "capex and annual costs"
+      ],
+      "sources": [
+        "https://developer.nlr.gov/docs/solar/pvwatts/v8/"
+      ],
+      "next_action": "Provide: validated site; roof assessment; capacity, tilt, azimuth, losses; generation model; interval consumption; tariff and export rules; capex and annual costs",
+      "priority_group": "investigation",
+      "priority_reason": "Missing evidence or nonpositive benefit; no positive savings presumed."
+    },
+    {
+      "id": "catalog:tariff_comparison",
+      "category": "tariff_comparison",
+      "title": "Compare eligible utility plans",
+      "explanation": "Business with eligible alternative plans",
+      "applicability": "possible",
+      "calculation_status": "needs_data",
+      "annual_kwh_saved": null,
+      "annual_energy_charge_savings_usd": null,
+      "annual_net_savings_usd": null,
+      "upfront_cost_usd": null,
+      "simple_payback_years": null,
+      "annual_simple_roi_percent": null,
+      "confidence": "unverified caller scenario",
+      "provenance": {
+        "kind": "user_entered",
+        "reference": "No category-specific evidence supplied",
+        "load_id": "unknown",
+        "rate_source": null
+      },
+      "inputs_used": {
+        "id": "catalog:tariff_comparison",
+        "category": "tariff_comparison",
+        "load_id": "unknown",
+        "evidence_kind": "user_entered",
+        "evidence_reference": "No category-specific evidence supplied"
+      },
+      "assumptions": [
+        "Standalone estimate against supplied baseline. Do not sum overlapping measures.",
+        "Energy charges only; no demand, fixed-charge, tax, incentive or escalation savings assumed.",
+        "Evidence and customer applicability are caller attestations; not independently audited.",
+        "Annual projection holds the supplied operating schedule and current flat rate constant; future rates are unknown.",
+        "Installation cost is caller-supplied net upfront cost; no incentives or tax benefits inferred."
+      ],
+      "calculation_method": "Investigation only; no numerical model in v1; gross USD = kWh * customer USD/kWh; net = gross - annual incremental cost; payback = upfront/net when net > 0; annual simple ROI = net/upfront * 100 when upfront > 0",
+      "missing_information": [
+        "verified current and alternative tariffs",
+        "effective dates",
+        "utility eligibility",
+        "interval kWh and demand",
+        "seasonal, fixed, minimum and ratchet rules"
+      ],
+      "sources": [
+        "https://apps.openei.org/services/doc/rest/util_rates/"
+      ],
+      "next_action": "Provide: verified current and alternative tariffs; effective dates; utility eligibility; interval kWh and demand; seasonal, fixed, minimum and ratchet rules",
+      "priority_group": "investigation",
+      "priority_reason": "Missing evidence or nonpositive benefit; no positive savings presumed."
+    }
+  ],
+  "portfolio_savings_usd": null,
+  "warnings": [
+    "No portfolio total: standalone recommendations may overlap.",
+    "No AI inference, PVWatts, URDB or climate API calls are made by this endpoint."
+  ]
+}
