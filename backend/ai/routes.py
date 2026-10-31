@@ -45,3 +45,8 @@ def explain(body: ExplainRequest):
 
 from backend.ai.advisor import converse
 router.add_api_route("/conversation", converse, methods=["POST"])
+
+# Additive business-savings conversation; no scenario or optimizer execution required.
+from backend.ai.savings import savings_conversation, SavingsConversationResponse
+router.add_api_route('/savings/conversation', savings_conversation, methods=['POST'],
+                     response_model=SavingsConversationResponse)
