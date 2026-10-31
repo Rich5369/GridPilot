@@ -1,3 +1,6 @@
+import {exportEvidence} from '../../services/exportEvidence';
+import { formatHour } from "../../data/time";
+import type { CustomEquipment } from "../../types/dashboard";
 import { useState } from "react";
 import type { OptimizationResult, Scenario } from "../../types/api";
 import type { SchedulingMode } from "../../services/api";
@@ -8,17 +11,19 @@ const number = (n: number) =>
     : n < 0.001
       ? n.toExponential(6)
       : Number(n.toPrecision(7)).toString();
-const hour = (h: number) => `${String(h).padStart(2, "0")}:00`;
+const hour = formatHour;
 export function OperatingTimeline({
   result,
   scenario,
   mode,
   stale,
+  customEquipment,
 }: {
   result: OptimizationResult | null;
   scenario: Scenario | null;
   mode: SchedulingMode;
   stale: boolean;
+  customEquipment?: CustomEquipment;
 }) {
   const [view, setView] = useState<"baseline" | "optimized">("optimized");
   const [selection, setSelection] = useState(
@@ -30,29 +35,8 @@ export function OperatingTimeline({
     result.feasibility_status === "feasible" &&
     plan?.verification_status === "passed";
   const shown = verified ? view : "baseline";
-  function download() {
-    const url = URL.createObjectURL(
-      new Blob(
-        [
-          JSON.stringify(
-            {
-              scheduling_mode: mode,
-              submitted_scenario: scenario,
-              response: result,
-            },
-            null,
-            2,
-          ),
-        ],
-        { type: "application/json" },
-      ),
-    );
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "gridpilot-submitted-operating-plan.json";
-    a.click();
-    URL.revokeObjectURL(url);
-  }
+  function download() { exportEvidence(scenario,result!,mode,customEquipment) }
+
   return (
     <section
       className="panel operating-timeline"
@@ -216,9 +200,7 @@ export function OperatingTimeline({
             <span>DEVICE / ENERGY</span>
             <div>
               {Array.from({ length: 25 }, (_, h) => (
-                <span key={h}>
-                  {h % 3 === 0 ? String(h).padStart(2, "0") : ""}
-                </span>
+                <span key={h}>{h % 3 === 0 ? (h===24 ? "12 AM (end)" : formatHour(h).replace(":00", "")) : ""}</span>
               ))}
             </div>
           </div>
@@ -236,7 +218,11 @@ export function OperatingTimeline({
                 key={JSON.stringify([d.device_type, d.device_id])}
               >
                 <div className="device-label">
-                  <h3>{d.device_id}</h3>
+                  <h3>
+                    {d.device_id === customEquipment?.id
+                      ? `${customEquipment.name} · ${d.device_id}`
+                      : d.device_id}
+                  </h3>
                   <span>
                     {d.device_type === "ev" ? "EV" : "Flexible equipment"} ·{" "}
                     {d.scheduling_role === "held_at_baseline"

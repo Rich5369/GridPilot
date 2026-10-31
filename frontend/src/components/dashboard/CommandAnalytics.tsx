@@ -1,3 +1,4 @@
+import { formatHour, formatWindow } from '../../data/time'
 import { chartAxis, chartCursor } from '../../data/chartPresentation'
 import {
   Line,
@@ -63,10 +64,12 @@ export function CommandMetrics({
   result,
   scenario,
   stale,
+  busy = false,
 }: {
   result: OptimizationResult | null
   scenario: Scenario | null
   stale: boolean
+  busy?: boolean
 }) {
   const profiles = hourlyAnalytics(result, scenario)
   const cost = result?.optimized_electricity_cost_usd
@@ -131,7 +134,9 @@ export function CommandMetrics({
               </span>
               <h2>{label}</h2>
             </div>
-            <strong className="kpi-number">{value}</strong>
+            <strong className="kpi-number" aria-busy={busy}>
+              {busy && !result ? 'Calculating…' : value}
+            </strong>
             <p>{context}</p>
             {values ? (
               <Sparkline
@@ -140,7 +145,11 @@ export function CommandMetrics({
                 color={color}
               />
             ) : (
-              <div className="kpi-no-data">No calculated hourly profile</div>
+              <div className="kpi-no-data">
+                {busy
+                  ? 'Waiting for the submitted calculation'
+                  : 'No calculated hourly profile'}
+              </div>
             )}
             <div className="kpi-footer">
               <span>
@@ -148,7 +157,7 @@ export function CommandMetrics({
                   ? 'Previous submitted scenario'
                   : '24 hourly values · visual interpolation'}
               </span>
-              <span>00–23h</span>
+              <span>12 AM–11 PM</span>
             </div>
           </article>
         ),
@@ -197,10 +206,12 @@ export function ScenarioAnalytics({
         <p className="eyebrow">{draft ? 'DRAFT INPUTS' : 'SUBMITTED INPUTS'}</p>
         <h2>Electricity tariff</h2>
         <p className="panel-subtitle">
-          24 hourly inputs · $/kWh · straight connections are visual interpolation; optimizer uses the exact hourly tariff
+          24 hourly inputs · $/kWh · straight connections are visual
+          interpolation; optimizer uses the exact hourly tariff
         </p>
         <div
-          className="tariff-range cost-totals" role="group"
+          className="tariff-range cost-totals"
+          role="group"
           aria-label="Hourly tariff range"
         >
           <div>
@@ -231,7 +242,7 @@ export function ScenarioAnalytics({
                 type="number"
                 domain={[0, 23]}
                 ticks={[0, 6, 12, 18, 23]}
-                tickFormatter={(hour) => `${String(hour).padStart(2, '0')}:00`}
+                tickFormatter={(hour) => formatHour(hour)}
                 tick={chartAxis}
                 axisLine={false}
                 tickLine={false}
@@ -276,7 +287,7 @@ export function ScenarioAnalytics({
               <tbody>
                 {rows.map((r) => (
                   <tr key={r.hour}>
-                    <th>{String(r.hour).padStart(2, '0')}:00</th>
+                    <th>{formatHour(r.hour)}</th>
                     <td>{r.price.toFixed(4)}</td>
                   </tr>
                 ))}
@@ -289,11 +300,16 @@ export function ScenarioAnalytics({
         <p className="eyebrow">MODELED DAILY OUTCOME</p>
         <h2>Baseline vs. optimized cost</h2>
         <p className="panel-subtitle">
-          Hourly energy cost · USD per 1-hour interval · straight connections are visual interpolation
+          Hourly energy cost · USD per 1-hour interval · straight connections
+          are visual interpolation
         </p>
         {result ? (
           <>
-            <div className="cost-totals" role="group" aria-label="Daily energy cost totals">
+            <div
+              className="cost-totals"
+              role="group"
+              aria-label="Daily energy cost totals"
+            >
               <div>
                 <span>Baseline · daily total</span>
                 <strong>{money(result.baseline_electricity_cost_usd)}</strong>
@@ -332,19 +348,14 @@ export function ScenarioAnalytics({
                         type="number"
                         domain={[0, 23]}
                         ticks={[0, 6, 12, 18, 23]}
-                        tickFormatter={(h) =>
-                          `${String(h).padStart(2, '0')}:00`
-                        }
+                        tickFormatter={(h) => formatHour(h)}
                         tick={chartAxis}
                         axisLine={false}
                         tickLine={false}
                       />
                       <YAxis
                         width={48}
-                        domain={[
-                          (min: number) => Math.min(0, min),
-                          'auto',
-                        ]}
+                        domain={[(min: number) => Math.min(0, min), 'auto']}
                         tick={chartAxis}
                         tickFormatter={(v) => money(Number(v))}
                         axisLine={false}
@@ -405,10 +416,7 @@ export function ScenarioAnalytics({
                       <tbody>
                         {costRows.slice(0, 24).map((row) => (
                           <tr key={row.hour}>
-                            <th>
-                              {String(row.hour).padStart(2, '0')}:00–
-                              {String(row.hour + 1).padStart(2, '0')}:00
-                            </th>
+                            <th>{formatWindow(row.hour, row.hour + 1)}</th>
                             {costSeries.map((s) => (
                               <td key={s.key}>
                                 {s.values[row.hour].toFixed(4)}

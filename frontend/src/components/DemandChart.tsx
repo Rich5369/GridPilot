@@ -1,3 +1,4 @@
+import { formatHour, formatWindow } from '../data/time'
 import { chartAxis, chartCursor } from '../data/chartPresentation'
 import { useState } from 'react'
 import { AnalyticsTooltip, ChartLegend } from './ChartPrimitives'
@@ -58,7 +59,7 @@ export function DemandChart({
           aria-pressed={!breakdown}
           onClick={() => setView('total')}
         >
-          Total demand
+          {baseline ? 'Total demand' : total.label}
         </button>
         {sources.length > 0 && (
           <button
@@ -102,6 +103,16 @@ export function DemandChart({
           ))}
         </div>
       )}
+      {!breakdown &&
+        baseline &&
+        baseline.values.every(
+          (v, h) => Math.abs(v - total.values[h]) < 1e-6,
+        ) && (
+          <p className="field-hint">
+            Baseline and optimized demand overlap at this display precision.
+            Both series use the returned hourly values.
+          </p>
+        )}
       {!breakdown && (
         <ChartLegend
           items={[
@@ -134,7 +145,7 @@ export function DemandChart({
               type="number"
               domain={[0, 23]}
               ticks={[0, 4, 8, 12, 16, 20, 23]}
-              tickFormatter={(h) => `${String(h).padStart(2, '0')}:00`}
+              tickFormatter={(h) => formatHour(h)}
               tick={chartAxis}
               tickLine={false}
               axisLine={false}
@@ -238,10 +249,7 @@ export function DemandChart({
             <tbody>
               {rows.slice(0, 24).map((row) => (
                 <tr key={row.hour}>
-                  <th>
-                    {String(row.hour).padStart(2, '0')}:00–
-                    {String(row.hour + 1).padStart(2, '0')}:00
-                  </th>
+                  <th>{formatWindow(row.hour, row.hour + 1)}</th>
                   {series.map((s) => (
                     <td key={s.key}>{s.values[row.hour].toFixed(2)}</td>
                   ))}

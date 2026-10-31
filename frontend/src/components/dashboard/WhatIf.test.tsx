@@ -89,5 +89,5 @@ it('uses joint mode for both snapshots and hides the old comparison on mode chan
   expect(host.textContent).toContain('Outdated comparison results are hidden')
   await click('Compare both scenarios')
   expect(vi.mocked(optimizeScenario).mock.calls.slice(-2).map(call => call[1])).toEqual(['joint', 'joint'])
-  expect(host.textContent).toContain('Scheduling mode for both scenarios: EV + flexible equipment')
+  expect(host.textContent).toContain('Analysis for both scenarios: EV charging and flexible equipment')
 })

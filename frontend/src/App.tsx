@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback, useState, useRef } from "react";
 import { Zap } from "lucide-react";
 import { Dashboard } from "./pages/Dashboard";
 import { Setup } from "./pages/Setup";
@@ -8,7 +8,11 @@ import { useSavedWorkspace } from "./hooks/useSavedWorkspace";
 import { demoWorkspace } from "./services/workspaceStorage";
 import type { WorkspaceSetup } from "./types/workspace";
 import type { ScenarioEditor } from "./types/dashboard";
-import type { SchedulingMode } from "./services/api";
+import { optimizeScenario, type SchedulingMode } from "./services/api";
+import { toScenario, validateEditor } from "./data/demoScenario";
+import { effectiveMode } from "./data/analysisOptions";
+import { formatWindow } from "./data/time";
+import type { InitialCalculation } from "./types/initialCalculation";
 
 export default function App() {
   const { record, setRecord, status, clear, withoutSaving, recovery } =
@@ -18,6 +22,10 @@ export default function App() {
   const [session, setSession] = useState(0);
   const [pending, setPending] = useState<"clear" | "demo" | null>(null);
   const workspace = record?.workspace;
+  const [initialCalculation, setInitialCalculation] =
+    useState<InitialCalculation | null>(null);
+  const setupPending = useRef<object | null>(null);
+  const consumeInitial = useCallback(() => setInitialCalculation(null), []);
   const resetView = () => {
     navigate("setup");
     setSession((n) => n + 1);
@@ -57,13 +65,38 @@ export default function App() {
     },
     [setRecord],
   );
-  function complete(value: WorkspaceSetup) {
+  function complete(value: WorkspaceSetup, calculate = false) {
+    if (setupPending.current) return;
+    if (calculate && Object.keys(validateEditor(value.editor)).length) return;
+    value = { ...value, mode: effectiveMode(value.editor, value.mode) };
+    if (calculate) {
+      const token = {};
+      setupPending.current = token;
+      const scenario = toScenario(value.editor);
+      const promise = optimizeScenario(scenario, value.mode);
+      void promise.then(
+        () => {
+          if (setupPending.current === token) setupPending.current = null;
+        },
+        () => {
+          if (setupPending.current === token) setupPending.current = null;
+        },
+      );
+      setInitialCalculation({
+        editor: structuredClone(value.editor),
+        scenario,
+        mode: value.mode,
+        promise,
+      });
+    } else setInitialCalculation(null);
     setRecord({ version: 1, workspace: value, step: 3, completed: true });
     setResumed(false);
-    navigate(isDashboardRoute(route) ? route : "overview");
+    navigate("overview");
     window.scrollTo(0, 0);
   }
   function edit(editor?: ScenarioEditor, mode?: SchedulingMode) {
+    setInitialCalculation(null);
+    setupPending.current = null;
     setRecord((previous) =>
       previous
         ? {
@@ -83,8 +116,13 @@ export default function App() {
   function confirm() {
     if (pending === "clear") {
       if (!clear()) return;
+      setInitialCalculation(null);
+      setupPending.current = null;
       resetView();
-    } else if (pending === "demo") complete(demoWorkspace());
+    } else if (pending === "demo") {
+      setupPending.current = null;
+      complete(demoWorkspace());
+    }
     setPending(null);
   }
   const messages: Partial<Record<typeof status, string>> = {
@@ -193,9 +231,10 @@ export default function App() {
       }
       workspaceControls={controls}
       onDraftChange={saveDraft}
-      onComplete={complete}
+      onComplete={(value) => complete(value, true)}
       onContinue={() => {
         setResumed(true);
+        setInitialCalculation(null);
         navigate(isDashboardRoute(route) ? route : "overview");
         window.scrollTo(0, 0);
       }}
@@ -207,6 +246,8 @@ export default function App() {
     />
   ) : (
     <Dashboard
+      initialCalculation={initialCalculation}
+      onInitialSettled={consumeInitial}
       selectedView={route}
       onNavigate={navigate}
       initialEditor={workspace.editor}
@@ -225,7 +266,16 @@ export default function App() {
       }
       businessProfile={{
         business_type: workspace.businessType,
-        operating_hours: `${workspace.editor.opening}:00–${workspace.editor.closing}:00`,
+        equipment: workspace.editor.customEquipment
+          ? `${workspace.editor.customEquipment.name}: ${workspace.editor.customEquipment.description} (${workspace.editor.customEquipment.kind})`.slice(
+              0,
+              500,
+            )
+          : null,
+        operating_hours: formatWindow(
+          workspace.editor.opening,
+          workspace.editor.closing,
+        ),
         employee_count:
           workspace.employees === "" ? null : Number(workspace.employees),
         electricity_cost_and_period:

@@ -1,6 +1,7 @@
+import { formatHour } from "../../data/time";
 import type { OptimizationResult } from "../../types/api";
 import { evidenceTitles } from "../../services/infeasibilityEvidence";
-const hour = (h: number) => `${String(h).padStart(2, "0")}:00`;
+const hour = formatHour;
 export function InfeasibilityDetails({
   result,
   stale = false,

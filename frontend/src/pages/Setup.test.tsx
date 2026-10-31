@@ -53,6 +53,7 @@ async function click(text: string) {
 async function company() {
   await change("[name=businessName]", "Northstar Logistics");
   await change(".setup-fields select", "Warehouse & logistics");
+  await change("#setup-analysis-choice", "joint");
   await click("Continue to energy profile");
 }
 it("completes setup with original fractional energy, edited inputs and bounded goals", async () => {
@@ -76,8 +77,10 @@ it("completes setup with original fractional energy, edited inputs and bounded g
     ].find((b) => b.textContent === "Plan vehicle charging")!.disabled,
   ).toBe(true);
   await click("Review workspace");
-  expect(container.textContent).toContain("No optimization has run yet");
-  await click("Create my workspace");
+  expect(container.textContent).toContain(
+    "submits these reviewed energy inputs once",
+  );
+  await click("Create workspace and calculate");
   expect(complete).toHaveBeenCalledTimes(1);
   const setup = complete.mock.calls[0][0];
   const scenario = toScenario(setup.editor);

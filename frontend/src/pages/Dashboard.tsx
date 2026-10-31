@@ -1,5 +1,16 @@
+import { exportEvidence } from '../services/exportEvidence'
+import { AnalysisSelect } from '../components/configuration/AnalysisSelect'
+import { analysisLabel, effectiveMode } from '../data/analysisOptions'
+import type { InitialCalculation } from '../types/initialCalculation'
 import { OperatingTimeline } from '../components/dashboard/OperatingTimeline'
-import { lazy, Suspense, useRef, useState, type ReactNode } from 'react'
+import {
+  lazy,
+  Suspense,
+  useRef,
+  useState,
+  useEffect,
+  type ReactNode,
+} from 'react'
 import {
   Building2,
   Globe2,
@@ -65,10 +76,29 @@ const views = [
   { id: 'assistant', label: 'AI assistant', icon: Sparkles },
   { id: 'markets', label: 'Electricity markets', icon: Globe2 },
 ] as const
-export function Dashboard({ initialEditor, initialMode = 'ev_only', workspaceName = 'Scenario workspace', businessProfile, onSetup, workspaceControls, onInputsChange, onBusinessContextChange, businessContextLabel, selectedView, onNavigate, resumed = false }: {
+export function Dashboard({
+  initialEditor,
+  initialMode = 'ev_only',
+  workspaceName = 'Scenario workspace',
+  businessProfile,
+  onSetup,
+  workspaceControls,
+  onInputsChange,
+  onBusinessContextChange,
+  businessContextLabel,
+  selectedView,
+  onNavigate,
+  initialCalculation,
+  onInitialSettled,
+  resumed = false,
+}: {
+  initialCalculation?: InitialCalculation | null
+  onInitialSettled?: () => void
   selectedView?: DashboardView
   onNavigate?: (view: DashboardView) => void
-  onBusinessContextChange?: (profile: Record<string, string | number | null>) => void
+  onBusinessContextChange?: (
+    profile: Record<string, string | number | null>,
+  ) => void
   businessContextLabel?: string
   workspaceControls?: ReactNode
   onInputsChange?: (editor: ScenarioEditor, mode: SchedulingMode) => void
@@ -79,7 +109,9 @@ export function Dashboard({ initialEditor, initialMode = 'ev_only', workspaceNam
   businessProfile?: Record<string, string | number | null>
   onSetup?: (editor: ScenarioEditor, mode: SchedulingMode) => void
 } = {}) {
-  const [mode, setMode] = useState<SchedulingMode>(initialMode)
+  const [mode, setMode] = useState<SchedulingMode>(
+    effectiveMode(initialEditor ?? defaultEditor, initialMode),
+  )
   const modeVersion = useRef(0)
   const [modeRevision, setModeRevision] = useState(0)
   const [resultMode, setResultMode] = useState<SchedulingMode>(initialMode)
@@ -87,11 +119,22 @@ export function Dashboard({ initialEditor, initialMode = 'ev_only', workspaceNam
   const [appliedBilling, setAppliedBilling] = useState(defaultBillingInputs)
   const [localView, setLocalView] = useState<DashboardView>('overview')
   const view = selectedView ?? localView
-  function setView(next: DashboardView) { setLocalView(next); onNavigate?.(next) }
-  const [editor, setEditorState] = useState({ ...(initialEditor ?? defaultEditor) })
+  function setView(next: DashboardView) {
+    setLocalView(next)
+    onNavigate?.(next)
+  }
+  const [editor, setEditorState] = useState({
+    ...(initialEditor ?? defaultEditor),
+  })
   function setEditor(next: ScenarioEditor) {
+    const nextMode = effectiveMode(next, mode)
+    if (nextMode !== mode) {
+      modeVersion.current += 1
+      setModeRevision(modeVersion.current)
+      setMode(nextMode)
+    }
     setEditorState(next)
-    onInputsChange?.(next, mode)
+    onInputsChange?.(next, nextMode)
   }
   const [alternative, setAlternative] = useState<ScenarioEditor | null>(null)
   // An AI handoff starts a new comparison and captures the current Restore snapshot.
@@ -99,13 +142,46 @@ export function Dashboard({ initialEditor, initialMode = 'ev_only', workspaceNam
   const [result, setResult] = useState<OptimizationResult | null>(null)
   const [submitted, setSubmitted] = useState('')
   const [resultScenario, setResultScenario] = useState<Scenario | null>(null)
-  const [busy, setBusy] = useState(false)
-  const inFlight = useRef(false)
+  const [busy, setBusy] = useState(Boolean(initialCalculation))
+  const inFlight = useRef(Boolean(initialCalculation))
   const [message, setMessage] = useState('')
   const invalid = Object.keys(validateEditor(editor)).length > 0
   const stale = Boolean(result) && submitted !== JSON.stringify(editor)
   const submittedEditor: ScenarioEditor | null =
     result && submitted ? JSON.parse(submitted) : null
+  useEffect(() => {
+    if (!initialCalculation) return
+    let active = true
+    const version = modeVersion.current
+    const initial = initialCalculation
+    void initial.promise
+      .then(
+        (response) => {
+          if (!active || modeVersion.current !== version) return
+          setResultMode(initial.mode)
+          setResult(response)
+          setResultScenario(initial.scenario)
+          setSubmitted(JSON.stringify(initial.editor))
+          setMessage('Backend result received for the submitted scenario.')
+          // Stay in the section selected by the user; initial setup opens Overview.
+        },
+        (error) => {
+          if (active && modeVersion.current === version)
+            setMessage(optimizationError(error))
+        },
+      )
+      .finally(() => {
+        if (active) {
+          inFlight.current = false
+          setBusy(false)
+          onInitialSettled?.()
+        }
+      })
+    return () => {
+      active = false
+    }
+    // This subscribes to one event-started request; it never initiates a solve.
+  }, [initialCalculation, onInitialSettled])
   async function runOptimization() {
     if (invalid || inFlight.current) return
     inFlight.current = true
@@ -132,14 +208,24 @@ export function Dashboard({ initialEditor, initialMode = 'ev_only', workspaceNam
   }
   return (
     <div className="app-shell">
-      <a className="skip-link" href="#workspace-main" onClick={e => { e.preventDefault(); document.getElementById("workspace-main")?.focus() }}>
+      <a
+        className="skip-link"
+        href="#workspace-main"
+        onClick={(e) => {
+          e.preventDefault()
+          document.getElementById('workspace-main')?.focus()
+        }}
+      >
         Skip to main content
       </a>
       <aside className="sidebar">
         <a
           className="brand"
           href="#overview"
-          onClick={e => { e.preventDefault(); setView('overview') }}
+          onClick={(e) => {
+            e.preventDefault()
+            setView('overview')
+          }}
         >
           <span className="brand-icon">
             <Zap size={23} fill="currentColor" />
@@ -196,10 +282,31 @@ export function Dashboard({ initialEditor, initialMode = 'ev_only', workspaceNam
             Workspace <span className="breadcrumb">/</span>
             <strong>{views.find((v) => v.id === view)?.label}</strong>
           </span>
-          <div className="topbar-actions">{onNavigate && <a className="secondary home-link" href="#home">Home</a>}{onSetup && <button className="secondary" onClick={() => onSetup(editor, mode)}>Edit building</button>}{workspaceControls}<BackendStatus /></div>
+          <div className="topbar-actions">
+            {onNavigate && (
+              <a className="secondary home-link" href="#home">
+                Home
+              </a>
+            )}
+            {onSetup && (
+              <button
+                className="secondary"
+                onClick={() => onSetup(editor, mode)}
+              >
+                Edit building
+              </button>
+            )}
+            {workspaceControls}
+            <BackendStatus />
+          </div>
         </header>
         <main id="workspace-main" tabIndex={-1}>
-          {resumed && !result && <p className="workspace-result-notice" role="status">Building inputs restored. No optimizer result has been restored. Run optimization explicitly to calculate a new schedule.</p>}
+          {resumed && !result && (
+            <p className="workspace-result-notice" role="status">
+              Building inputs restored. No optimizer result has been restored.
+              Run optimization explicitly to calculate a new schedule.
+            </p>
+          )}
           <div className="page-heading">
             <div>
               <p className="eyebrow">GRIDPILOT / ENERGY INTELLIGENCE</p>
@@ -209,7 +316,8 @@ export function Dashboard({ initialEditor, initialMode = 'ev_only', workspaceNam
                   : views.find((v) => v.id === view)?.label}
               </h1>
               <p className="muted">
-                <strong className="workspace-name">{workspaceName}</strong> · Clearer insights. Smarter scheduling.
+                <strong className="workspace-name">{workspaceName}</strong> ·
+                Clearer insights. Smarter scheduling.
               </p>
             </div>
             <button
@@ -234,7 +342,7 @@ export function Dashboard({ initialEditor, initialMode = 'ev_only', workspaceNam
                   ? 'Ready to configure · No backend result yet'
                   : stale
                     ? 'Inputs changed · Run optimization to update your results'
-                    : `Result available · ${modeLabel(resultMode)} · ${result.feasibility_status}`}
+                    : `Result available · ${analysisLabel(submittedEditor ?? editor, resultMode)} · ${result.feasibility_status}`}
             </div>
             <div className="workflow-actions">
               <button
@@ -260,29 +368,24 @@ export function Dashboard({ initialEditor, initialMode = 'ev_only', workspaceNam
             </div>
           </section>
           <div className="mode-control field">
-            <label htmlFor="scheduling-mode">Scheduling mode</label>
-            <select
-              id="scheduling-mode"
-              aria-describedby="scheduling-assumptions-label"
-              value={mode}
-              onChange={(event) => {
+            <AnalysisSelect
+              describedBy="scheduling-assumptions-label"
+              editor={editor}
+              mode={mode}
+              onChange={(next, nextMode) => {
                 modeVersion.current += 1
                 setModeRevision(modeVersion.current)
-                setMode(event.target.value as SchedulingMode)
-                onInputsChange?.(editor, event.target.value as SchedulingMode)
+                setMode(nextMode)
+                setEditorState(next)
+                onInputsChange?.(next, nextMode)
                 setResult(null)
                 setResultScenario(null)
-                setMessage(
-                  'Scheduling mode changed. Run again for new results.',
-                )
+                setMessage('Analysis changed. Run again for new results.')
               }}
-            >
-              <option value="ev_only">EV-only</option>
-              <option value="joint">EV + flexible equipment</option>
-            </select>
+            />
             <details className="mode-explanation">
               <summary id="scheduling-assumptions-label">
-                Scheduling assumptions · {modeLabel(mode)}
+                Scheduling assumptions · {analysisLabel(editor, mode)}
               </summary>
               <p>
                 {mode === 'ev_only'
@@ -314,6 +417,7 @@ export function Dashboard({ initialEditor, initialMode = 'ev_only', workspaceNam
           {view === 'overview' && (
             <CommandMetrics
               result={result}
+              busy={busy}
               scenario={resultScenario}
               stale={stale}
             />
@@ -342,7 +446,46 @@ export function Dashboard({ initialEditor, initialMode = 'ev_only', workspaceNam
                       draft={!resultScenario}
                     />
                   )}
-                  <OperatingTimeline key={JSON.stringify(result)} result={result} scenario={resultScenario} mode={resultMode} stale={stale} />
+                  {resultScenario &&
+                    resultScenario.ev_requirements.length +
+                      (resultScenario.flexible_equipment?.length ?? 0) >
+                      0 && (
+                      <OperatingTimeline
+                        key={JSON.stringify(result)}
+                        result={result}
+                        scenario={resultScenario}
+                        mode={resultMode}
+                        stale={stale}
+                        customEquipment={submittedEditor?.customEquipment}
+                      />
+                    )}
+                  {resultScenario &&
+                    !resultScenario.ev_requirements.length &&
+                    !resultScenario.flexible_equipment?.length && (
+                      <div className="panel fixed-only-note">
+                        <p>
+                          No schedulable equipment is configured; this analysis
+                          reflects your building’s fixed electricity use. Site
+                          limits still apply.
+                        </p>
+                        {result && (
+                          <button
+                            type="button"
+                            className="secondary"
+                            onClick={() =>
+                              exportEvidence(
+                                resultScenario,
+                                result,
+                                resultMode,
+                                submittedEditor?.customEquipment,
+                              )
+                            }
+                          >
+                            Export submitted evidence
+                          </button>
+                        )}
+                      </div>
+                    )}
                   <EnergyInsights
                     scenario={resultScenario}
                     result={result}
@@ -469,7 +612,7 @@ export function Dashboard({ initialEditor, initialMode = 'ev_only', workspaceNam
                   )}
                 </>
               )}
-              {(
+              {
                 <div hidden={view !== 'whatif'}>
                   <Suspense
                     fallback={<p role="status">Loading what-if comparison…</p>}
@@ -496,7 +639,7 @@ export function Dashboard({ initialEditor, initialMode = 'ev_only', workspaceNam
                     />
                   </Suspense>
                 </div>
-              )}
+              }
             </div>
             <aside
               className={
