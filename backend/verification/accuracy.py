@@ -214,4 +214,3 @@ def small_case(seed):
             for h in slots[:remaining]: total[h] += .25
         case['building_max_demand_kw'] = max(.25, max(total))
     return case
-

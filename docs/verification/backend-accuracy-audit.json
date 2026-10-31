@@ -1,19 +1,9 @@
 {
   "source": "synthetic engineering inputs; no measured business data; no live AI",
-  "utc": "2026-10-31T00:22:03.365049+00:00",
-  "commit": "0f23b56be9a5c47b049ace8ab96ec16c54753b6c",
+  "utc": "2026-10-31T00:23:13.288243+00:00",
+  "commit": "ec7f8ccea7da26b252fbd7c3e074409963ad2622",
   "working_tree_changes": [
-    " M backend/ai/advisor.py",
-    " M backend/eia/retail.py",
-    " M backend/main.py",
-    "?? backend/api/validation.py",
-    "?? backend/tests/test_accuracy_audit.py",
-    "?? backend/tests/test_audit_regressions.py",
-    "?? backend/verification/",
-    "?? docs/backend-accuracy-engineering-review.md",
-    "?? docs/verification/backend-accuracy-audit.json",
-    "?? docs/verification/backend-eia-source-check.json",
-    "?? scripts/audit_backend_accuracy.py"
+    " M backend/verification/accuracy.py"
   ],
   "source_sha256": {
     "backend/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
@@ -72,7 +62,7 @@
     "backend/tests/test_tariff.py": "e62a27505b1a35f3831b6323802441e98c3e27852ce068a25a7c057fe27368ab",
     "backend/tests/test_what_if_acceptance.py": "3221a4c64ab847c434c3481d25ffdc95ff6913be4e832f2013b8466b24d75875",
     "backend/verification/__init__.py": "cbfda7af2889897e6b8ba1891c30e8ef28143953995aa9358621f518f3a6fc36",
-    "backend/verification/accuracy.py": "ffe754449d3b0244a1c2dcb9b85784576de1a3cb356dee50f7bc146fe0193ee9"
+    "backend/verification/accuracy.py": "0252e4dafd7d125738097aedc7c3ccb3e1421fe9f6aeddfb8682f4c36a81f4e0"
   },
   "python": "3.14.2",
   "solver": "Glop solver v9.15.6755",
@@ -3075,7 +3065,7 @@
       "flexible_count": 5,
       "mode": "ev_only",
       "status": "feasible",
-      "seconds": 0.03678523100006714,
+      "seconds": 0.04327952599987839,
       "optimized_peak_kw": 1.625
     },
     {
@@ -3083,7 +3073,7 @@
       "flexible_count": 5,
       "mode": "joint",
       "status": "feasible",
-      "seconds": 0.03725756099993305,
+      "seconds": 0.04106944700015447,
       "optimized_peak_kw": 1.078125
     },
     {
@@ -3091,7 +3081,7 @@
       "flexible_count": 50,
       "mode": "ev_only",
       "status": "infeasible",
-      "seconds": 0.08658974000036324,
+      "seconds": 0.09611097800006974,
       "optimized_peak_kw": null
     },
     {
@@ -3099,7 +3089,7 @@
       "flexible_count": 50,
       "mode": "joint",
       "status": "feasible",
-      "seconds": 0.31103448500016384,
+      "seconds": 0.3416690869999002,
       "optimized_peak_kw": 1.7812500000000002
     },
     {
@@ -3107,7 +3097,7 @@
       "flexible_count": 150,
       "mode": "ev_only",
       "status": "infeasible",
-      "seconds": 0.31603504999975485,
+      "seconds": 0.28807300000016767,
       "optimized_peak_kw": null
     },
     {
@@ -3115,7 +3105,7 @@
       "flexible_count": 150,
       "mode": "joint",
       "status": "feasible",
-      "seconds": 0.9637014520003504,
+      "seconds": 1.09395405999976,
       "optimized_peak_kw": 3.34375
     }
   ],
@@ -3124,9 +3114,9 @@
       "name": "joint_recovery",
       "mode": "ev_only",
       "status": 200,
-      "result_id": "df99f1b0ed9a485cb3c5c0790d4716cd",
+      "result_id": "fbe74070816f40ffb37649ca9dc41ddd",
       "response": {
-        "result_id": "df99f1b0ed9a485cb3c5c0790d4716cd",
+        "result_id": "fbe74070816f40ffb37649ca9dc41ddd",
         "feasibility_status": "infeasible",
         "baseline_electricity_cost_usd": 5.6000000000000005,
         "baseline_peak_demand_kw": 5.0,
@@ -3330,9 +3320,9 @@
       "name": "joint_recovery",
       "mode": "joint",
       "status": 200,
-      "result_id": "45ed6f973ce34644b99599c6146a49fa",
+      "result_id": "9bda6ff95cb34925aab8be05fd1ac279",
       "response": {
-        "result_id": "45ed6f973ce34644b99599c6146a49fa",
+        "result_id": "9bda6ff95cb34925aab8be05fd1ac279",
         "feasibility_status": "feasible",
         "baseline_electricity_cost_usd": 5.6000000000000005,
         "baseline_peak_demand_kw": 5.0,
@@ -3616,9 +3606,9 @@
       "name": "joint_price_shift",
       "mode": "ev_only",
       "status": 200,
-      "result_id": "0f9a8959dc5947ed98ba20796d615bc0",
+      "result_id": "9ae30f66ac844a858416bd7fc99abd7d",
       "response": {
-        "result_id": "0f9a8959dc5947ed98ba20796d615bc0",
+        "result_id": "9ae30f66ac844a858416bd7fc99abd7d",
         "feasibility_status": "feasible",
         "baseline_electricity_cost_usd": 7.9,
         "baseline_peak_demand_kw": 3.0,
@@ -3833,9 +3823,9 @@
       "name": "joint_price_shift",
       "mode": "joint",
       "status": 200,
-      "result_id": "31ac7af9903f4bb9b747942d1d6c4c83",
+      "result_id": "e1fec20aa0b94263bd6217128a00de48",
       "response": {
-        "result_id": "31ac7af9903f4bb9b747942d1d6c4c83",
+        "result_id": "e1fec20aa0b94263bd6217128a00de48",
         "feasibility_status": "feasible",
         "baseline_electricity_cost_usd": 7.9,
         "baseline_peak_demand_kw": 3.0,
@@ -4050,9 +4040,9 @@
       "name": "joint_infeasible",
       "mode": "ev_only",
       "status": 200,
-      "result_id": "edd0a5a8e8f84f9496995bd832509967",
+      "result_id": "52715c370cb44853a4f98e8f6673d08c",
       "response": {
-        "result_id": "edd0a5a8e8f84f9496995bd832509967",
+        "result_id": "52715c370cb44853a4f98e8f6673d08c",
         "feasibility_status": "infeasible",
         "baseline_electricity_cost_usd": 5.800000000000001,
         "baseline_peak_demand_kw": 5.0,
@@ -4256,9 +4246,9 @@
       "name": "joint_infeasible",
       "mode": "joint",
       "status": 200,
-      "result_id": "1638d492feaa460e922d8f0927b1ec32",
+      "result_id": "e0abb5536e7c44389d20e6db443659c3",
       "response": {
-        "result_id": "1638d492feaa460e922d8f0927b1ec32",
+        "result_id": "e0abb5536e7c44389d20e6db443659c3",
         "feasibility_status": "infeasible",
         "baseline_electricity_cost_usd": 5.800000000000001,
         "baseline_peak_demand_kw": 5.0,
