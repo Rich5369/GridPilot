@@ -9,7 +9,9 @@
   "openapi_unchanged": true,
   "warehouse_acceptance_fixtures_equal": true,
   "live_meta_requests": 0,
-  "production_post_checks": "pending verified Render deployment identity",
+  "production_post_checks": "15/15 non-AI checks passed on user-identified Live #50 revision; not acceptance of #51/#52",
   "render_deployment_id": null,
-  "render_serving_sha": null
+  "render_serving_sha": "99268894c60e833a814e4d737dcdcd5ac9000f32",
+  "render_evidence_source": "User direct Render overview observation; no independent control-plane access",
+  "pr51_live": false
 }

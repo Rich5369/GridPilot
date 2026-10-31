@@ -1,0 +1,17 @@
+{
+  "recorded_at_utc": "2026-10-31T15:12:19.521372+00:00",
+  "evidence_source": "User direct Render service overview observation in this conversation",
+  "service_name": "gridpilot-api",
+  "branch": "main",
+  "status": "Live",
+  "serving_commit": "99268894c60e833a814e4d737dcdcd5ac9000f32",
+  "service_id": null,
+  "deployment_id": null,
+  "deployment_timestamp": null,
+  "agent_independently_read_render_control_plane": false,
+  "github_main_sha": "89f20fb68aadf65346034bcf6fa25c7e463d2071",
+  "pr51_merged_in_main": true,
+  "pr51_present_in_serving_commit": false,
+  "pr52_state": "OPEN; unmerged",
+  "paid_inference_authorized": false
+}

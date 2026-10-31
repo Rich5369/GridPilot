@@ -54,19 +54,31 @@ consistent with the earlier audit's sandbox limitation; providers were injected.
 
 ## Deployment and production gates
 
-Current Render deployment ID, full serving SHA and Live status are **unverified**.
-Historical user-supplied evidence identifies #50 (`9926889`); public schema equality
-cannot prove #51's settings or this correction are served. GitHub deployment
-metadata is empty and commit statuses identify only Vercel frontend deployments.
+Current **user-supplied** Render overview evidence identifies service `gridpilot-api`,
+branch `main`, status **Live**, serving SHA
+`99268894c60e833a814e4d737dcdcd5ac9000f32` (#50). This is a current observation,
+not merely the historical deployment artifact. No independent control-plane read
+was possible; deployment ID, service ID and deployment timestamp remain unknown.
+See [attributed deployment evidence](render-evidence.json).
 
-Retrieve Render service ID, current **Live** deployment ID, full commit SHA,
-repository/branch and deployment timestamp. Verify its Git ancestry and code
-include #50 and #51; this fix additionally requires an approved deployment of
-the correction. No deployment, restart or environment modification is authorized.
+Fresh GitHub fetch still identifies main as `89f20fb68aadf65346034bcf6fa25c7e463d2071`.
+Both #51's merge and implementation commit are ancestors of main, and the actual
+call sets `reasoning_effort='low'`. Neither is an ancestor of the observed serving
+#50 commit; its actual call lacks this argument. PR #52 remains open/unmerged,
+and production #50 also lacks its thread offload. No merge, deployment, restart,
+environment change or paid inference is authorized.
 
-New production savings/optimizer POST checks are **not run**, honoring the required
-revision-verification prerequisite. Prior audit production results remain historical,
-not fresh acceptance of this correction. Once identity is established, use only
+Fresh **15/15 production non-AI checks passed** against the user-identified #50
+revision. These results do not accept #51 or #52 in production. The first health
+request took **33.217 seconds**; subsequent probes took **0.026–0.854 seconds**.
+No retry was sent. The initial delay's cause is not established by these timings;
+do not attribute it to provider work or assume a Render cold start. No paid
+provider call was involved. [Compact results](production-summary.json); full
+fictional requests/responses and harness are retained in the original workspace's
+`artifacts/backend-responsiveness-2026-10-31/`.
+
+The same production probes must be repeated after a future approved deployment
+is identified if they are to accept that revision. Once identity is established, use only
 fictional requests and zero retries for the following deterministic checks:
 
 | Probe | Required result |
@@ -94,8 +106,8 @@ top-level category map; the frontend must filter its full catalog view.
 
 Use the existing [warehouse fixture](../meta-savings-acceptance-request.json),
 also checked into `backend/tests/fixtures/savings_warehouse_acceptance.json`.
-Do not send until the serving revision is verified and the user explicitly
-authorizes exactly one paid request. No automatic retry. Success requires genuine
+The current #50 revision is insufficient. Do not send until the required fix is
+confirmed Live and the user explicitly authorizes exactly one paid request. No automatic retry. Success requires genuine
 `source: meta`, useful warehouse investigations/questions, no excluded scheduling,
 refrigeration or compressed-air selection, exact pilot **2,000 kWh/year**, unknown
 main-lighting energy, and null money/payback throughout. Profile/history must not
