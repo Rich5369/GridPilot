@@ -46,6 +46,7 @@ export interface OperatingPlan {
   device_schedules: DeviceSchedule[]
 }
 export interface OptimizationResult {
+  infeasibility_evidence?: InfeasibilityEvidence[] | null
   result_id?: string | null
   operating_plan?: OperatingPlan | null
   feasibility_status: 'feasible' | 'infeasible'
@@ -58,3 +59,25 @@ export interface OptimizationResult {
   constraint_violations: string[]
 }
 export interface NotImplementedResponse { status: 'not_implemented'; message: string }
+
+// Existing E2 backend contract; quantities are supplied by the verified outcome.
+export interface InfeasibilityEvidence {
+  code: 'device_window_capacity' | 'fixed_demand_above_site_limit' | 'shared_window_capacity' | 'solver_infeasible'
+  message: string
+  proof_source: 'analytical_necessary_condition' | 'solver_infeasible'
+  devices: {device_type:'ev'|'flexible';device_id:string}[]
+  window: HourWindow | null
+  required: number | null
+  available: number | null
+  unit: 'kW' | 'kWh' | null
+  context: {
+    scheduling_mode:'ev_only'|'joint'
+    tolerance:number|null
+    site_limit_kw?:number|null
+    max_power_kw?:number|null
+    immutable_fixed_power_kw?:number|null
+    held_flexible_power_kw?:number|null
+    immutable_fixed_energy_kwh?:number|null
+    held_flexible_energy_kwh?:number|null
+  }
+}

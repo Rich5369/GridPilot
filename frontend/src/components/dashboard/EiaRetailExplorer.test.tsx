@@ -33,3 +33,37 @@ it('never invents a retail price when the backend is unreachable', async () => {
   expect(container.querySelector('.market-price')?.textContent).toContain('—')
   await act(async () => root.unmount())
 })
+
+it.each([
+  {states:[{state:'California',cents_per_kwh:'30.02',previous_year_cents_per_kwh:29}]},
+  {period:'2026-13'}, {released_at:'2026-02-30'}, {source_checked_at:'yesterday'},
+  {units:'USD/MWh'}, {sector:'Residential'}, {source_url:'javascript:alert(1)'},
+  {states:[snapshot.states[0],snapshot.states[0]]},
+])('rejects malformed releases and retries the read-only service: %j', async patch => {
+  vi.mocked(apiRequest).mockResolvedValue({...snapshot,...patch})
+  const container=document.createElement('div'),root=createRoot(container)
+  try {
+    await act(async()=>root.render(<ElectricityPriceExplorer />))
+    expect(container.textContent).toContain('Data unavailable')
+    expect(container.querySelector('.market-price')!.textContent).toContain('—')
+    expect(container.querySelector('a[href^="javascript:"]')).toBeNull()
+    vi.mocked(apiRequest).mockResolvedValue({...snapshot,status:'saved',preliminary:false})
+    await act(async()=>[...container.querySelectorAll('button')].find(b=>b.textContent==='Retry price release')!.click())
+    expect(container.textContent).toContain('Saved release · refresh unavailable')
+    expect(container.textContent).toContain('Published estimates')
+    expect(container.querySelector('.market-price')!.textContent).toContain('30.02')
+  } finally { await act(async()=>root.unmount()) }
+})
+it('keeps the last validated release with an honest saved label if a background refresh is malformed',async()=>{
+  vi.useFakeTimers()
+  vi.mocked(apiRequest).mockReset().mockResolvedValueOnce(snapshot).mockResolvedValue({states:[]})
+  const container=document.createElement('div'),root=createRoot(container)
+  try{
+    await act(async()=>root.render(<ElectricityPriceExplorer/>))
+    expect(container.querySelector('.market-price')!.textContent).toContain('30.02')
+    await act(async()=>{await vi.advanceTimersByTimeAsync(6*60*60*1000)})
+    expect(container.textContent).toContain('Saved release · connection unavailable')
+    expect(container.textContent).toContain('August 2026')
+    expect(container.querySelector('.market-price')!.textContent).toContain('30.02')
+  }finally{await act(async()=>root.unmount());vi.useRealTimers()}
+})

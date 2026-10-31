@@ -41,6 +41,7 @@ export function Setup({
   onContinue,
   onEdit,
   workspaceControls,
+  entryMessage,
 }: {
   initial?: WorkspaceSetup | null;
   onComplete: (setup: WorkspaceSetup) => void;
@@ -51,6 +52,7 @@ export function Setup({
   onContinue?: () => void;
   onEdit?: () => void;
   workspaceControls?: ReactNode;
+  entryMessage?: string;
 }) {
   const [draft, setDraft] = useState<WorkspaceSetup>(
     () => initial ?? emptyWorkspace(),
@@ -159,6 +161,7 @@ export function Setup({
             energy.
           </p>
         </div>
+        {entryMessage && <p className="workspace-result-notice" role="status">{entryMessage}</p>}
         <div className="setup-layout">
           <aside className="setup-intro">
             <div className="intro-copy">

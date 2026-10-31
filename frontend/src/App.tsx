@@ -2,6 +2,8 @@ import { useCallback, useState } from "react";
 import { Zap } from "lucide-react";
 import { Dashboard } from "./pages/Dashboard";
 import { Setup } from "./pages/Setup";
+import { useWorkspaceNavigation } from "./hooks/useWorkspaceNavigation";
+import { isDashboardRoute } from "./services/navigation";
 import { useSavedWorkspace } from "./hooks/useSavedWorkspace";
 import { demoWorkspace } from "./services/workspaceStorage";
 import type { WorkspaceSetup } from "./types/workspace";
@@ -11,23 +13,23 @@ import type { SchedulingMode } from "./services/api";
 export default function App() {
   const { record, setRecord, status, clear, withoutSaving, recovery } =
     useSavedWorkspace();
-  const [screen, setScreen] = useState<"setup" | "dashboard">("setup");
-  const [resumed, setResumed] = useState(false);
+  const { route, navigate } = useWorkspaceNavigation();
+  const [resumed, setResumed] = useState(() => record?.completed ?? false);
   const [session, setSession] = useState(0);
   const [pending, setPending] = useState<"clear" | "demo" | null>(null);
   const workspace = record?.workspace;
   const resetView = () => {
-    setScreen("setup");
+    navigate("setup");
     setSession((n) => n + 1);
     window.scrollTo(0, 0);
   };
   const saveDraft = useCallback(
     (draft: WorkspaceSetup, step: number) => {
-      setRecord((previous) => ({
+      setRecord(() => ({
         version: 1,
         workspace: draft,
         step,
-        completed: previous?.completed ?? false,
+        completed: false,
       }));
     },
     [setRecord],
@@ -58,7 +60,7 @@ export default function App() {
   function complete(value: WorkspaceSetup) {
     setRecord({ version: 1, workspace: value, step: 3, completed: true });
     setResumed(false);
-    setScreen("dashboard");
+    navigate(isDashboardRoute(route) ? route : "overview");
     window.scrollTo(0, 0);
   }
   function edit(editor?: ScenarioEditor, mode?: SchedulingMode) {
@@ -178,18 +180,23 @@ export default function App() {
         </main>
       </div>
     );
-  return screen === "setup" || !workspace ? (
+  return !isDashboardRoute(route) || !workspace || !record?.completed ? (
     <Setup
-      key={session}
+      key={`${session}:${route === "setup" ? "edit" : "entry"}`}
       initial={workspace}
-      initialStep={record?.step}
-      completed={record?.completed}
+      initialStep={route === "setup" && record?.completed ? 0 : record?.step}
+      completed={route !== "setup" && record?.completed}
+      entryMessage={
+        isDashboardRoute(route) && !record?.completed
+          ? "Finish or resume your building setup to open this dashboard section. No inputs have been replaced."
+          : undefined
+      }
       workspaceControls={controls}
       onDraftChange={saveDraft}
       onComplete={complete}
       onContinue={() => {
         setResumed(true);
-        setScreen("dashboard");
+        navigate(isDashboardRoute(route) ? route : "overview");
         window.scrollTo(0, 0);
       }}
       onEdit={() => edit()}
@@ -200,6 +207,8 @@ export default function App() {
     />
   ) : (
     <Dashboard
+      selectedView={route}
+      onNavigate={navigate}
       initialEditor={workspace.editor}
       initialMode={workspace.mode}
       workspaceName={workspace.name}

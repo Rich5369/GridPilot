@@ -25,7 +25,9 @@ export function EnergyAssistant({ editor, onChange, resultScenario, onComparePro
   const [snapshot, setSnapshot] = useState('')
   const [history, setHistory] = useState<{role: 'user' | 'assistant'; content: string; category?: Advisor['category']; message?: string; facts?: string[]; questions?: string[]}[]>([])
   const [profile, setProfile] = useState<Profile>(initialProfile ?? {})
-  const [edited, setEdited] = useState<Record<string, string | number | null>>({})
+  const [edited, setEdited] = useState<Profile>({})
+  // User corrections made while a reply is pending take precedence over extraction.
+  const editedRef = useRef<Profile>({})
   const [source, setSource] = useState('No advisor reply yet')
   const [conversation, setConversation] = useState('')
   const validDraft = !Object.keys(validateEditor(editor)).length
@@ -35,6 +37,8 @@ export function EnergyAssistant({ editor, onChange, resultScenario, onComparePro
   useEffect(() => { contextRef.current = contextKey }, [contextKey])
   const [busy, setBusy] = useState(false)
   const pending = useRef(false)
+  const active = useRef(true)
+  useEffect(() => { active.current = true; return () => { active.current = false } }, [])
   const [error, setError] = useState('')
   async function send() {
     if (pending.current || !request.trim() || (!resultScenario && !validDraft)) return
@@ -49,19 +53,21 @@ export function EnergyAssistant({ editor, onChange, resultScenario, onComparePro
       const response = await apiRequest<Advisor>('/api/ai/conversation', {
         method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body), signal: AbortSignal.timeout(60000),
       })
+      if (!active.current) return
       if (contextRef.current !== submittedKey) { setError('Scenario changed during the request. Please send again.'); return }
       setConversation(submittedKey)
       setHistory([...prior, { role: 'user', content: request }, { role: 'assistant', category: response.category, message: response.message, facts: response.facts ?? [], questions: response.follow_up_questions ?? [], content: [response.message, ...(response.follow_up_questions ?? []), ...(response.facts ?? [])].join('\n\n').slice(0, 3000) }].slice(-12) as typeof history)
-      const nextProfile = {...response.profile, ...edited}
+      const nextProfile = {...response.profile, ...editedRef.current}
       setProfile(nextProfile)
       onProfileChange?.(nextProfile)
       setSource(response.source === 'meta' ? 'Meta · reply received' : 'MOCK MODE — NOT META AI')
       if (response.category === 'scenario_proposal') setProposal({ ...response, status: 'proposed' })
     } catch (e) {
+      if (!active.current) return
       const detail = e instanceof ApiError ? (e.body as { detail?: { message?: string } })?.detail?.message : null
       setSource('Meta unavailable · last request failed')
       setError(detail || 'AI request failed or timed out. Optimization remains available.')
-    } finally { setBusy(false); pending.current = false }
+    } finally { if (active.current) setBusy(false); pending.current = false }
   }
   function apply(compare = false) {
     if (stale || busy || !proposal?.proposed_scenario) return
@@ -89,7 +95,7 @@ export function EnergyAssistant({ editor, onChange, resultScenario, onComparePro
       {profileFields.some(key => profile[key] != null && profile[key] !== '') ? <dl className="advisor-context-summary">{profileFields.filter(key => profile[key] != null && profile[key] !== '').map(key => <div key={key}><dt>{fieldLabel(key)}</dt><dd>{profile[key]} <span className="advisor-provenance">{Object.hasOwn(edited, key) && edited[key] === profile[key] ? 'User edited' : initialProfile?.[key] != null && profile[key] === initialProfile[key] ? initialProfileLabel : 'Extracted'}</span></dd></div>)}</dl> : <p className="advisor-context-empty">No business details yet. Tell me about your operations, goals, or restrictions to add context.</p>}
       <details><summary>Edit business details <span className="advisor-caption">{profileFields.filter(key => profile[key] != null && profile[key] !== '').length} of 8 provided</span></summary>
         <p className="advisor-caption">Extracted details are unconfirmed excerpts from your messages. Review or correct them here; unknown details are optional.</p>
-        <div className="advisor-fields">{profileFields.map(key => <label key={key}>{fieldLabel(key)}<input type={key === 'employee_count' ? 'number' : 'text'} placeholder="Not provided" min="0" maxLength={key === 'business_type' ? 120 : key === 'equipment' || key === 'goals' || key === 'restrictions' ? 500 : 200} value={profile[key] ?? ''} onChange={e => { const value = e.target.value === '' ? null : key === 'employee_count' ? Number(e.target.value) : e.target.value; const nextProfile = {...profile, [key]: value}; setProfile(nextProfile); onProfileChange?.(nextProfile); setEdited(p => ({...p, [key]: value})) }} /></label>)}</div>
+        <div className="advisor-fields">{profileFields.map(key => <label key={key}>{fieldLabel(key)}<input type={key === 'employee_count' ? 'number' : 'text'} placeholder="Not provided" min="0" maxLength={key === 'business_type' ? 120 : key === 'equipment' || key === 'goals' || key === 'restrictions' ? 500 : 200} value={profile[key] ?? ''} onChange={e => { const value = e.target.value === '' ? null : key === 'employee_count' ? Number(e.target.value) : e.target.value; const nextProfile = {...profile, [key]: value}; setProfile(nextProfile); onProfileChange?.(nextProfile); editedRef.current = {...editedRef.current, [key]: value}; setEdited(editedRef.current) }} /></label>)}</div>
       </details>
     </section>
     {conversation && conversation !== contextKey && <p role="status" className="advisor-notice">Submitted context changed. Your next message starts a new conversation.</p>}

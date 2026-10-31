@@ -76,6 +76,7 @@ async function input(selector: string, value: string) {
 }
 beforeEach(() => {
   localStorage.clear();
+  window.history.replaceState(null, "", "/");
   host = document.createElement("div");
   document.body.append(host);
   root = createRoot(host);
@@ -176,7 +177,6 @@ it("restores inputs without replaying optimizer results, result IDs or execution
   expect(raw).not.toContain("optimized_demand_kw");
   expect(raw).not.toContain("operating_plan");
   await reopen();
-  await click("Continue to your building");
   expect(host.textContent).toContain("No optimizer result has been restored");
   expect(
     host.querySelector('[aria-label="Device operating schedule"]'),
@@ -269,9 +269,7 @@ it("labels demo workspaces and requires explicit replacement of existing saved i
   );
   expect(host.textContent).toContain("Demonstration workspace");
   await reopen();
-  expect(host.textContent).toContain(
-    "Demonstration workspace · synthetic inputs",
-  );
+  expect(host.textContent).toContain("Demonstration workspace");
 });
 it("retains edited advisor business context without storing its conversation", async () => {
   seed(saved(true));
@@ -285,7 +283,6 @@ it("retains edited advisor business context without storing its conversation", a
   expect(stored.workspace.businessContext.equipment).toBe("Warehouse vans");
   expect(stored).not.toHaveProperty("history");
   await reopen();
-  await click("Continue to your building");
   await click("AI assistant");
   expect(
     host.querySelector<HTMLInputElement>(
@@ -338,4 +335,38 @@ it("does not hide session-only edits if clearing the original unreadable record 
   ).toBe("Working copy");
   expect(host.textContent).not.toContain("Saved workspace needs attention");
   expect(localStorage.getItem(WORKSPACE_KEY)).toBe(raw);
+});
+
+it("guards dashboard deep links until setup is complete without replacing saved inputs", async () => {
+  seed(saved(false));
+  window.history.replaceState(null, "", "#/building/whatif");
+  await mount();
+  expect(host.textContent).toContain("Finish or resume your building setup");
+  expect(host.querySelector<HTMLInputElement>("#limit")!.value).toBe("17");
+  expect(JSON.parse(localStorage.getItem(WORKSPACE_KEY)!).completed).toBe(
+    false,
+  );
+});
+it("restores a dashboard section directly, handles history and Home Continue without replaying a solve", async () => {
+  seed(saved(true));
+  window.history.replaceState(null, "", "#/building/configuration");
+  await mount();
+  expect(host.querySelector<HTMLInputElement>("#limit")!.value).toBe("17");
+  expect(host.textContent).toContain("No optimizer result has been restored");
+  await click("AI assistant");
+  expect(location.hash).toBe("#assistant");
+  await act(async () => {
+    history.replaceState(null, "", "#configuration");
+    window.dispatchEvent(new PopStateEvent("popstate"));
+  });
+  expect(host.querySelector<HTMLInputElement>("#limit")!.value).toBe("17");
+  await act(async () => {
+    history.replaceState(null, "", "#home");
+    window.dispatchEvent(new HashChangeEvent("hashchange"));
+  });
+  await click("Continue to your building");
+  expect(location.hash).toBe("#overview");
+  expect(
+    fetchMock.mock.calls.filter(([u]) => String(u).includes("/api/optimize")),
+  ).toHaveLength(0);
 });
