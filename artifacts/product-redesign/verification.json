@@ -1,0 +1,1359 @@
+{
+  "baseRevision": "0f23b56be9a5c47b049ace8ab96ec16c54753b6c",
+  "implementation": "Uncommitted frontend visual redesign working tree; baseRevision is not the implementation or deployment SHA",
+  "frontend": "http://127.0.0.1:5292",
+  "accessibility": [
+    {
+      "name": "homepage",
+      "violations": []
+    },
+    {
+      "name": "energy-profile",
+      "violations": []
+    },
+    {
+      "name": "dashboard-chrome-and-comparison",
+      "violations": []
+    }
+  ],
+  "backend": "http://127.0.0.1:8012",
+  "source": "real_local_http_and_chromium",
+  "errors": [],
+  "checks": [
+    "real infeasible response retains null optimized fields and clear warnings",
+    "exact-response export and displayed cost/peak arithmetic",
+    "edited scenario survives returning to setup",
+    "onboarding values and mode preserved",
+    "real backend result rendered",
+    "business context passed to advisor without inference",
+    "no page overflow at 1440/390",
+    "stale result warning remains"
+  ],
+  "requests": [
+    {
+      "url": "http://127.0.0.1:8012/api/optimize?scheduling_mode=joint",
+      "scenario": {
+        "operating_hours": {
+          "start_hour": 8,
+          "end_hour": 18
+        },
+        "building_max_demand_kw": 25,
+        "fixed_demand_kw": [
+          1.5,
+          1.5,
+          1.5,
+          1.5,
+          1.5,
+          1.5,
+          2.5,
+          3.5,
+          5.5,
+          6.5,
+          6.5,
+          7.5,
+          7.5,
+          7.5,
+          7.5,
+          6.5,
+          6.5,
+          5.5,
+          3.5,
+          2.5,
+          1.5,
+          1.5,
+          1.5,
+          1.5
+        ],
+        "electricity_prices_usd_per_kwh": [
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.28,
+          0.28,
+          0.28,
+          0.28,
+          0.28,
+          0.28,
+          0.12,
+          0.12,
+          0.12,
+          0.12
+        ],
+        "ev_requirements": [
+          {
+            "id": "office-ev-1",
+            "arrival_hour": 15,
+            "deadline_hour": 22,
+            "energy_required_kwh": 14.4,
+            "max_charging_power_kw": 7.2
+          },
+          {
+            "id": "office-ev-2",
+            "arrival_hour": 15,
+            "deadline_hour": 22,
+            "energy_required_kwh": 14.4,
+            "max_charging_power_kw": 7.2
+          }
+        ],
+        "flexible_equipment": [
+          {
+            "id": "office-equipment",
+            "available_hours": {
+              "start_hour": 10,
+              "end_hour": 16
+            },
+            "energy_required_kwh": 6,
+            "max_power_kw": 3
+          }
+        ]
+      },
+      "response": {
+        "result_id": "13318c4374ce4071a0c47234350bee20",
+        "feasibility_status": "feasible",
+        "baseline_electricity_cost_usd": 25.184,
+        "baseline_peak_demand_kw": 20.9,
+        "baseline_demand_kw": [
+          1.5,
+          1.5,
+          1.5,
+          1.5,
+          1.5,
+          1.5,
+          2.5,
+          3.5,
+          5.5,
+          6.5,
+          9.5,
+          10.5,
+          7.5,
+          7.5,
+          7.5,
+          20.9,
+          20.9,
+          5.5,
+          3.5,
+          2.5,
+          1.5,
+          1.5,
+          1.5,
+          1.5
+        ],
+        "optimized_electricity_cost_usd": 20.576000100000005,
+        "optimized_peak_demand_kw": 15.899999687499989,
+        "optimized_demand_kw": [
+          1.5,
+          1.5,
+          1.5,
+          1.5,
+          1.5,
+          1.5,
+          2.5,
+          3.5,
+          5.5,
+          6.5,
+          9.5,
+          10.5,
+          7.5,
+          7.5,
+          7.5,
+          6.5,
+          6.5,
+          5.5,
+          3.500000625000023,
+          2.5,
+          15.899999687499989,
+          15.899999687499989,
+          1.5,
+          1.5
+        ],
+        "constraint_violations": [],
+        "operating_plan": {
+          "scheduling_mode": "joint",
+          "solver_status": "optimal",
+          "primary_status": "optimal",
+          "peak_tiebreak_status": "optimal",
+          "primary_optimum_usd": 20.576,
+          "verification_status": "passed",
+          "warnings": [],
+          "baseline_constraint_violations": [],
+          "device_schedules": [
+            {
+              "device_id": "office-ev-1",
+              "device_type": "ev",
+              "scheduling_role": "optimized",
+              "required_energy_kwh": 14.4,
+              "available_hours": {
+                "start_hour": 15,
+                "end_hour": 22
+              },
+              "max_power_kw": 7.2,
+              "baseline_power_kw": [
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                7.2,
+                7.2,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0
+              ],
+              "baseline_delivered_energy_kwh": 14.4,
+              "optimized_power_kw": [
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                6.250000226704579e-7,
+                0,
+                7.199999687499989,
+                7.199999687499989,
+                0,
+                0
+              ],
+              "optimized_delivered_energy_kwh": 14.400000000000002
+            },
+            {
+              "device_id": "office-ev-2",
+              "device_type": "ev",
+              "scheduling_role": "optimized",
+              "required_energy_kwh": 14.4,
+              "available_hours": {
+                "start_hour": 15,
+                "end_hour": 22
+              },
+              "max_power_kw": 7.2,
+              "baseline_power_kw": [
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                7.2,
+                7.2,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0
+              ],
+              "baseline_delivered_energy_kwh": 14.4,
+              "optimized_power_kw": [
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                7.2,
+                7.2,
+                0,
+                0
+              ],
+              "optimized_delivered_energy_kwh": 14.4
+            },
+            {
+              "device_id": "office-equipment",
+              "device_type": "flexible",
+              "scheduling_role": "optimized",
+              "required_energy_kwh": 6,
+              "available_hours": {
+                "start_hour": 10,
+                "end_hour": 16
+              },
+              "max_power_kw": 3,
+              "baseline_power_kw": [
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                3,
+                3,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0
+              ],
+              "baseline_delivered_energy_kwh": 6,
+              "optimized_power_kw": [
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                3,
+                3,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0
+              ],
+              "optimized_delivered_energy_kwh": 6
+            }
+          ]
+        },
+        "infeasibility_evidence": []
+      }
+    },
+    {
+      "url": "http://127.0.0.1:8012/api/optimize?scheduling_mode=joint",
+      "scenario": {
+        "operating_hours": {
+          "start_hour": 8,
+          "end_hour": 18
+        },
+        "building_max_demand_kw": 1,
+        "fixed_demand_kw": [
+          1.5,
+          1.5,
+          1.5,
+          1.5,
+          1.5,
+          1.5,
+          2.5,
+          3.5,
+          5.5,
+          6.5,
+          6.5,
+          7.5,
+          7.5,
+          7.5,
+          7.5,
+          6.5,
+          6.5,
+          5.5,
+          3.5,
+          2.5,
+          1.5,
+          1.5,
+          1.5,
+          1.5
+        ],
+        "electricity_prices_usd_per_kwh": [
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.28,
+          0.28,
+          0.28,
+          0.28,
+          0.28,
+          0.28,
+          0.12,
+          0.12,
+          0.12,
+          0.12
+        ],
+        "ev_requirements": [
+          {
+            "id": "office-ev-1",
+            "arrival_hour": 15,
+            "deadline_hour": 22,
+            "energy_required_kwh": 14.4,
+            "max_charging_power_kw": 7.2
+          },
+          {
+            "id": "office-ev-2",
+            "arrival_hour": 15,
+            "deadline_hour": 22,
+            "energy_required_kwh": 14.4,
+            "max_charging_power_kw": 7.2
+          }
+        ],
+        "flexible_equipment": [
+          {
+            "id": "office-equipment",
+            "available_hours": {
+              "start_hour": 10,
+              "end_hour": 16
+            },
+            "energy_required_kwh": 6,
+            "max_power_kw": 3
+          }
+        ]
+      },
+      "response": {
+        "result_id": "db9f0eefea1541b597f1505abaa78691",
+        "feasibility_status": "infeasible",
+        "baseline_electricity_cost_usd": 25.184,
+        "baseline_peak_demand_kw": 20.9,
+        "baseline_demand_kw": [
+          1.5,
+          1.5,
+          1.5,
+          1.5,
+          1.5,
+          1.5,
+          2.5,
+          3.5,
+          5.5,
+          6.5,
+          9.5,
+          10.5,
+          7.5,
+          7.5,
+          7.5,
+          20.9,
+          20.9,
+          5.5,
+          3.5,
+          2.5,
+          1.5,
+          1.5,
+          1.5,
+          1.5
+        ],
+        "optimized_electricity_cost_usd": null,
+        "optimized_peak_demand_kw": null,
+        "optimized_demand_kw": null,
+        "constraint_violations": [
+          "Hour 0: immutable background/HVAC demand (1.5 kW) exceeds site cap (1 kW)",
+          "Hour 1: immutable background/HVAC demand (1.5 kW) exceeds site cap (1 kW)",
+          "Hour 2: immutable background/HVAC demand (1.5 kW) exceeds site cap (1 kW)",
+          "Hour 3: immutable background/HVAC demand (1.5 kW) exceeds site cap (1 kW)",
+          "Hour 4: immutable background/HVAC demand (1.5 kW) exceeds site cap (1 kW)",
+          "Hour 5: immutable background/HVAC demand (1.5 kW) exceeds site cap (1 kW)",
+          "Hour 6: immutable background/HVAC demand (2.5 kW) exceeds site cap (1 kW)",
+          "Hour 7: immutable background/HVAC demand (3.5 kW) exceeds site cap (1 kW)",
+          "Hour 8: immutable background/HVAC demand (5.5 kW) exceeds site cap (1 kW)",
+          "Hour 9: immutable background/HVAC demand (6.5 kW) exceeds site cap (1 kW)",
+          "Hour 10: immutable background/HVAC demand (6.5 kW) exceeds site cap (1 kW)",
+          "Hour 11: immutable background/HVAC demand (7.5 kW) exceeds site cap (1 kW)",
+          "Hour 12: immutable background/HVAC demand (7.5 kW) exceeds site cap (1 kW)",
+          "Hour 13: immutable background/HVAC demand (7.5 kW) exceeds site cap (1 kW)",
+          "Hour 14: immutable background/HVAC demand (7.5 kW) exceeds site cap (1 kW)",
+          "Hour 15: immutable background/HVAC demand (6.5 kW) exceeds site cap (1 kW)",
+          "Hour 16: immutable background/HVAC demand (6.5 kW) exceeds site cap (1 kW)",
+          "Hour 17: immutable background/HVAC demand (5.5 kW) exceeds site cap (1 kW)",
+          "Hour 18: immutable background/HVAC demand (3.5 kW) exceeds site cap (1 kW)",
+          "Hour 19: immutable background/HVAC demand (2.5 kW) exceeds site cap (1 kW)",
+          "Hour 20: immutable background/HVAC demand (1.5 kW) exceeds site cap (1 kW)",
+          "Hour 21: immutable background/HVAC demand (1.5 kW) exceeds site cap (1 kW)",
+          "Hour 22: immutable background/HVAC demand (1.5 kW) exceeds site cap (1 kW)",
+          "Hour 23: immutable background/HVAC demand (1.5 kW) exceeds site cap (1 kW)",
+          "Window [0, 16): EVs and flexible equipment require 6 kWh but shared capacity is at most 0 kWh",
+          "Window [0, 22): EVs and flexible equipment require 34.8 kWh but shared capacity is at most 0 kWh",
+          "Window [0, 24): EVs and flexible equipment require 34.8 kWh but shared capacity is at most 0 kWh",
+          "Window [10, 16): EVs and flexible equipment require 6 kWh but shared capacity is at most 0 kWh",
+          "Window [10, 22): EVs and flexible equipment require 34.8 kWh but shared capacity is at most 0 kWh",
+          "Window [10, 24): EVs and flexible equipment require 34.8 kWh but shared capacity is at most 0 kWh",
+          "Window [15, 22): EVs and flexible equipment require 28.8 kWh but shared capacity is at most 0 kWh",
+          "Window [15, 24): EVs and flexible equipment require 28.8 kWh but shared capacity is at most 0 kWh",
+          "Infeasible under the immutable background/HVAC schedules."
+        ],
+        "operating_plan": {
+          "scheduling_mode": "joint",
+          "solver_status": "infeasible",
+          "primary_status": "analytic_infeasibility",
+          "peak_tiebreak_status": "not_run",
+          "primary_optimum_usd": null,
+          "verification_status": "unavailable",
+          "warnings": [],
+          "baseline_constraint_violations": [
+            "Hour 0: demand 1.5 kW exceeds building limit 1 kW",
+            "Hour 1: demand 1.5 kW exceeds building limit 1 kW",
+            "Hour 2: demand 1.5 kW exceeds building limit 1 kW",
+            "Hour 3: demand 1.5 kW exceeds building limit 1 kW",
+            "Hour 4: demand 1.5 kW exceeds building limit 1 kW",
+            "Hour 5: demand 1.5 kW exceeds building limit 1 kW",
+            "Hour 6: demand 2.5 kW exceeds building limit 1 kW",
+            "Hour 7: demand 3.5 kW exceeds building limit 1 kW",
+            "Hour 8: demand 5.5 kW exceeds building limit 1 kW",
+            "Hour 9: demand 6.5 kW exceeds building limit 1 kW",
+            "Hour 10: demand 9.5 kW exceeds building limit 1 kW",
+            "Hour 11: demand 10.5 kW exceeds building limit 1 kW",
+            "Hour 12: demand 7.5 kW exceeds building limit 1 kW",
+            "Hour 13: demand 7.5 kW exceeds building limit 1 kW",
+            "Hour 14: demand 7.5 kW exceeds building limit 1 kW",
+            "Hour 15: demand 20.9 kW exceeds building limit 1 kW",
+            "Hour 16: demand 20.9 kW exceeds building limit 1 kW",
+            "Hour 17: demand 5.5 kW exceeds building limit 1 kW",
+            "Hour 18: demand 3.5 kW exceeds building limit 1 kW",
+            "Hour 19: demand 2.5 kW exceeds building limit 1 kW",
+            "Hour 20: demand 1.5 kW exceeds building limit 1 kW",
+            "Hour 21: demand 1.5 kW exceeds building limit 1 kW",
+            "Hour 22: demand 1.5 kW exceeds building limit 1 kW",
+            "Hour 23: demand 1.5 kW exceeds building limit 1 kW"
+          ],
+          "device_schedules": [
+            {
+              "device_id": "office-ev-1",
+              "device_type": "ev",
+              "scheduling_role": "optimized",
+              "required_energy_kwh": 14.4,
+              "available_hours": {
+                "start_hour": 15,
+                "end_hour": 22
+              },
+              "max_power_kw": 7.2,
+              "baseline_power_kw": [
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                7.2,
+                7.2,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0
+              ],
+              "baseline_delivered_energy_kwh": 14.4,
+              "optimized_power_kw": null,
+              "optimized_delivered_energy_kwh": null
+            },
+            {
+              "device_id": "office-ev-2",
+              "device_type": "ev",
+              "scheduling_role": "optimized",
+              "required_energy_kwh": 14.4,
+              "available_hours": {
+                "start_hour": 15,
+                "end_hour": 22
+              },
+              "max_power_kw": 7.2,
+              "baseline_power_kw": [
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                7.2,
+                7.2,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0
+              ],
+              "baseline_delivered_energy_kwh": 14.4,
+              "optimized_power_kw": null,
+              "optimized_delivered_energy_kwh": null
+            },
+            {
+              "device_id": "office-equipment",
+              "device_type": "flexible",
+              "scheduling_role": "optimized",
+              "required_energy_kwh": 6,
+              "available_hours": {
+                "start_hour": 10,
+                "end_hour": 16
+              },
+              "max_power_kw": 3,
+              "baseline_power_kw": [
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                3,
+                3,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0
+              ],
+              "baseline_delivered_energy_kwh": 6,
+              "optimized_power_kw": null,
+              "optimized_delivered_energy_kwh": null
+            }
+          ]
+        },
+        "infeasibility_evidence": [
+          {
+            "code": "fixed_demand_above_site_limit",
+            "message": "Hour 0: immutable background/HVAC demand (1.5 kW) exceeds site cap (1 kW)",
+            "proof_source": "analytical_necessary_condition",
+            "devices": [],
+            "window": {
+              "start_hour": 0,
+              "end_hour": 1
+            },
+            "required": 1.5,
+            "available": 1,
+            "unit": "kW",
+            "context": {
+              "scheduling_mode": "joint",
+              "tolerance": 0.000001,
+              "site_limit_kw": 1,
+              "max_power_kw": null,
+              "immutable_fixed_power_kw": 1.5,
+              "held_flexible_power_kw": 0,
+              "immutable_fixed_energy_kwh": null,
+              "held_flexible_energy_kwh": null
+            }
+          },
+          {
+            "code": "fixed_demand_above_site_limit",
+            "message": "Hour 1: immutable background/HVAC demand (1.5 kW) exceeds site cap (1 kW)",
+            "proof_source": "analytical_necessary_condition",
+            "devices": [],
+            "window": {
+              "start_hour": 1,
+              "end_hour": 2
+            },
+            "required": 1.5,
+            "available": 1,
+            "unit": "kW",
+            "context": {
+              "scheduling_mode": "joint",
+              "tolerance": 0.000001,
+              "site_limit_kw": 1,
+              "max_power_kw": null,
+              "immutable_fixed_power_kw": 1.5,
+              "held_flexible_power_kw": 0,
+              "immutable_fixed_energy_kwh": null,
+              "held_flexible_energy_kwh": null
+            }
+          },
+          {
+            "code": "fixed_demand_above_site_limit",
+            "message": "Hour 2: immutable background/HVAC demand (1.5 kW) exceeds site cap (1 kW)",
+            "proof_source": "analytical_necessary_condition",
+            "devices": [],
+            "window": {
+              "start_hour": 2,
+              "end_hour": 3
+            },
+            "required": 1.5,
+            "available": 1,
+            "unit": "kW",
+            "context": {
+              "scheduling_mode": "joint",
+              "tolerance": 0.000001,
+              "site_limit_kw": 1,
+              "max_power_kw": null,
+              "immutable_fixed_power_kw": 1.5,
+              "held_flexible_power_kw": 0,
+              "immutable_fixed_energy_kwh": null,
+              "held_flexible_energy_kwh": null
+            }
+          },
+          {
+            "code": "fixed_demand_above_site_limit",
+            "message": "Hour 3: immutable background/HVAC demand (1.5 kW) exceeds site cap (1 kW)",
+            "proof_source": "analytical_necessary_condition",
+            "devices": [],
+            "window": {
+              "start_hour": 3,
+              "end_hour": 4
+            },
+            "required": 1.5,
+            "available": 1,
+            "unit": "kW",
+            "context": {
+              "scheduling_mode": "joint",
+              "tolerance": 0.000001,
+              "site_limit_kw": 1,
+              "max_power_kw": null,
+              "immutable_fixed_power_kw": 1.5,
+              "held_flexible_power_kw": 0,
+              "immutable_fixed_energy_kwh": null,
+              "held_flexible_energy_kwh": null
+            }
+          },
+          {
+            "code": "fixed_demand_above_site_limit",
+            "message": "Hour 4: immutable background/HVAC demand (1.5 kW) exceeds site cap (1 kW)",
+            "proof_source": "analytical_necessary_condition",
+            "devices": [],
+            "window": {
+              "start_hour": 4,
+              "end_hour": 5
+            },
+            "required": 1.5,
+            "available": 1,
+            "unit": "kW",
+            "context": {
+              "scheduling_mode": "joint",
+              "tolerance": 0.000001,
+              "site_limit_kw": 1,
+              "max_power_kw": null,
+              "immutable_fixed_power_kw": 1.5,
+              "held_flexible_power_kw": 0,
+              "immutable_fixed_energy_kwh": null,
+              "held_flexible_energy_kwh": null
+            }
+          },
+          {
+            "code": "fixed_demand_above_site_limit",
+            "message": "Hour 5: immutable background/HVAC demand (1.5 kW) exceeds site cap (1 kW)",
+            "proof_source": "analytical_necessary_condition",
+            "devices": [],
+            "window": {
+              "start_hour": 5,
+              "end_hour": 6
+            },
+            "required": 1.5,
+            "available": 1,
+            "unit": "kW",
+            "context": {
+              "scheduling_mode": "joint",
+              "tolerance": 0.000001,
+              "site_limit_kw": 1,
+              "max_power_kw": null,
+              "immutable_fixed_power_kw": 1.5,
+              "held_flexible_power_kw": 0,
+              "immutable_fixed_energy_kwh": null,
+              "held_flexible_energy_kwh": null
+            }
+          },
+          {
+            "code": "fixed_demand_above_site_limit",
+            "message": "Hour 6: immutable background/HVAC demand (2.5 kW) exceeds site cap (1 kW)",
+            "proof_source": "analytical_necessary_condition",
+            "devices": [],
+            "window": {
+              "start_hour": 6,
+              "end_hour": 7
+            },
+            "required": 2.5,
+            "available": 1,
+            "unit": "kW",
+            "context": {
+              "scheduling_mode": "joint",
+              "tolerance": 0.000001,
+              "site_limit_kw": 1,
+              "max_power_kw": null,
+              "immutable_fixed_power_kw": 2.5,
+              "held_flexible_power_kw": 0,
+              "immutable_fixed_energy_kwh": null,
+              "held_flexible_energy_kwh": null
+            }
+          },
+          {
+            "code": "fixed_demand_above_site_limit",
+            "message": "Hour 7: immutable background/HVAC demand (3.5 kW) exceeds site cap (1 kW)",
+            "proof_source": "analytical_necessary_condition",
+            "devices": [],
+            "window": {
+              "start_hour": 7,
+              "end_hour": 8
+            },
+            "required": 3.5,
+            "available": 1,
+            "unit": "kW",
+            "context": {
+              "scheduling_mode": "joint",
+              "tolerance": 0.000001,
+              "site_limit_kw": 1,
+              "max_power_kw": null,
+              "immutable_fixed_power_kw": 3.5,
+              "held_flexible_power_kw": 0,
+              "immutable_fixed_energy_kwh": null,
+              "held_flexible_energy_kwh": null
+            }
+          },
+          {
+            "code": "fixed_demand_above_site_limit",
+            "message": "Hour 8: immutable background/HVAC demand (5.5 kW) exceeds site cap (1 kW)",
+            "proof_source": "analytical_necessary_condition",
+            "devices": [],
+            "window": {
+              "start_hour": 8,
+              "end_hour": 9
+            },
+            "required": 5.5,
+            "available": 1,
+            "unit": "kW",
+            "context": {
+              "scheduling_mode": "joint",
+              "tolerance": 0.000001,
+              "site_limit_kw": 1,
+              "max_power_kw": null,
+              "immutable_fixed_power_kw": 5.5,
+              "held_flexible_power_kw": 0,
+              "immutable_fixed_energy_kwh": null,
+              "held_flexible_energy_kwh": null
+            }
+          },
+          {
+            "code": "fixed_demand_above_site_limit",
+            "message": "Hour 9: immutable background/HVAC demand (6.5 kW) exceeds site cap (1 kW)",
+            "proof_source": "analytical_necessary_condition",
+            "devices": [],
+            "window": {
+              "start_hour": 9,
+              "end_hour": 10
+            },
+            "required": 6.5,
+            "available": 1,
+            "unit": "kW",
+            "context": {
+              "scheduling_mode": "joint",
+              "tolerance": 0.000001,
+              "site_limit_kw": 1,
+              "max_power_kw": null,
+              "immutable_fixed_power_kw": 6.5,
+              "held_flexible_power_kw": 0,
+              "immutable_fixed_energy_kwh": null,
+              "held_flexible_energy_kwh": null
+            }
+          },
+          {
+            "code": "fixed_demand_above_site_limit",
+            "message": "Hour 10: immutable background/HVAC demand (6.5 kW) exceeds site cap (1 kW)",
+            "proof_source": "analytical_necessary_condition",
+            "devices": [],
+            "window": {
+              "start_hour": 10,
+              "end_hour": 11
+            },
+            "required": 6.5,
+            "available": 1,
+            "unit": "kW",
+            "context": {
+              "scheduling_mode": "joint",
+              "tolerance": 0.000001,
+              "site_limit_kw": 1,
+              "max_power_kw": null,
+              "immutable_fixed_power_kw": 6.5,
+              "held_flexible_power_kw": 0,
+              "immutable_fixed_energy_kwh": null,
+              "held_flexible_energy_kwh": null
+            }
+          },
+          {
+            "code": "fixed_demand_above_site_limit",
+            "message": "Hour 11: immutable background/HVAC demand (7.5 kW) exceeds site cap (1 kW)",
+            "proof_source": "analytical_necessary_condition",
+            "devices": [],
+            "window": {
+              "start_hour": 11,
+              "end_hour": 12
+            },
+            "required": 7.5,
+            "available": 1,
+            "unit": "kW",
+            "context": {
+              "scheduling_mode": "joint",
+              "tolerance": 0.000001,
+              "site_limit_kw": 1,
+              "max_power_kw": null,
+              "immutable_fixed_power_kw": 7.5,
+              "held_flexible_power_kw": 0,
+              "immutable_fixed_energy_kwh": null,
+              "held_flexible_energy_kwh": null
+            }
+          },
+          {
+            "code": "fixed_demand_above_site_limit",
+            "message": "Hour 12: immutable background/HVAC demand (7.5 kW) exceeds site cap (1 kW)",
+            "proof_source": "analytical_necessary_condition",
+            "devices": [],
+            "window": {
+              "start_hour": 12,
+              "end_hour": 13
+            },
+            "required": 7.5,
+            "available": 1,
+            "unit": "kW",
+            "context": {
+              "scheduling_mode": "joint",
+              "tolerance": 0.000001,
+              "site_limit_kw": 1,
+              "max_power_kw": null,
+              "immutable_fixed_power_kw": 7.5,
+              "held_flexible_power_kw": 0,
+              "immutable_fixed_energy_kwh": null,
+              "held_flexible_energy_kwh": null
+            }
+          },
+          {
+            "code": "fixed_demand_above_site_limit",
+            "message": "Hour 13: immutable background/HVAC demand (7.5 kW) exceeds site cap (1 kW)",
+            "proof_source": "analytical_necessary_condition",
+            "devices": [],
+            "window": {
+              "start_hour": 13,
+              "end_hour": 14
+            },
+            "required": 7.5,
+            "available": 1,
+            "unit": "kW",
+            "context": {
+              "scheduling_mode": "joint",
+              "tolerance": 0.000001,
+              "site_limit_kw": 1,
+              "max_power_kw": null,
+              "immutable_fixed_power_kw": 7.5,
+              "held_flexible_power_kw": 0,
+              "immutable_fixed_energy_kwh": null,
+              "held_flexible_energy_kwh": null
+            }
+          },
+          {
+            "code": "fixed_demand_above_site_limit",
+            "message": "Hour 14: immutable background/HVAC demand (7.5 kW) exceeds site cap (1 kW)",
+            "proof_source": "analytical_necessary_condition",
+            "devices": [],
+            "window": {
+              "start_hour": 14,
+              "end_hour": 15
+            },
+            "required": 7.5,
+            "available": 1,
+            "unit": "kW",
+            "context": {
+              "scheduling_mode": "joint",
+              "tolerance": 0.000001,
+              "site_limit_kw": 1,
+              "max_power_kw": null,
+              "immutable_fixed_power_kw": 7.5,
+              "held_flexible_power_kw": 0,
+              "immutable_fixed_energy_kwh": null,
+              "held_flexible_energy_kwh": null
+            }
+          },
+          {
+            "code": "fixed_demand_above_site_limit",
+            "message": "Hour 15: immutable background/HVAC demand (6.5 kW) exceeds site cap (1 kW)",
+            "proof_source": "analytical_necessary_condition",
+            "devices": [],
+            "window": {
+              "start_hour": 15,
+              "end_hour": 16
+            },
+            "required": 6.5,
+            "available": 1,
+            "unit": "kW",
+            "context": {
+              "scheduling_mode": "joint",
+              "tolerance": 0.000001,
+              "site_limit_kw": 1,
+              "max_power_kw": null,
+              "immutable_fixed_power_kw": 6.5,
+              "held_flexible_power_kw": 0,
+              "immutable_fixed_energy_kwh": null,
+              "held_flexible_energy_kwh": null
+            }
+          },
+          {
+            "code": "fixed_demand_above_site_limit",
+            "message": "Hour 16: immutable background/HVAC demand (6.5 kW) exceeds site cap (1 kW)",
+            "proof_source": "analytical_necessary_condition",
+            "devices": [],
+            "window": {
+              "start_hour": 16,
+              "end_hour": 17
+            },
+            "required": 6.5,
+            "available": 1,
+            "unit": "kW",
+            "context": {
+              "scheduling_mode": "joint",
+              "tolerance": 0.000001,
+              "site_limit_kw": 1,
+              "max_power_kw": null,
+              "immutable_fixed_power_kw": 6.5,
+              "held_flexible_power_kw": 0,
+              "immutable_fixed_energy_kwh": null,
+              "held_flexible_energy_kwh": null
+            }
+          },
+          {
+            "code": "fixed_demand_above_site_limit",
+            "message": "Hour 17: immutable background/HVAC demand (5.5 kW) exceeds site cap (1 kW)",
+            "proof_source": "analytical_necessary_condition",
+            "devices": [],
+            "window": {
+              "start_hour": 17,
+              "end_hour": 18
+            },
+            "required": 5.5,
+            "available": 1,
+            "unit": "kW",
+            "context": {
+              "scheduling_mode": "joint",
+              "tolerance": 0.000001,
+              "site_limit_kw": 1,
+              "max_power_kw": null,
+              "immutable_fixed_power_kw": 5.5,
+              "held_flexible_power_kw": 0,
+              "immutable_fixed_energy_kwh": null,
+              "held_flexible_energy_kwh": null
+            }
+          },
+          {
+            "code": "fixed_demand_above_site_limit",
+            "message": "Hour 18: immutable background/HVAC demand (3.5 kW) exceeds site cap (1 kW)",
+            "proof_source": "analytical_necessary_condition",
+            "devices": [],
+            "window": {
+              "start_hour": 18,
+              "end_hour": 19
+            },
+            "required": 3.5,
+            "available": 1,
+            "unit": "kW",
+            "context": {
+              "scheduling_mode": "joint",
+              "tolerance": 0.000001,
+              "site_limit_kw": 1,
+              "max_power_kw": null,
+              "immutable_fixed_power_kw": 3.5,
+              "held_flexible_power_kw": 0,
+              "immutable_fixed_energy_kwh": null,
+              "held_flexible_energy_kwh": null
+            }
+          },
+          {
+            "code": "fixed_demand_above_site_limit",
+            "message": "Hour 19: immutable background/HVAC demand (2.5 kW) exceeds site cap (1 kW)",
+            "proof_source": "analytical_necessary_condition",
+            "devices": [],
+            "window": {
+              "start_hour": 19,
+              "end_hour": 20
+            },
+            "required": 2.5,
+            "available": 1,
+            "unit": "kW",
+            "context": {
+              "scheduling_mode": "joint",
+              "tolerance": 0.000001,
+              "site_limit_kw": 1,
+              "max_power_kw": null,
+              "immutable_fixed_power_kw": 2.5,
+              "held_flexible_power_kw": 0,
+              "immutable_fixed_energy_kwh": null,
+              "held_flexible_energy_kwh": null
+            }
+          },
+          {
+            "code": "fixed_demand_above_site_limit",
+            "message": "Hour 20: immutable background/HVAC demand (1.5 kW) exceeds site cap (1 kW)",
+            "proof_source": "analytical_necessary_condition",
+            "devices": [],
+            "window": {
+              "start_hour": 20,
+              "end_hour": 21
+            },
+            "required": 1.5,
+            "available": 1,
+            "unit": "kW",
+            "context": {
+              "scheduling_mode": "joint",
+              "tolerance": 0.000001,
+              "site_limit_kw": 1,
+              "max_power_kw": null,
+              "immutable_fixed_power_kw": 1.5,
+              "held_flexible_power_kw": 0,
+              "immutable_fixed_energy_kwh": null,
+              "held_flexible_energy_kwh": null
+            }
+          },
+          {
+            "code": "fixed_demand_above_site_limit",
+            "message": "Hour 21: immutable background/HVAC demand (1.5 kW) exceeds site cap (1 kW)",
+            "proof_source": "analytical_necessary_condition",
+            "devices": [],
+            "window": {
+              "start_hour": 21,
+              "end_hour": 22
+            },
+            "required": 1.5,
+            "available": 1,
+            "unit": "kW",
+            "context": {
+              "scheduling_mode": "joint",
+              "tolerance": 0.000001,
+              "site_limit_kw": 1,
+              "max_power_kw": null,
+              "immutable_fixed_power_kw": 1.5,
+              "held_flexible_power_kw": 0,
+              "immutable_fixed_energy_kwh": null,
+              "held_flexible_energy_kwh": null
+            }
+          },
+          {
+            "code": "fixed_demand_above_site_limit",
+            "message": "Hour 22: immutable background/HVAC demand (1.5 kW) exceeds site cap (1 kW)",
+            "proof_source": "analytical_necessary_condition",
+            "devices": [],
+            "window": {
+              "start_hour": 22,
+              "end_hour": 23
+            },
+            "required": 1.5,
+            "available": 1,
+            "unit": "kW",
+            "context": {
+              "scheduling_mode": "joint",
+              "tolerance": 0.000001,
+              "site_limit_kw": 1,
+              "max_power_kw": null,
+              "immutable_fixed_power_kw": 1.5,
+              "held_flexible_power_kw": 0,
+              "immutable_fixed_energy_kwh": null,
+              "held_flexible_energy_kwh": null
+            }
+          },
+          {
+            "code": "fixed_demand_above_site_limit",
+            "message": "Hour 23: immutable background/HVAC demand (1.5 kW) exceeds site cap (1 kW)",
+            "proof_source": "analytical_necessary_condition",
+            "devices": [],
+            "window": {
+              "start_hour": 23,
+              "end_hour": 24
+            },
+            "required": 1.5,
+            "available": 1,
+            "unit": "kW",
+            "context": {
+              "scheduling_mode": "joint",
+              "tolerance": 0.000001,
+              "site_limit_kw": 1,
+              "max_power_kw": null,
+              "immutable_fixed_power_kw": 1.5,
+              "held_flexible_power_kw": 0,
+              "immutable_fixed_energy_kwh": null,
+              "held_flexible_energy_kwh": null
+            }
+          },
+          {
+            "code": "shared_window_capacity",
+            "message": "Window [10, 16): EVs and flexible equipment require 6 kWh but shared capacity is at most 0 kWh",
+            "proof_source": "analytical_necessary_condition",
+            "devices": [
+              {
+                "device_type": "flexible",
+                "device_id": "office-equipment"
+              }
+            ],
+            "window": {
+              "start_hour": 10,
+              "end_hour": 16
+            },
+            "required": 6,
+            "available": 0,
+            "unit": "kWh",
+            "context": {
+              "scheduling_mode": "joint",
+              "tolerance": 0.000001,
+              "site_limit_kw": 1,
+              "max_power_kw": null,
+              "immutable_fixed_power_kw": null,
+              "held_flexible_power_kw": null,
+              "immutable_fixed_energy_kwh": 43,
+              "held_flexible_energy_kwh": 0
+            }
+          },
+          {
+            "code": "shared_window_capacity",
+            "message": "Window [10, 22): EVs and flexible equipment require 34.8 kWh but shared capacity is at most 0 kWh",
+            "proof_source": "analytical_necessary_condition",
+            "devices": [
+              {
+                "device_type": "ev",
+                "device_id": "office-ev-1"
+              },
+              {
+                "device_type": "ev",
+                "device_id": "office-ev-2"
+              },
+              {
+                "device_type": "flexible",
+                "device_id": "office-equipment"
+              }
+            ],
+            "window": {
+              "start_hour": 10,
+              "end_hour": 22
+            },
+            "required": 34.8,
+            "available": 0,
+            "unit": "kWh",
+            "context": {
+              "scheduling_mode": "joint",
+              "tolerance": 0.000001,
+              "site_limit_kw": 1,
+              "max_power_kw": null,
+              "immutable_fixed_power_kw": null,
+              "held_flexible_power_kw": null,
+              "immutable_fixed_energy_kwh": 64,
+              "held_flexible_energy_kwh": 0
+            }
+          },
+          {
+            "code": "shared_window_capacity",
+            "message": "Window [15, 22): EVs and flexible equipment require 28.8 kWh but shared capacity is at most 0 kWh",
+            "proof_source": "analytical_necessary_condition",
+            "devices": [
+              {
+                "device_type": "ev",
+                "device_id": "office-ev-1"
+              },
+              {
+                "device_type": "ev",
+                "device_id": "office-ev-2"
+              }
+            ],
+            "window": {
+              "start_hour": 15,
+              "end_hour": 22
+            },
+            "required": 28.8,
+            "available": 0,
+            "unit": "kWh",
+            "context": {
+              "scheduling_mode": "joint",
+              "tolerance": 0.000001,
+              "site_limit_kw": 1,
+              "max_power_kw": null,
+              "immutable_fixed_power_kw": null,
+              "held_flexible_power_kw": null,
+              "immutable_fixed_energy_kwh": 27.5,
+              "held_flexible_energy_kwh": 0
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "pass": true
+}

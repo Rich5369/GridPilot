@@ -70,6 +70,7 @@ export function ScenarioPanel({
           </h2>
         </div>
         <button
+          type="button"
           className="secondary"
           onClick={() => onChange({ ...defaultEditor })}
         >
