@@ -10,7 +10,7 @@ profiles. Custom/named inputs replace the demo; EVs and separately modeled
 equipment are added exactly once. **Optimization** displays real backend results;
 **What-if scenarios** compares independently submitted current/alternative inputs,
 with Apply/Restore and stale-result invalidation. The **Energy overview** remains
-clearly labeled fictional demo data. Editor state is in memory, not a database.
+clearly labeled fictional demo data. Building inputs support validated browser-local [Save and Resume](docs/save-resume.md); optimizer results stay session-only. No account or cross-device storage is provided.
 
 **Start here:** [engineering demo walkthrough](docs/demo-walkthrough.md),
 [API contract](docs/contracts.md), [engineering reference](backend/simulator/README.md).

@@ -1,0 +1,341 @@
+// @vitest-environment jsdom
+import { act, StrictMode } from "react";
+import { createRoot } from "react-dom/client";
+import { afterEach, beforeEach, expect, it, vi } from "vitest";
+import captures from "../../artifacts/product-redesign/verification.json";
+import App from "./App";
+import {
+  emptyWorkspace,
+  demoWorkspace,
+  WORKSPACE_KEY,
+} from "./services/workspaceStorage";
+import type { SavedWorkspace } from "./types/workspace";
+
+// The real dashboard owns editor/mode changes. Only its responsive charts are
+// omitted in these DOM tests; the browser verifier exercises the full UI.
+vi.mock("./components/dashboard/CommandAnalytics", () => ({
+  CommandMetrics: () => null,
+  ScenarioAnalytics: () => null,
+}));
+vi.mock("./components/DemandChart", () => ({ DemandChart: () => null }));
+Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
+let host: HTMLDivElement, root: ReturnType<typeof createRoot>;
+const fetchMock = vi.fn();
+function saved(completed = false): SavedWorkspace {
+  return {
+    version: 1,
+    step: completed ? 3 : 1,
+    completed,
+    workspace: {
+      ...emptyWorkspace(),
+      name: "Northstar",
+      businessType: "Warehouse & logistics",
+      editor: {
+        ...emptyWorkspace().editor,
+        arrival: "15",
+        deadline: "22",
+        limit: "17",
+      },
+    },
+  };
+}
+function seed(value: SavedWorkspace) {
+  localStorage.setItem(WORKSPACE_KEY, JSON.stringify(value));
+}
+async function mount() {
+  await act(async () =>
+    root.render(
+      <StrictMode>
+        <App />
+      </StrictMode>,
+    ),
+  );
+}
+async function reopen() {
+  await act(async () => root.unmount());
+  root = createRoot(host);
+  await mount();
+}
+async function click(label: string) {
+  const button = [...host.querySelectorAll("button")].find(
+    (b) => b.textContent?.trim() === label,
+  )!;
+  expect(button).toBeTruthy();
+  await act(async () => button.click());
+}
+async function input(selector: string, value: string) {
+  const el = host.querySelector<HTMLInputElement>(selector)!;
+  expect(el).toBeTruthy();
+  await act(async () => {
+    Object.getOwnPropertyDescriptor(
+      HTMLInputElement.prototype,
+      "value",
+    )!.set!.call(el, value);
+    el.dispatchEvent(new Event("input", { bubbles: true }));
+  });
+}
+beforeEach(() => {
+  localStorage.clear();
+  host = document.createElement("div");
+  document.body.append(host);
+  root = createRoot(host);
+  vi.stubGlobal("scrollTo", vi.fn());
+  vi.stubGlobal("fetch", fetchMock);
+  fetchMock.mockResolvedValue(
+    new Response(JSON.stringify({ status: "ok", project: "GridPilot" })),
+  );
+});
+afterEach(async () => {
+  await act(async () => root.unmount());
+  host.remove();
+  vi.restoreAllMocks();
+  vi.unstubAllGlobals();
+  fetchMock.mockReset();
+});
+it("does not create a saved draft until inputs change, then restores an exact partial step", async () => {
+  await mount();
+  expect(localStorage.getItem(WORKSPACE_KEY)).toBeNull();
+  await input("[name=businessName]", "My unfinished building");
+  const value = JSON.parse(localStorage.getItem(WORKSPACE_KEY)!);
+  expect(value.completed).toBe(false);
+  expect(value.workspace.name).toBe("My unfinished building");
+  await reopen();
+  expect(
+    host.querySelector<HTMLInputElement>("[name=businessName]")!.value,
+  ).toBe("My unfinished building");
+  expect(host.textContent).not.toContain("Continue to your building");
+});
+it("restores incomplete energy inputs and the correct step, including empty invalid fields", async () => {
+  const value = saved();
+  value.workspace.editor.limit = "";
+  seed(value);
+  await mount();
+  expect(host.querySelector("#setup-title")!.textContent).toBe(
+    "Build your energy profile",
+  );
+  expect(host.querySelector<HTMLInputElement>("#limit")!.value).toBe("");
+  expect(host.querySelector<HTMLInputElement>("#evEnergy")!.value).toBe("14.4");
+  await input("#limit", "16.5");
+  await reopen();
+  expect(host.querySelector<HTMLInputElement>("#limit")!.value).toBe("16.5");
+});
+it("offers Continue and persists real dashboard input/mode changes and Edit building", async () => {
+  seed(saved(true));
+  await mount();
+  await click("Continue to your building");
+  expect(host.textContent).toContain("No optimizer result has been restored");
+  await click("Scenario configuration");
+  await input("#limit", "19.5");
+  const select = host.querySelector<HTMLSelectElement>("#scheduling-mode")!;
+  await act(async () => {
+    select.value = "ev_only";
+    select.dispatchEvent(new Event("change", { bubbles: true }));
+  });
+  let value = JSON.parse(localStorage.getItem(WORKSPACE_KEY)!);
+  expect(value.workspace.editor.limit).toBe("19.5");
+  expect(value.workspace.mode).toBe("ev_only");
+  await click("Edit building");
+  expect(
+    host.querySelector<HTMLInputElement>("[name=businessName]")!.value,
+  ).toBe("Northstar");
+  await click("Continue to energy profile");
+  expect(host.querySelector<HTMLInputElement>("#limit")!.value).toBe("19.5");
+  value = JSON.parse(localStorage.getItem(WORKSPACE_KEY)!);
+  expect(value.completed).toBe(false);
+  expect(value.step).toBe(1);
+});
+it("restores inputs without replaying optimizer results, result IDs or executions", async () => {
+  const value = saved(true);
+  value.workspace.editor.limit = "25";
+  seed(value);
+  const capture = captures.requests[0];
+  fetchMock.mockImplementation(
+    async (url: string) =>
+      new Response(
+        JSON.stringify(
+          url.includes("/api/optimize")
+            ? capture.response
+            : { status: "ok", project: "GridPilot" },
+        ),
+      ),
+  );
+  await mount();
+  await click("Continue to your building");
+  await click("Run optimization");
+  // Flush the existing lazy comparison module, without starting another request.
+  await act(async () => {
+    await import("./components/dashboard/Comparison");
+  });
+  expect(
+    fetchMock.mock.calls.filter(([url]) =>
+      String(url).includes("/api/optimize"),
+    ),
+  ).toHaveLength(1);
+  const raw = localStorage.getItem(WORKSPACE_KEY)!;
+  expect(raw).not.toContain("result_id");
+  expect(raw).not.toContain("optimized_demand_kw");
+  expect(raw).not.toContain("operating_plan");
+  await reopen();
+  await click("Continue to your building");
+  expect(host.textContent).toContain("No optimizer result has been restored");
+  expect(
+    host.querySelector('[aria-label="Device operating schedule"]'),
+  ).toBeNull();
+  expect(
+    fetchMock.mock.calls.filter(([url]) =>
+      String(url).includes("/api/optimize"),
+    ),
+  ).toHaveLength(1);
+});
+it.each(["{bad", JSON.stringify({ version: 99 })])(
+  "keeps unreadable/unsupported storage untouched and supports explicit recovery",
+  async (raw) => {
+    localStorage.setItem(WORKSPACE_KEY, raw);
+    await mount();
+    expect(host.textContent).toContain("Saved workspace needs attention");
+    expect(host.textContent).toContain("has not been replaced");
+    expect(host.querySelector("[name=businessName]")).toBeNull();
+    expect(localStorage.getItem(WORKSPACE_KEY)).toBe(raw);
+    await click("Continue without saving");
+    await input("[name=businessName]", "Temporary building");
+    expect(host.textContent).toContain("Working without saving");
+    expect(localStorage.getItem(WORKSPACE_KEY)).toBe(raw);
+  },
+);
+it("preserves current inputs when writing fails and does not falsely report clearing", async () => {
+  const value = saved();
+  seed(value);
+  await mount();
+  vi.spyOn(Storage.prototype, "setItem").mockImplementation(() => {
+    throw new Error("QuotaExceededError");
+  });
+  await input("#limit", "18.5");
+  expect(host.querySelector<HTMLInputElement>("#limit")!.value).toBe("18.5");
+  expect(host.textContent).toContain("Changes could not be saved");
+  expect(
+    JSON.parse(localStorage.getItem(WORKSPACE_KEY)!).workspace.editor.limit,
+  ).toBe("17");
+  vi.spyOn(Storage.prototype, "removeItem").mockImplementation(() => {
+    throw new Error("SecurityError");
+  });
+  await click("Clear saved workspace");
+  await click("Clear workspace");
+  expect(host.textContent).toContain("could not be cleared");
+  expect(host.querySelector<HTMLInputElement>("#limit")!.value).toBe("18.5");
+});
+it("works in session memory after a read failure without overwriting inaccessible saved inputs", async () => {
+  const original = JSON.stringify(saved());
+  localStorage.setItem(WORKSPACE_KEY, original);
+  const denied = vi
+    .spyOn(Storage.prototype, "getItem")
+    .mockImplementation(() => {
+      throw new Error("SecurityError");
+    });
+  await mount();
+  expect(host.textContent).toContain("Browser storage is unavailable");
+  denied.mockRestore();
+  await input("[name=businessName]", "Temporary input");
+  expect(localStorage.getItem(WORKSPACE_KEY)).toBe(original);
+});
+it("confirms clearing, removes only this saved workspace and stays cleared on reopening", async () => {
+  seed(saved(true));
+  localStorage.setItem("unrelated", "keep");
+  await mount();
+  await click("Clear saved workspace");
+  await click("Keep workspace");
+  expect(localStorage.getItem(WORKSPACE_KEY)).not.toBeNull();
+  await click("Clear saved workspace");
+  await click("Clear workspace");
+  expect(localStorage.getItem(WORKSPACE_KEY)).toBeNull();
+  expect(localStorage.getItem("unrelated")).toBe("keep");
+  expect(
+    host.querySelector<HTMLInputElement>("[name=businessName]")!.value,
+  ).toBe("");
+  await reopen();
+  expect(localStorage.getItem(WORKSPACE_KEY)).toBeNull();
+});
+it("labels demo workspaces and requires explicit replacement of existing saved inputs", async () => {
+  seed(saved(true));
+  await mount();
+  await click("Explore demo");
+  expect(JSON.parse(localStorage.getItem(WORKSPACE_KEY)!).workspace.name).toBe(
+    "Northstar",
+  );
+  await click("Keep workspace");
+  await click("Explore demo");
+  await click("Replace with demonstration");
+  expect(JSON.parse(localStorage.getItem(WORKSPACE_KEY)!).workspace).toEqual(
+    demoWorkspace(),
+  );
+  expect(host.textContent).toContain("Demonstration workspace");
+  await reopen();
+  expect(host.textContent).toContain(
+    "Demonstration workspace · synthetic inputs",
+  );
+});
+it("retains edited advisor business context without storing its conversation", async () => {
+  seed(saved(true));
+  await mount();
+  await click("Continue to your building");
+  await click("AI assistant");
+  await input(".advisor-fields label:nth-child(2) input", "43");
+  await input(".advisor-fields label:nth-child(6) input", "Warehouse vans");
+  const stored = JSON.parse(localStorage.getItem(WORKSPACE_KEY)!);
+  expect(stored.workspace.businessContext.employee_count).toBe(43);
+  expect(stored.workspace.businessContext.equipment).toBe("Warehouse vans");
+  expect(stored).not.toHaveProperty("history");
+  await reopen();
+  await click("Continue to your building");
+  await click("AI assistant");
+  expect(
+    host.querySelector<HTMLInputElement>(
+      ".advisor-fields label:nth-child(2) input",
+    )!.value,
+  ).toBe("43");
+  expect(
+    host.querySelector<HTMLInputElement>(
+      ".advisor-fields label:nth-child(6) input",
+    )!.value,
+  ).toBe("Warehouse vans");
+  expect(host.querySelector("[role=log]")!.textContent).toBe("");
+});
+it("keeps saved context consistent with explicit setup edits without dropping other profile fields", async () => {
+  const value = saved(true);
+  value.workspace.businessContext = {
+    employee_count: 42,
+    equipment: "Warehouse vans",
+  };
+  seed(value);
+  await mount();
+  await click("Edit building");
+  const inputElement = host.querySelector<HTMLInputElement>(
+    'input[type=number][max="10000000"]',
+  )!;
+  await act(async () => {
+    Object.getOwnPropertyDescriptor(
+      HTMLInputElement.prototype,
+      "value",
+    )!.set!.call(inputElement, "44");
+    inputElement.dispatchEvent(new Event("input", { bubbles: true }));
+  });
+  expect(
+    JSON.parse(localStorage.getItem(WORKSPACE_KEY)!).workspace.businessContext,
+  ).toMatchObject({ employee_count: 44, equipment: "Warehouse vans" });
+});
+it("does not hide session-only edits if clearing the original unreadable record fails", async () => {
+  const raw = JSON.stringify({ version: 99 });
+  localStorage.setItem(WORKSPACE_KEY, raw);
+  await mount();
+  await click("Continue without saving");
+  await input("[name=businessName]", "Working copy");
+  vi.spyOn(Storage.prototype, "removeItem").mockImplementation(() => {
+    throw new Error("SecurityError");
+  });
+  await click("Clear saved workspace");
+  await click("Clear workspace");
+  expect(
+    host.querySelector<HTMLInputElement>("[name=businessName]")!.value,
+  ).toBe("Working copy");
+  expect(host.textContent).not.toContain("Saved workspace needs attention");
+  expect(localStorage.getItem(WORKSPACE_KEY)).toBe(raw);
+});

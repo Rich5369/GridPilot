@@ -1174,3 +1174,117 @@ button:disabled {
 .kpi-footer {
   padding-top: 8px;
 }
+
+/* Save/resume stays within the existing header and setup-card surfaces. */
+.workspace-storage {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+  min-width: 0;
+  max-width: 100%;
+  margin: 12px 0;
+}
+.workspace-storage-scope {
+  font-size: 11px;
+  color: #91cbbb;
+}
+.workspace-storage-link {
+  background: none;
+  border: 0;
+  color: #b5c9d5;
+  font-size: 11px;
+  padding: 5px 0;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.workspace-storage-link:hover {
+  color: #76e6cf;
+}
+.workspace-storage-warning {
+  flex-basis: 100%;
+  margin: 4px 0 0;
+  font-size: 12px;
+  line-height: 1.7;
+  color: #f0ce93;
+  overflow-wrap: anywhere;
+}
+.workspace-confirm {
+  flex-basis: 100%;
+  border: 1px solid #50616b;
+  border-radius: 7px;
+  background: #102632;
+  padding: 12px;
+}
+.workspace-confirm p {
+  font-size: 12px;
+  color: #d3e4ec;
+  margin: 0 0 10px;
+  line-height: 1.7;
+}
+.workspace-confirm button {
+  font-size: 11px;
+  padding: 8px 10px;
+  margin: 0 8px 4px 0;
+}
+.workspace-resume {
+  padding: 24px 0 5px;
+}
+.workspace-resume h2 {
+  font-size: 24px;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+.workspace-resume > p {
+  font-size: 13px;
+  color: #a6c0ce;
+  line-height: 1.8;
+}
+.workspace-resume > .run-button {
+  width: 100%;
+  margin: 20px 0 10px;
+}
+.workspace-resume > .secondary {
+  width: 100%;
+  padding: 11px;
+}
+.workspace-recovery {
+  max-width: 650px;
+  margin: 50px auto;
+}
+.workspace-recovery h1 {
+  font-size: 26px;
+}
+.workspace-recovery > .secondary {
+  margin-top: 20px;
+  padding: 12px;
+}
+.workspace-result-notice {
+  background: #0c2a32;
+  border: 1px solid #24535c;
+  border-radius: 7px;
+  padding: 10px 13px;
+  font-size: 12px;
+  color: #b7d7e2;
+}
+.topbar-actions {
+  flex-wrap: wrap;
+  min-width: 0;
+  max-width: 100%;
+}
+.topbar-actions .workspace-storage {
+  margin: 0;
+  flex: 1 1 auto;
+  max-width: 460px;
+}
+.topbar-actions .workspace-storage .tag {
+  font-size: 9px;
+}
+@media (max-width: 760px) {
+  .topbar-actions .workspace-storage {
+    flex-basis: 100%;
+  }
+  .workspace-resume h2 {
+    font-size: 22px;
+  }
+}

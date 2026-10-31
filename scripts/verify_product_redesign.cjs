@@ -234,7 +234,7 @@ const assert = require("assert/strict");
       ).includes("PREVIOUS SCENARIO"),
     );
     await page
-      .getByRole("button", { name: "Business setup", exact: true })
+      .getByRole("button", { name: "Edit building", exact: true })
       .click();
     await page
       .getByRole("heading", { name: "Tell us about your business" })

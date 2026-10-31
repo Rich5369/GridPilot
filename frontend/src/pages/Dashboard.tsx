@@ -1,5 +1,5 @@
 import { OperatingTimeline } from '../components/dashboard/OperatingTimeline'
-import { lazy, Suspense, useRef, useState } from 'react'
+import { lazy, Suspense, useRef, useState, type ReactNode } from 'react'
 import {
   Building2,
   Globe2,
@@ -64,7 +64,12 @@ const views = [
   { id: 'assistant', label: 'AI assistant', icon: Sparkles },
   { id: 'markets', label: 'Electricity markets', icon: Globe2 },
 ] as const
-export function Dashboard({ initialEditor, initialMode = 'ev_only', workspaceName = 'Scenario workspace', businessProfile, onSetup }: {
+export function Dashboard({ initialEditor, initialMode = 'ev_only', workspaceName = 'Scenario workspace', businessProfile, onSetup, workspaceControls, onInputsChange, onBusinessContextChange, businessContextLabel, resumed = false }: {
+  onBusinessContextChange?: (profile: Record<string, string | number | null>) => void
+  businessContextLabel?: string
+  workspaceControls?: ReactNode
+  onInputsChange?: (editor: ScenarioEditor, mode: SchedulingMode) => void
+  resumed?: boolean
   initialEditor?: ScenarioEditor
   initialMode?: SchedulingMode
   workspaceName?: string
@@ -78,7 +83,11 @@ export function Dashboard({ initialEditor, initialMode = 'ev_only', workspaceNam
   const [billingInputs, setBillingInputs] = useState(defaultBillingInputs)
   const [appliedBilling, setAppliedBilling] = useState(defaultBillingInputs)
   const [view, setView] = useState<string>('overview')
-  const [editor, setEditor] = useState({ ...(initialEditor ?? defaultEditor) })
+  const [editor, setEditorState] = useState({ ...(initialEditor ?? defaultEditor) })
+  function setEditor(next: ScenarioEditor) {
+    setEditorState(next)
+    onInputsChange?.(next, mode)
+  }
   const [alternative, setAlternative] = useState<ScenarioEditor | null>(null)
   // An AI handoff starts a new comparison and captures the current Restore snapshot.
   const [whatIfSession, setWhatIfSession] = useState(0)
@@ -184,9 +193,10 @@ export function Dashboard({ initialEditor, initialMode = 'ev_only', workspaceNam
             Workspace <span className="breadcrumb">/</span>
             <strong>{views.find((v) => v.id === view)?.label}</strong>
           </span>
-          <div className="topbar-actions">{onSetup && <button className="secondary" onClick={() => onSetup(editor, mode)}>Business setup</button>}<BackendStatus /></div>
+          <div className="topbar-actions">{onSetup && <button className="secondary" onClick={() => onSetup(editor, mode)}>Edit building</button>}{workspaceControls}<BackendStatus /></div>
         </header>
         <main id="overview" tabIndex={-1}>
+          {resumed && !result && <p className="workspace-result-notice" role="status">Building inputs restored. No optimizer result has been restored. Run optimization explicitly to calculate a new schedule.</p>}
           <div className="page-heading">
             <div>
               <p className="eyebrow">GRIDPILOT / ENERGY INTELLIGENCE</p>
@@ -257,6 +267,7 @@ export function Dashboard({ initialEditor, initialMode = 'ev_only', workspaceNam
                 modeVersion.current += 1
                 setModeRevision(modeVersion.current)
                 setMode(event.target.value as SchedulingMode)
+                onInputsChange?.(editor, event.target.value as SchedulingMode)
                 setResult(null)
                 setResultScenario(null)
                 setMessage(
@@ -511,6 +522,8 @@ export function Dashboard({ initialEditor, initialMode = 'ev_only', workspaceNam
                       resultScenario={resultScenario}
                       resultId={result?.result_id}
                       initialProfile={businessProfile}
+                      onProfileChange={onBusinessContextChange}
+                      initialProfileLabel={businessContextLabel}
                     />
                   </div>
                 }
