@@ -68,7 +68,7 @@ def mode():
 def generate(schema: type[T], instructions: str, payload: dict, *, completion_tokens: int = 1500, request_timeout: float = 25.0, reasoning_effort: str | None = None) -> tuple[T, str]:
     source = mode()
     if source == 'mock':
-        if schema.__name__ == 'Selection':
+        if schema.__name__ in ('Selection', 'CategorySelection'):
             raise fail(503, 'ai_unavailable', 'Conversational Meta inference is unavailable in mock mode. Manual optimization remains available.')
         if schema is ExplanationSelection:
             return schema(points=['outcome', 'cost', 'peak', 'constraints', 'method']), 'mock'
