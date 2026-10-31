@@ -64,15 +64,21 @@ const views = [
   { id: 'assistant', label: 'AI assistant', icon: Sparkles },
   { id: 'markets', label: 'Electricity markets', icon: Globe2 },
 ] as const
-export function Dashboard() {
-  const [mode, setMode] = useState<SchedulingMode>('ev_only')
+export function Dashboard({ initialEditor, initialMode = 'ev_only', workspaceName = 'Scenario workspace', businessProfile, onSetup }: {
+  initialEditor?: ScenarioEditor
+  initialMode?: SchedulingMode
+  workspaceName?: string
+  businessProfile?: Record<string, string | number | null>
+  onSetup?: (editor: ScenarioEditor, mode: SchedulingMode) => void
+} = {}) {
+  const [mode, setMode] = useState<SchedulingMode>(initialMode)
   const modeVersion = useRef(0)
   const [modeRevision, setModeRevision] = useState(0)
-  const [resultMode, setResultMode] = useState<SchedulingMode>('ev_only')
+  const [resultMode, setResultMode] = useState<SchedulingMode>(initialMode)
   const [billingInputs, setBillingInputs] = useState(defaultBillingInputs)
   const [appliedBilling, setAppliedBilling] = useState(defaultBillingInputs)
   const [view, setView] = useState<string>('overview')
-  const [editor, setEditor] = useState({ ...defaultEditor })
+  const [editor, setEditor] = useState({ ...(initialEditor ?? defaultEditor) })
   const [alternative, setAlternative] = useState<ScenarioEditor | null>(null)
   // An AI handoff starts a new comparison and captures the current Restore snapshot.
   const [whatIfSession, setWhatIfSession] = useState(0)
@@ -130,7 +136,7 @@ export function Dashboard() {
         <div className="workspace">
           <Building2 size={20} />
           <div>
-            <strong>Scenario workspace</strong>
+            <strong>{workspaceName}</strong>
             <span>Single-day energy planning</span>
           </div>
         </div>
@@ -167,7 +173,7 @@ export function Dashboard() {
         <div className="sidebar-bottom">
           <span className="avatar">GP</span>
           <div>
-            <strong>GridPilot team</strong>
+            <strong>{workspaceName}</strong>
             <span>24-hour scenario planning</span>
           </div>
         </div>
@@ -178,7 +184,7 @@ export function Dashboard() {
             Workspace <span className="breadcrumb">/</span>
             <strong>{views.find((v) => v.id === view)?.label}</strong>
           </span>
-          <BackendStatus />
+          <div className="topbar-actions">{onSetup && <button className="secondary" onClick={() => onSetup(editor, mode)}>Business setup</button>}<BackendStatus /></div>
         </header>
         <main id="overview" tabIndex={-1}>
           <div className="page-heading">
@@ -186,11 +192,11 @@ export function Dashboard() {
               <p className="eyebrow">GRIDPILOT / ENERGY INTELLIGENCE</p>
               <h1>
                 {view === 'overview'
-                  ? 'Energy Command Center'
+                  ? 'Your energy, in focus'
                   : views.find((v) => v.id === view)?.label}
               </h1>
               <p className="muted">
-                Clearer insights. Smarter scheduling. A more resilient business.
+                <strong className="workspace-name">{workspaceName}</strong> · Clearer insights. Smarter scheduling.
               </p>
             </div>
             <button
@@ -306,7 +312,6 @@ export function Dashboard() {
                 view === 'assistant' ? 'advisor-main-hidden' : 'command-primary'
               }
             >
-              {view === 'overview' && <ElectricityPriceExplorer />}
               {(view === 'overview' || view === 'comparison') && (
                 <>
                   <Suspense fallback={<p role="status">Loading comparison…</p>}>
@@ -317,7 +322,6 @@ export function Dashboard() {
                       stale={stale}
                     />
                   </Suspense>
-                  <OperatingTimeline key={JSON.stringify(result)} result={result} scenario={resultScenario} mode={resultMode} stale={stale} />
                   {(resultScenario || !invalid) && (
                     <ScenarioAnalytics
                       scenario={resultScenario ?? toScenario(editor)}
@@ -325,6 +329,7 @@ export function Dashboard() {
                       draft={!resultScenario}
                     />
                   )}
+                  <OperatingTimeline key={JSON.stringify(result)} result={result} scenario={resultScenario} mode={resultMode} stale={stale} />
                   <EnergyInsights
                     scenario={resultScenario}
                     result={result}
@@ -505,6 +510,7 @@ export function Dashboard() {
                       onChange={setEditor}
                       resultScenario={resultScenario}
                       resultId={result?.result_id}
+                      initialProfile={businessProfile}
                     />
                   </div>
                 }

@@ -17,14 +17,14 @@ type Advisor = Omit<Proposal, 'status'> & { category: 'answer' | 'clarification_
 const profileFields = ['business_type', 'employee_count', 'operating_hours', 'electricity_cost_and_period', 'consumption_and_units', 'equipment', 'goals', 'restrictions']
 const fieldLabel = (key: string) => ({ electricity_cost_and_period: 'Electricity cost & billing period', consumption_and_units: 'Consumption & units' }[key] ?? key.replaceAll('_', ' '))
 const examples = ['Keep peak power demand below 15 kW.', 'Compare a lower power-cap scenario.']
-export function EnergyAssistant({ editor, onChange, resultScenario, onCompareProposal, schedulingMode = 'ev_only', resultId }: {
-  resultId?: string | null; schedulingMode?: 'ev_only' | 'joint'; editor: ScenarioEditor; onChange: (editor: ScenarioEditor) => void; resultScenario: Scenario | null; onCompareProposal?: (e: ScenarioEditor) => void
+export function EnergyAssistant({ editor, onChange, resultScenario, onCompareProposal, schedulingMode = 'ev_only', resultId, initialProfile }: {
+  initialProfile?: Profile; resultId?: string | null; schedulingMode?: 'ev_only' | 'joint'; editor: ScenarioEditor; onChange: (editor: ScenarioEditor) => void; resultScenario: Scenario | null; onCompareProposal?: (e: ScenarioEditor) => void
 }) {
   const [request, setRequest] = useState('')
   const [proposal, setProposal] = useState<Proposal | null>(null)
   const [snapshot, setSnapshot] = useState('')
   const [history, setHistory] = useState<{role: 'user' | 'assistant'; content: string; category?: Advisor['category']; message?: string; facts?: string[]; questions?: string[]}[]>([])
-  const [profile, setProfile] = useState<Profile>({})
+  const [profile, setProfile] = useState<Profile>(initialProfile ?? {})
   const [edited, setEdited] = useState<Record<string, string | number | null>>({})
   const [source, setSource] = useState('No advisor reply yet')
   const [conversation, setConversation] = useState('')
@@ -84,7 +84,7 @@ export function EnergyAssistant({ editor, onChange, resultScenario, onComparePro
     <p className="advisor-boundary">Guidance and proposals for your submitted scenario. Only the optimizer calculates outcomes.</p>
     <section className="advisor-context" aria-labelledby="business-context-heading">
       <div className="section-heading"><h3 id="business-context-heading">Business context</h3><span className="advisor-caption">Session only · separate from engineering inputs</span></div>
-      {profileFields.some(key => profile[key] != null && profile[key] !== '') ? <dl className="advisor-context-summary">{profileFields.filter(key => profile[key] != null && profile[key] !== '').map(key => <div key={key}><dt>{fieldLabel(key)}</dt><dd>{profile[key]} <span className="advisor-provenance">{Object.hasOwn(edited, key) && edited[key] === profile[key] ? 'User edited' : 'Extracted'}</span></dd></div>)}</dl> : <p className="advisor-context-empty">No business details yet. Tell me about your operations, goals, or restrictions to add context.</p>}
+      {profileFields.some(key => profile[key] != null && profile[key] !== '') ? <dl className="advisor-context-summary">{profileFields.filter(key => profile[key] != null && profile[key] !== '').map(key => <div key={key}><dt>{fieldLabel(key)}</dt><dd>{profile[key]} <span className="advisor-provenance">{Object.hasOwn(edited, key) && edited[key] === profile[key] ? 'User edited' : initialProfile?.[key] != null && profile[key] === initialProfile[key] ? 'From setup' : 'Extracted'}</span></dd></div>)}</dl> : <p className="advisor-context-empty">No business details yet. Tell me about your operations, goals, or restrictions to add context.</p>}
       <details><summary>Edit business details <span className="advisor-caption">{profileFields.filter(key => profile[key] != null && profile[key] !== '').length} of 8 provided</span></summary>
         <p className="advisor-caption">Extracted details are unconfirmed excerpts from your messages. Review or correct them here; unknown details are optional.</p>
         <div className="advisor-fields">{profileFields.map(key => <label key={key}>{fieldLabel(key)}<input type={key === 'employee_count' ? 'number' : 'text'} placeholder="Not provided" min="0" maxLength={key === 'business_type' ? 120 : key === 'equipment' || key === 'goals' || key === 'restrictions' ? 500 : 200} value={profile[key] ?? ''} onChange={e => { const value = e.target.value === '' ? null : key === 'employee_count' ? Number(e.target.value) : e.target.value; setProfile(p => ({...p, [key]: value})); setEdited(p => ({...p, [key]: value})) }} /></label>)}</div>
