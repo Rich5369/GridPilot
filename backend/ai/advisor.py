@@ -69,6 +69,37 @@ def safe_prose(text):
     return text
 
 
+def exact_employee_evidence(user_text, value):
+    """Conservative extraction gate, not a general natural-language interpreter.
+
+    Inspect full user clauses, since the model can omit a qualifier from its
+    quoted excerpt. Ambiguity requires clarification rather than an exact count.
+    """
+    counts = []
+    numeral = r'(?<![\w.,+\-])([0-9]+)(?!\w|[.,]\d)'
+    employment = re.compile(
+        numeral + r'\s+(?:employees?|staff|workers?)\b'
+        + r'|\b(?:employ|staff\s*:|employee count\s*(?:is|:))\s*' + numeral,
+        re.I,
+    )
+    uncertain = re.compile(
+        r'\b(?:approximately|approx|about|around|roughly|between|or|'
+        r'unknown|unsure|uncertain|guess|maybe|perhaps|not|no longer|at least|at most|'
+        r'more than|less than|up to)\b|[~≈–—]|\d\s*(?:-|to)\s*\d', re.I,
+    )
+    for clause in re.split(r'(?<!\d)\.|\.(?!\d)|[!?;\n]', user_text):
+        matches = list(employment.finditer(clause))
+        if not matches:
+            # Unknown/negated employee context cannot supply an exact count.
+            if re.search(r'\b(?:employees?|staff|employee count)\b', clause, re.I) and uncertain.search(clause):
+                return False
+            continue
+        if uncertain.search(clause):
+            return False
+        counts.extend(int(m.group(1) or m.group(2)) for m in matches)
+    return bool(counts) and all(count == value for count in counts)
+
+
 def grounded_profile(body, selection):
     # Extracted details are unconfirmed; never accept assistant history as evidence.
     user_text = '\n'.join([t.content for t in body.history if t.role == 'user'] + [body.request])
@@ -81,7 +112,8 @@ def grounded_profile(body, selection):
         if key == 'employee_count':
             # A count must be a complete numeral, not 30 inside 300 or 30.5.
             # Keep exact user excerpts; do not infer or round employee counts.
-            supported = re.search(r'(?<![\w.,+\-])' + str(value) + r'(?!\w|[.,]\d)', quote) is not None
+            supported = (re.search(r'(?<![\w.,+\-])' + str(value) + r'(?!\w|[.,]\d)', quote) is not None
+                         and exact_employee_evidence(user_text, value))
         if not quote or quote.casefold() not in user_text.casefold() or not supported:
             raise fail(502, 'ai_invalid_response', 'Meta returned business details without user evidence. No changes were applied.')
         merged[key] = value
