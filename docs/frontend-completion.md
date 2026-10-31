@@ -1,5 +1,9 @@
 # Frontend ownership and completion
 
+This records the PR #45 implementation. The subsequent
+[business-analysis follow-up](business-analysis-dashboard.md) adds non-EV choices,
+AM/PM controls and an explicit calculate action at setup completion.
+
 shaJ46 owns landing/onboarding, dashboard/design, frontend integration and browser
 verification. Richard (Rich5369) owns all backend APIs, numerical systems, pricing,
 validation and Meta provider reliability. This supersedes the historical EE/CS split.

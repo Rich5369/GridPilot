@@ -282,8 +282,9 @@ requirements rather than duplicating version ranges. To deliberately upgrade bac
 | Both | `backend/models/`, `frontend/src/types/`, `docs/contracts.md`, sample scenarios; agree on contract changes first |
 
 This division supersedes the earlier EE/CS implementation split. See the
-[frontend completion report](docs/frontend-completion.md) for current behavior,
-local verification and account/backend dependencies.
+[frontend completion report](docs/frontend-completion.md) for the completed PR #45 scope,
+and [business-analysis follow-up](docs/business-analysis-dashboard.md) for non-EV choices,
+AM/PM controls, calculated onboarding and current verification.
 
 Richard's remaining handoff is confirming actual served revisions and the genuine
 hosted Meta workflow. The team supplies final submission details and presentation

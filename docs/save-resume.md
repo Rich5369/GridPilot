@@ -5,6 +5,10 @@ Implemented on `feature/save-resume-workspace`, starting from merged main
 no newer authentication/persistence implementation or open PR was present.
 This feature is for review; it does not change main or production settings.
 
+See the [business-analysis follow-up](business-analysis-dashboard.md) for additive
+analysis-choice/custom-equipment drafts and the new explicit calculate action.
+Browser return continues to restore inputs without automatically solving.
+
 ## Retained inputs
 
 One workspace is saved in `localStorage` under `gridpilot.building-workspace`.
