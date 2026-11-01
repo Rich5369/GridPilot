@@ -31,7 +31,7 @@ it('requires confirmation, applies validated changes and cancels proposals', asy
   }
 })
 
-it('separates advice, next step and a question while keeping raw evidence out of cards and history', async () => {
+it('separates paragraphs, takeaways and a question while keeping raw evidence out of cards and history', async () => {
   const container = document.createElement('div')
   document.body.append(container)
   const root = createRoot(container)
@@ -41,7 +41,7 @@ it('separates advice, next step and a question while keeping raw evidence out of
     expect(container.querySelector('details')!.open).toBe(false)
     expect(container.textContent).toContain('No business details yet')
     expect(container.querySelectorAll('input[placeholder="Not provided"]')).toHaveLength(8)
-    vi.mocked(apiRequest).mockResolvedValue({ source: 'mock', category: 'clarification_required', message: 'Try running equipment when electricity is cheaper.', next_step: 'Run optimization to check a different schedule.', warnings: ['Savings have not been calculated yet.'], follow_up_questions: ['Which equipment can shift without affecting staff? This defines flexibility.'], facts: ['Submitted hourly electricity prices: [0.12, 0.28]', '{"max_charging_power_kw":7.2}'], profile: { business_type: 'Office', employee_count: 0 }, changes: {}, proposed_scenario: null })
+    vi.mocked(apiRequest).mockResolvedValue({ source: 'mock', category: 'clarification_required', message: 'Try running equipment when electricity is cheaper. Keep operations in mind.\n\nAvoid using large devices together. Run optimization to check a different schedule.', summary_bullets: ['Use cheaper electricity periods.', 'Run optimization to check a different schedule.'], warnings: ['Savings have not been calculated yet.'], follow_up_questions: ['Which equipment can shift without affecting staff? This defines flexibility.'], facts: ['Submitted hourly electricity prices: [0.12, 0.28]', '{"max_charging_power_kw":7.2}'], profile: { business_type: 'Office', employee_count: 0 }, changes: {}, proposed_scenario: null })
     await click('Keep peak power demand below 15 kW.')
     await click('Send to advisor')
     expect(container.querySelector('[aria-label="Follow-up question"]')!.textContent).toContain('Which equipment can shift')
@@ -51,6 +51,9 @@ it('separates advice, next step and a question while keeping raw evidence out of
     expect(container.querySelectorAll('.advisor-provenance')).toHaveLength(2)
     expect(container.querySelector('.advisor-verified')).toBeNull()
     expect(container.querySelector('.advisor-proposal')).toBeNull()
+    expect(container.querySelectorAll('.advisor-answer p')).toHaveLength(2)
+    expect(container.querySelectorAll('.advisor-summary li')).toHaveLength(2)
+    expect(container.textContent).not.toContain('Next step')
     vi.mocked(apiRequest).mockResolvedValue({ source: 'mock', category: 'answer', message: 'From your submitted engineering scenario:', facts: ['Verified submitted ev_only result: baseline daily energy charges USD 10.0000; optimized daily energy charges: USD 8.0000.'], profile: {}, changes: {}, proposed_scenario: null })
     await click('Send to advisor')
     expect(container.querySelector('.advisor-evidence')).toBeNull()
@@ -58,11 +61,12 @@ it('separates advice, next step and a question while keeping raw evidence out of
     expect(container.textContent).not.toContain('Verified submitted')
     expect(container.textContent).not.toContain('[0.12, 0.28]')
     expect(container.textContent).not.toContain('max_charging_power_kw')
-    expect(container.querySelector('[aria-label="Suggested next step"]')!.textContent).toContain('Run optimization')
+    expect(container.querySelector('[aria-label="Key takeaways"]')!.textContent).toContain('Run optimization')
     expect(container.querySelector('[aria-label="Important information"]')!.textContent).toContain('Savings have not been calculated')
     const latestReply = container.querySelectorAll('.advisor-message.answer')[0]!
     expect(latestReply.querySelectorAll('section')).toHaveLength(0)
     expect(latestReply.querySelectorAll('p')).toHaveLength(1)
+    expect(latestReply.querySelector('.advisor-summary')).toBeNull()
     const body = JSON.parse(vi.mocked(apiRequest).mock.calls.at(-1)![1]!.body as string)
     expect(body.result_id).toBe('execution-fixture')
     expect(body.history[1].content).toContain('Which equipment can shift')
@@ -184,4 +188,19 @@ it('does not write a late reply into the saved workspace after leaving the dashb
   await act(async()=>resolve({source:'mock',category:'answer',message:'Late reply',profile:{employee_count:10},changes:{},proposed_scenario:null}))
   expect(persist).not.toHaveBeenCalled()
   container.remove()
+})
+
+it('shows a single takeaway as a bullet without a next-step heading', async () => {
+  const container = document.createElement('div'), root = createRoot(container)
+  document.body.append(container)
+  vi.mocked(apiRequest).mockResolvedValue({ source: 'mock', category: 'answer', message: 'Run optimization to check the schedule.', summary_bullets: ['Check the schedule with optimization.'], profile: {}, changes: {}, proposed_scenario: null })
+  try {
+    await act(async () => root.render(<EnergyAssistant editor={defaultEditor} onChange={vi.fn()} resultScenario={null} />))
+    for (const label of ['Keep peak power demand below 15 kW.', 'Send to advisor']) {
+      await act(async () => [...container.querySelectorAll('button')].find(b => b.textContent === label)!.click())
+    }
+    expect(container.querySelectorAll('.advisor-summary li')).toHaveLength(1)
+    expect(container.querySelector('.advisor-summary')!.textContent).toContain('Check the schedule')
+    expect(container.textContent).not.toContain('Next step')
+  } finally { await act(async () => root.unmount()); container.remove() }
 })

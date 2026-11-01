@@ -12,7 +12,7 @@ type Proposal = {
   proposed_scenario: Scenario | null
 }
 type Profile = Record<string, string | number | null>
-type Advisor = Omit<Proposal, 'status'> & { category: 'answer' | 'clarification_required' | 'scenario_proposal' | 'unavailable_or_unsupported'; next_step?: string | null; warnings?: string[]; follow_up_questions?: string[]; missing_information?: string[]; profile: Profile }
+type Advisor = Omit<Proposal, 'status'> & { category: 'answer' | 'clarification_required' | 'scenario_proposal' | 'unavailable_or_unsupported'; summary_bullets?: string[]; next_step?: string | null; warnings?: string[]; follow_up_questions?: string[]; missing_information?: string[]; profile: Profile }
 
 const profileFields = ['business_type', 'employee_count', 'operating_hours', 'electricity_cost_and_period', 'consumption_and_units', 'equipment', 'goals', 'restrictions']
 const fieldLabel = (key: string) => ({ electricity_cost_and_period: 'Electricity cost & billing period', consumption_and_units: 'Consumption & units' }[key] ?? key.replaceAll('_', ' '))
@@ -23,7 +23,7 @@ export function EnergyAssistant({ editor, onChange, resultScenario, onComparePro
   const [request, setRequest] = useState('')
   const [proposal, setProposal] = useState<Proposal | null>(null)
   const [snapshot, setSnapshot] = useState('')
-  const [history, setHistory] = useState<{role: 'user' | 'assistant'; content: string; category?: Advisor['category']; message?: string; nextStep?: string | null; warnings?: string[]; questions?: string[]}[]>([])
+  const [history, setHistory] = useState<{role: 'user' | 'assistant'; content: string; category?: Advisor['category']; message?: string; bullets?: string[]; warnings?: string[]; questions?: string[]}[]>([])
   const [profile, setProfile] = useState<Profile>(initialProfile ?? {})
   const [edited, setEdited] = useState<Profile>({})
   // User corrections made while a reply is pending take precedence over extraction.
@@ -55,8 +55,9 @@ export function EnergyAssistant({ editor, onChange, resultScenario, onComparePro
       })
       if (!active.current) return
       if (contextRef.current !== submittedKey) { setError('Scenario changed during the request. Please send again.'); return }
+      const bullets = response.summary_bullets ?? (response.next_step ? [response.next_step] : [])
       setConversation(submittedKey)
-      setHistory([...prior, { role: 'user', content: request }, { role: 'assistant', category: response.category, message: response.message, nextStep: response.next_step, warnings: response.warnings ?? [], questions: response.follow_up_questions ?? [], content: [response.message, response.next_step, ...(response.warnings ?? []), ...(response.follow_up_questions ?? [])].filter(Boolean).join('\n\n').slice(0, 3000) }].slice(-12) as typeof history)
+      setHistory([...prior, { role: 'user', content: request }, { role: 'assistant', category: response.category, message: response.message, bullets, warnings: response.warnings ?? [], questions: response.follow_up_questions ?? [], content: [response.message, ...bullets, ...(response.warnings ?? []), ...(response.follow_up_questions ?? [])].filter(Boolean).join('\n\n').slice(0, 3000) }].slice(-12) as typeof history)
       const nextProfile = {...response.profile, ...editedRef.current}
       setProfile(nextProfile)
       onProfileChange?.(nextProfile)
@@ -102,8 +103,8 @@ export function EnergyAssistant({ editor, onChange, resultScenario, onComparePro
     {!history.length && <div className="advisor-welcome"><h3>What would you like to explore?</h3><p>Start with a question or describe what matters to your business.</p></div>}
     <div className="advisor-history" role="log" aria-label="Energy advisor conversation" aria-live="polite" aria-busy={busy}>{history.map((turn, i) => <article className={`advisor-message ${turn.role} ${turn.category ?? ''}`} key={i}>
       <div className="advisor-message-heading"><strong>{turn.role === 'user' ? 'You' : 'Energy Advisor'}</strong>{turn.role === 'assistant' && <span>{turn.category === 'clarification_required' ? 'Clarification needed' : turn.category === 'scenario_proposal' ? 'Proposal · review required' : turn.category === 'unavailable_or_unsupported' ? 'Supported scope' : 'Scenario guidance'}</span>}</div>
-      <p>{turn.message ?? turn.content}</p>
-      {turn.nextStep && <section className="advisor-reply-section" aria-label="Suggested next step"><h4>Next step</h4><p>{turn.nextStep}</p></section>}
+      {turn.role === 'assistant' ? <div className="advisor-answer">{(turn.message ?? turn.content).split(/\n\s*\n/).filter(Boolean).map((paragraph, index) => <p key={index}>{paragraph}</p>)}</div> : <p>{turn.content}</p>}
+      {!!turn.bullets?.length && <ul className="advisor-summary" aria-label="Key takeaways">{turn.bullets.map((bullet, index) => <li key={index}>{bullet}</li>)}</ul>}
       {!!turn.warnings?.length && <section className="advisor-reply-section advisor-reply-notice" aria-label="Important information"><h4>Keep in mind</h4>{turn.warnings.map(warning => <p key={warning}>{warning}</p>)}</section>}
       {!!turn.questions?.length && <section className="advisor-reply-section" aria-label="Follow-up question"><h4>One question</h4><p>{turn.questions[0]}</p></section>}
     </article>)}</div>
