@@ -623,7 +623,7 @@ export function Dashboard({
                         <p role="status">Loading fixed demand chart…</p>
                       }
                     >
-                      <section className="panel">
+                      <section className="panel demand-preview">
                         <h2>Fixed building demand preview</h2>
                         <p>
                           Draft inputs only · excludes vehicle charging and
