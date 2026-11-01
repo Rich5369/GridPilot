@@ -1,0 +1,39 @@
+{
+  "checks": [
+    "Savings-first non-EV onboarding submits no daily solve; four primary sections",
+    "Real annual engine preserves missing rate/cost, negative and zero net savings",
+    "Real daily solve, chart/table, stale inputs, real proven infeasibility",
+    "Injected 503 preserves edited inputs",
+    "Legacy deep link refresh restores inputs; example opens checked result without replacing saved workspace",
+    "Example detail hashes preserve refresh and browser history",
+    "Browser back/forward and keyboard focus; preview refresh starts no solve or AI request",
+    "Planning-first flexible equipment without EVs completes a real daily solve",
+    "Controlled offline preview remains usable; failed explicit calculation clears snapshot rather than substituting it"
+  ],
+  "accessibility": [
+    {
+      "name": "goal-selection",
+      "violations": []
+    },
+    {
+      "name": "annual-result",
+      "violations": []
+    },
+    {
+      "name": "savings-mobile",
+      "violations": []
+    },
+    {
+      "name": "example",
+      "violations": []
+    }
+  ],
+  "errors": [],
+  "requests": [
+    "http://localhost:8000/api/optimize?scheduling_mode=joint",
+    "http://localhost:8000/api/optimize?scheduling_mode=joint",
+    "http://localhost:8000/api/optimize?scheduling_mode=joint",
+    "http://localhost:8000/api/optimize?scheduling_mode=joint",
+    "http://localhost:8000/api/optimize?scheduling_mode=joint"
+  ]
+}

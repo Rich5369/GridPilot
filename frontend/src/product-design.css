@@ -1460,3 +1460,29 @@ button:disabled {
 @media(max-width:600px){.savings-workspace .form-grid { grid-template-columns: minmax(0,1fr); }.savings-workspace > .panel, .savings-projects, .savings-context, .savings-applicability, .savings-conversation, .savings-card { padding: 18px; }.savings-values { grid-template-columns: minmax(0,1fr); }.savings-actions > button { width: 100%; }}
 .savings-values dd[data-value-state=unknown] { color: #b8cad6; font-size: 14px; }
 .savings-values dd[data-value-state=negative] { color: #f1c88f; }
+
+/* Focused task navigation and goal-led setup. */
+.plan-tabs { display: flex; flex-wrap: wrap; gap: .65rem; margin: 1rem 0; }
+.plan-tabs [aria-current="page"], .plan-tabs [aria-pressed="true"] { border-color: #52d9ba; color: #52d9ba; }
+.start-goal { margin: 1.5rem 0; padding: 1rem; border: 1px solid #324756; border-radius: 12px; }
+.start-goal legend { padding: 0 .5rem; font-weight: 650; }
+.start-goal label { display: grid; grid-template-columns: auto 1fr; gap: .5rem .8rem; padding: .85rem 0; cursor: pointer; }
+.start-goal input { grid-row: span 2; width: 20px; min-height: 20px; accent-color: #52d9ba; }
+.start-goal span { grid-column: 2; color: #aebcca; line-height: 1.6; }
+.overview-metrics { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1rem; margin: 1.25rem 0; }
+.overview-metrics h2 { font-size: 1rem; }
+.overview-metrics strong { font-size: 1.6rem; }
+.overview-next { margin-bottom: 1.25rem; }
+.chart[hidden] { display: none; }
+.topbar-actions { flex-wrap: wrap; }
+@media (max-width: 700px) { .overview-metrics { grid-template-columns: 1fr; } .plan-tabs > button { min-height: 44px; } }
+.overview-next, .overview-metrics > .panel, .overview-demand, .example-notice, .building-summary { padding: 24px; }
+.overview-next h2, .overview-demand h2, .example-notice h2 { margin-bottom: .65rem; font-size: 1.15rem; }
+.example-notice { margin-bottom: 1.5rem; }
+.example-notice details { margin: 1rem 0; }
+.example-notice pre { max-height: 400px; overflow: auto; }
+@media (max-width: 700px) {
+  .overview-next, .overview-metrics > .panel, .overview-demand, .example-notice, .building-summary { padding: 18px; }
+  .sidebar > nav[aria-label="Main navigation"] { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); overflow: visible; width: 100%; }
+  .sidebar nav button { min-height: 44px; white-space: normal; font-size: 13px; }
+}

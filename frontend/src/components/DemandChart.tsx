@@ -38,6 +38,7 @@ export function DemandChart({
   limit?: number
   title?: string
 }) {
+  const [presentation, setPresentation] = useState('chart')
   const [view, setView] = useState('total')
   const [hidden, setHidden] = useState<string[]>([])
   const breakdown = view === 'sources' && sources.length > 0
@@ -49,6 +50,10 @@ export function DemandChart({
   const rows = intervalRows(series).slice(0, 24)
   return (
     <>
+      <div className="plan-tabs" role="group" aria-label="Chart or table">
+        <button className="secondary" aria-pressed={presentation === 'chart'} onClick={() => setPresentation('chart')}>Chart</button>
+        <button className="secondary" aria-pressed={presentation === 'table'} onClick={() => setPresentation('table')}>Table</button>
+      </div>
       <div
         className="demand-chart-controls"
         role="group"
@@ -125,6 +130,7 @@ export function DemandChart({
         />
       )}
       <div
+        hidden={presentation !== 'chart'}
         className="chart"
         role="group"
         aria-label={`${title}. Demand in kilowatts; use arrow keys in the chart or read the hourly table below.`}
@@ -230,7 +236,7 @@ export function DemandChart({
           </ComposedChart>
         </ResponsiveContainer>
       </div>
-      <details className="hourly-table">
+      <details className="hourly-table" open={presentation === 'table'}>
         <summary>View all 24 hourly values</summary>
         <div className="table-scroll">
           <table>
@@ -241,6 +247,7 @@ export function DemandChart({
             <thead>
               <tr>
                 <th>Hour</th>
+                {limit !== undefined && <th>Site limit (kW)</th>}
                 {series.map((s) => (
                   <th key={s.key}>{s.label} (kW)</th>
                 ))}
@@ -250,6 +257,7 @@ export function DemandChart({
               {rows.slice(0, 24).map((row) => (
                 <tr key={row.hour}>
                   <th>{formatWindow(row.hour, row.hour + 1)}</th>
+                  {limit !== undefined && <td>{limit.toFixed(2)}</td>}
                   {series.map((s) => (
                     <td key={s.key}>{s.values[row.hour].toFixed(2)}</td>
                   ))}

@@ -21,8 +21,9 @@ export default function App() {
   const { route, navigate } = useWorkspaceNavigation();
   const [resumed, setResumed] = useState(() => record?.completed ?? false);
   const [session, setSession] = useState(0);
-  const [pending, setPending] = useState<"clear" | "demo" | null>(null);
-  const workspace = record?.workspace;
+  const [pending, setPending] = useState<"clear" | null>(null);
+  const preview = route === "example" || route.startsWith("example/");
+  const workspace = preview ? demoWorkspace() : record?.workspace;
   const [initialCalculation, setInitialCalculation] =
     useState<InitialCalculation | null>(null);
   const setupPending = useRef<object | null>(null);
@@ -105,7 +106,7 @@ export default function App() {
     } else setInitialCalculation(null);
     setRecord({ version: 1, workspace: value, step: 3, completed: true });
     setResumed(false);
-    navigate("overview");
+    navigate(value.startGoal === "savings" ? "savings" : "overview");
     window.scrollTo(0, 0);
   }
   function edit(editor?: ScenarioEditor, mode?: SchedulingMode) {
@@ -133,9 +134,6 @@ export default function App() {
       setInitialCalculation(null);
       setupPending.current = null;
       resetView();
-    } else if (pending === "demo") {
-      setupPending.current = null;
-      complete(demoWorkspace());
     }
     setPending(null);
   }
@@ -184,14 +182,10 @@ export default function App() {
       {pending && (
         <div className="workspace-confirm" role="alert">
           <p>
-            {pending === "clear"
-              ? "Clear the saved building and setup draft from this browser?"
-              : "Replace your saved workspace with a clearly labeled demonstration workspace?"}
+            Clear the saved building and setup draft from this browser?
           </p>
           <button type="button" className="secondary" onClick={confirm}>
-            {pending === "clear"
-              ? "Clear workspace"
-              : "Replace with demonstration"}
+            Clear workspace
           </button>
           <button
             type="button"
@@ -232,7 +226,7 @@ export default function App() {
         </main>
       </div>
     );
-  return !isDashboardRoute(route) || !workspace || !record?.completed ? (
+  return !preview && (!isDashboardRoute(route) || !workspace || !record?.completed) ? (
     <Setup
       key={`${session}:${route === "setup" ? "edit" : "entry"}`}
       initial={workspace}
@@ -245,7 +239,7 @@ export default function App() {
       }
       workspaceControls={controls}
       onDraftChange={saveDraft}
-      onComplete={(value) => complete(value, true)}
+      onComplete={(value) => complete(value, value.startGoal !== "savings")}
       onContinue={() => {
         setResumed(true);
         setInitialCalculation(null);
@@ -253,55 +247,54 @@ export default function App() {
         window.scrollTo(0, 0);
       }}
       onEdit={() => edit()}
-      onDemo={() => {
-        if (record) setPending("demo");
-        else complete(demoWorkspace());
-      }}
+      onDemo={() => navigate("example")}
     />
   ) : (
     <Dashboard
-      initialSavingsDraft={workspace.savingsDraft}
-      onSavingsDraftChange={saveSavingsDraft}
-      initialCalculation={initialCalculation}
+      key={preview ? "example" : "building"}
+      preview={preview}
+      initialSavingsDraft={workspace!.savingsDraft}
+      onSavingsDraftChange={preview ? undefined : saveSavingsDraft}
+      initialCalculation={preview ? null : initialCalculation}
       onInitialSettled={consumeInitial}
-      selectedView={route}
-      onNavigate={navigate}
-      initialEditor={workspace.editor}
-      initialMode={workspace.mode}
-      workspaceName={workspace.name}
-      workspaceControls={controls}
+      selectedView={preview && route.startsWith("example/") ? route.slice(8) as import("./services/navigation").DashboardView : isDashboardRoute(route) ? route : "overview"}
+      onNavigate={preview ? (next) => navigate(`example/${next}`) : navigate}
+      initialEditor={workspace!.editor}
+      initialMode={workspace!.mode}
+      workspaceName={workspace!.name}
+      workspaceControls={preview ? <span className="tag">Example snapshot · not your building</span> : controls}
       resumed={resumed}
-      onInputsChange={saveInputs}
-      onBusinessContextChange={saveBusinessContext}
+      onInputsChange={preview ? undefined : saveInputs}
+      onBusinessContextChange={preview ? undefined : saveBusinessContext}
       businessContextLabel={
-        workspace.businessContext
+        workspace!.businessContext
           ? status === "saved"
             ? "Saved in this browser"
             : "Current building context"
           : "From setup"
       }
       businessProfile={{
-        business_type: workspace.businessType,
-        equipment: workspace.editor.customEquipment
-          ? `${workspace.editor.customEquipment.name}: ${workspace.editor.customEquipment.description} (${workspace.editor.customEquipment.kind})`.slice(
+        business_type: workspace!.businessType,
+        equipment: workspace!.editor.customEquipment
+          ? `${workspace!.editor.customEquipment.name}: ${workspace!.editor.customEquipment.description} (${workspace!.editor.customEquipment.kind})`.slice(
               0,
               500,
             )
           : null,
         operating_hours: formatWindow(
-          workspace.editor.opening,
-          workspace.editor.closing,
+          workspace!.editor.opening,
+          workspace!.editor.closing,
         ),
         employee_count:
-          workspace.employees === "" ? null : Number(workspace.employees),
+          workspace!.employees === "" ? null : Number(workspace!.employees),
         electricity_cost_and_period:
-          workspace.monthlyBill === ""
+          workspace!.monthlyBill === ""
             ? null
-            : `USD ${workspace.monthlyBill} per month`,
-        goals: workspace.goals.join(", ") || null,
-        ...workspace.businessContext,
+            : `USD ${workspace!.monthlyBill} per month`,
+        goals: workspace!.goals.join(", ") || null,
+        ...workspace!.businessContext,
       }}
-      onSetup={edit}
+      onSetup={preview ? () => navigate("home") : edit}
     />
   );
 }

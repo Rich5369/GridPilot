@@ -18,7 +18,7 @@ vi.mock('../components/dashboard/Comparison', () => ({
     limit?: number
   }) => (
     <div data-testid="result" data-stale={stale} data-limit={limit}>
-      {result ? 'Backend result' : 'No optimization result yet'}
+      {result ? 'Backend result' : 'Choose your next step'}
     </div>
   ),
 }))
@@ -42,6 +42,7 @@ afterEach(async () => {
   fetchMock.mockReset()
 })
 async function click(label: string) {
+  if (['What-if comparisons', 'Results and equipment'].includes(label) && ![...container.querySelectorAll('button')].some(b => b.textContent === label)) await click('Energy plan')
   const b = [...container.querySelectorAll('button')].find(
     (b) => b.textContent === label,
   )!
@@ -69,8 +70,8 @@ async function input(id: string, value: string) {
 it('shows current draft inputs without fictional result metrics and validates edits', async () => {
   await act(async () => root.render(<Dashboard />))
   expect(container.textContent).not.toContain('128.8')
-  expect(container.textContent).toContain('No optimization result yet')
-  await click('Scenario configuration')
+  expect(container.textContent).toContain('Choose your next step')
+  await click('Energy plan')
   await input('limit', '12')
   expect(container.textContent).toContain('12 kW limit')
   await input('deadline', '6')
@@ -79,16 +80,16 @@ it('shows current draft inputs without fictional result metrics and validates ed
   ).toBe('true')
   expect(
     [...container.querySelectorAll('button')].find(
-      (b) => b.textContent === 'Run optimization',
+      (b) => b.textContent === 'Calculate energy plan',
     )!.disabled,
   ).toBe(true)
   await click('Reset to Default Scenario')
   expect(container.querySelector<HTMLInputElement>('#limit')!.value).toBe('25')
   await input('limit', '15')
-  await click('Energy overview')
+  await click('Overview')
   expect(container.textContent).not.toContain('128.8')
-  expect(container.textContent).toContain('No optimization result yet')
-  expect(container.textContent).toContain('15 kW')
+  expect(container.textContent).toContain('Choose your next step')
+  expect(container.textContent).toContain('Review energy inputs')
 })
 it('displays HTTP 501 clearly and never claims solver success', async () => {
   await act(async () => root.render(<Dashboard />))
@@ -97,11 +98,11 @@ it('displays HTTP 501 clearly and never claims solver success', async () => {
       status: 501,
     }),
   )
-  await click('Run optimization')
+  await click('Calculate energy plan')
   expect(container.textContent).toContain('No calculations were performed')
   expect(container.textContent).not.toContain('Backend result received')
-  expect(container.textContent).toContain('No optimization result yet')
-  await click('AI assistant')
+  expect(container.textContent).toContain('Your energy plan needs attention')
+  await click('Ask Energy Advisor')
   expect(container.textContent).toContain('No advisor reply yet')
 })
 
@@ -115,7 +116,7 @@ it('shows loading, prevents repeat submissions and recovers after failure', asyn
       }),
   )
   const run = [...container.querySelectorAll('button')].find(
-    (b) => b.textContent === 'Run optimization',
+    (b) => b.textContent === 'Calculate energy plan',
   )!
   await act(async () => {
     run.click()
@@ -134,7 +135,7 @@ it('shows loading, prevents repeat submissions and recovers after failure', asyn
   )
   expect(run.disabled).toBe(false)
   expect(container.textContent).toContain('timed out after 45 seconds')
-  expect(container.textContent).toContain('No optimization result yet')
+  expect(container.textContent).toContain('Your energy plan needs attention')
 })
 
 it('discards late results after a mode change and disables joint AI actions', async () => {
@@ -146,7 +147,7 @@ it('discards late results after a mode change and disables joint AI actions', as
         resolve = r
       }),
   )
-  await click('Run optimization')
+  await click('Calculate energy plan')
   const select = container.querySelector<HTMLSelectElement>('#analysis-choice')!
   await act(async () => {
     select.value = 'joint'
@@ -170,7 +171,7 @@ it('discards late results after a mode change and disables joint AI actions', as
   )
   expect(container.textContent).not.toContain('Backend result received')
   expect(container.textContent).not.toContain('Displayed result mode')
-  await click('AI assistant')
+  await click('Ask Energy Advisor')
   expect(container.textContent).toContain('GridPilot Energy Advisor')
 })
 
@@ -178,7 +179,7 @@ it.each([false, true])(
   'restores the AI handoff snapshot and isolates old responses (pending comparison: %s)',
   async (pendingComparison) => {
     await act(async () => root.render(<Dashboard />))
-    await click('What-if scenarios')
+    await click('What-if comparisons')
     await act(async () => {
       await import('../components/dashboard/WhatIf')
     })
@@ -194,9 +195,9 @@ it.each([false, true])(
       )
       await click('Compare both scenarios')
     }
-    await click('Scenario configuration')
+    await click('Energy plan')
     await input('limit', '20')
-    await click('AI assistant')
+    await click('Ask Energy Advisor')
     fetchMock.mockResolvedValueOnce(
       new Response(
         JSON.stringify({
@@ -239,13 +240,13 @@ it.each([false, true])(
       )
     }
     await click('Apply alternative to current')
-    await click('Scenario configuration')
+    await click('Energy plan')
     expect(container.querySelector<HTMLInputElement>('#limit')!.value).toBe(
       '15',
     )
-    await click('What-if scenarios')
+    await click('What-if comparisons')
     await click('Restore starting scenario')
-    await click('Scenario configuration')
+    await click('Energy plan')
     expect(container.querySelector<HTMLInputElement>('#limit')!.value).toBe(
       '20',
     )
@@ -260,9 +261,7 @@ it('guides configuration to results and labels demonstration inputs on overview'
   expect(
     container.querySelector('[aria-label="Energy planning workflow"]'),
   ).toBeTruthy()
-  expect(container.textContent).toContain(
-    'Fictional demonstration inputs; not meter data.',
-  )
+  expect(container.textContent).toContain('Evaluate an improvement')
   await click('1. Configure scenario')
   expect(container.querySelector('#limit')).toBeTruthy()
   expect(container.querySelector('.demo-banner')).toBeNull()
@@ -281,7 +280,7 @@ it('guides configuration to results and labels demonstration inputs on overview'
       }),
     ),
   )
-  await click('Run optimization')
+  await click('Calculate energy plan')
   expect(container.textContent).toContain(
     'Result available · Advanced: hold equipment at baseline (EV-only mode) · feasible',
   )
@@ -294,7 +293,7 @@ it('guides configuration to results and labels demonstration inputs on overview'
   await click('1. Configure scenario')
   await input('evEnergy', '19')
   expect(container.textContent).toContain(
-    'Inputs changed · Run optimization to update your results',
+    'Inputs changed · Calculate energy plan to update your results',
   )
   await click('3. Compare alternatives')
   expect(
@@ -314,7 +313,7 @@ async function selectProfile(value: string, prefix = 'current') {
 
 it('submits custom demand, marks edited results stale, validates and restores the demo profile', async () => {
   await act(async () => root.render(<Dashboard />))
-  await click('Scenario configuration')
+  await click('Energy plan')
   await selectProfile('custom')
   await input('current-fixed-demand-0', '0')
   await input('current-fixed-demand-10', '12.75')
@@ -335,7 +334,7 @@ it('submits custom demand, marks edited results stale, validates and restores th
       }),
     ),
   )
-  await click('Run optimization')
+  await click('Calculate energy plan')
   const call = fetchMock.mock.calls.find(([url]) =>
     String(url).includes('/api/optimize?'),
   )!
@@ -343,10 +342,11 @@ it('submits custom demand, marks edited results stale, validates and restores th
     ...toScenario(defaultEditor),
     fixed_demand_kw: expected,
   })
+  await click('Results and equipment')
   expect(container.textContent).toContain(
     'Optimizer-calculated result · Submitted inputs: User-configured',
   )
-  await click('Scenario configuration')
+  await click('Energy plan')
   await input('current-fixed-demand-1', '')
   expect(
     container
@@ -355,10 +355,10 @@ it('submits custom demand, marks edited results stale, validates and restores th
   ).toBe('true')
   expect(
     [...container.querySelectorAll('button')].find(
-      (b) => b.textContent === 'Run optimization',
+      (b) => b.textContent === 'Calculate energy plan',
     )!.disabled,
   ).toBe(true)
-  expect(container.textContent).toContain('Inputs changed · Run optimization')
+  expect(container.textContent).toContain('Inputs changed · Calculate energy plan')
   await input('current-fixed-demand-1', '2')
   await selectProfile('demo')
   expect(container.querySelector('#current-fixed-demand-0')).toBeNull()
@@ -376,36 +376,36 @@ it('submits custom demand, marks edited results stale, validates and restores th
 
 it('keeps hourly profile snapshots independent through What-if edit, apply and restore', async () => {
   await act(async () => root.render(<Dashboard />))
-  await click('Scenario configuration')
+  await click('Energy plan')
   await selectProfile('custom')
   await input('current-fixed-demand-10', '10')
-  await click('What-if scenarios')
+  await click('What-if comparisons')
   await click('Create alternative from current')
   expect(
     container.querySelector<HTMLInputElement>('#alternative-fixed-demand-10')!
       .value,
   ).toBe('10')
   await input('alternative-fixed-demand-10', '20')
-  await click('Scenario configuration')
+  await click('Energy plan')
   expect(
     container.querySelector<HTMLInputElement>('#current-fixed-demand-10')!
       .value,
   ).toBe('10')
   await input('current-fixed-demand-10', '12')
-  await click('What-if scenarios')
+  await click('What-if comparisons')
   expect(
     container.querySelector<HTMLInputElement>('#alternative-fixed-demand-10')!
       .value,
   ).toBe('20')
   await click('Apply alternative to current')
-  await click('Scenario configuration')
+  await click('Energy plan')
   expect(
     container.querySelector<HTMLInputElement>('#current-fixed-demand-10')!
       .value,
   ).toBe('20')
-  await click('What-if scenarios')
+  await click('What-if comparisons')
   await click('Restore starting scenario')
-  await click('Scenario configuration')
+  await click('Energy plan')
   expect(
     container.querySelector<HTMLInputElement>('#current-fixed-demand-10')!
       .value,
@@ -428,10 +428,10 @@ it('keeps submitted limits and provenance when the draft changes and returns res
       }),
     ),
   )
-  await click('Run optimization')
-  await click('Scenario configuration')
+  await click('Calculate energy plan')
+  await click('Energy plan')
   await input('limit', '10')
-  await click('Energy overview')
+  await click('Results and equipment')
   const result = container.querySelector('[data-testid="result"]')!
   expect(result.getAttribute('data-stale')).toBe('true')
   expect(result.getAttribute('data-limit')).toBe('25')
@@ -454,8 +454,8 @@ it('marks a late response stale if the draft was edited while the request was ru
         resolve = r
       }),
   )
-  await click('Run optimization')
-  await click('Scenario configuration')
+  await click('Calculate energy plan')
+  await click('Energy plan')
   await input('limit', '12')
   await act(async () =>
     resolve(
@@ -473,6 +473,7 @@ it('marks a late response stale if the draft was edited while the request was ru
       ),
     ),
   )
+  await click('Results and equipment')
   expect(
     container
       .querySelector('[data-testid="result"]')!
@@ -520,7 +521,7 @@ it.each(['custom', 'sources'])(
   'keeps all submitted %s profile entries independent of later draft edits',
   async (profile) => {
     await act(async () => root.render(<Dashboard />))
-    await click('Scenario configuration')
+    await click('Energy plan')
     await selectProfile(profile)
     if (profile === 'sources') await click('Add Lighting')
     const id =
@@ -543,10 +544,10 @@ it.each(['custom', 'sources'])(
         }),
       ),
     )
-    await click('Run optimization')
-    await click('Scenario configuration')
+    await click('Calculate energy plan')
+    await click('Energy plan')
     await input(`${id}0`, '9.5')
-    await click('Energy overview')
+    await click('Results and equipment')
     const snapshot = container.querySelector(
       '[aria-label="Submitted snapshot hourly fixed-demand inputs"]',
     )!
@@ -592,16 +593,17 @@ it('keeps insights on submitted prices and cap across stale edits and clears on 
       }),
     ),
   )
-  await click('Run optimization')
+  await click('Calculate energy plan')
+  await click('Results and equipment')
   const panel = () =>
     container.querySelector('[aria-label="Deterministic energy insights"]')!
   expect(panel().textContent).toContain('Optimized expenditure')
   expect(panel().textContent).toContain('8.0% of the submitted 25 kW cap')
   const before = panel().querySelector('.insight-periods')!.textContent
-  await click('Scenario configuration')
+  await click('Energy plan')
   await input('peak', '0.99')
   await input('limit', '10')
-  await click('Energy overview')
+  await click('Results and equipment')
   expect(panel().textContent).toContain('previous submitted inputs')
   expect(panel().textContent).toContain('8.0% of the submitted 25 kW cap')
   expect(panel().querySelector('.insight-periods')!.textContent).toBe(before)

@@ -14,3 +14,12 @@ it.each(["", "#home", "#unknown", "#how-it-works", "#the-model"])(
 );
 it("recognizes explicit setup without a new server route", () =>
   expect(parseRoute("#setup")).toBe("setup"));
+it('supports new primary aliases and the isolated offline example', () => {
+  expect(parseRoute('#energy-plan')).toBe('configuration')
+  expect(parseRoute('#my-building')).toBe('building')
+  expect(parseRoute('#example')).toBe('example')
+})
+
+it.each(dashboardViews)('preserves example subview %s for refresh and history', view => {
+  expect(parseRoute('#example/' + view)).toBe('example/' + view)
+})
