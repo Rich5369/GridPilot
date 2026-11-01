@@ -138,7 +138,8 @@ class Recommendation(Contract):
         description='Gross annual energy-charge savings plus supplied recurring non-energy savings minus explicit annual incremental expenses. Null when required energy, rate or expense evidence is missing.')
     upfront_cost_usd: float | None = Field(default=None, allow_inf_nan=False)
     simple_payback_years: float | None = Field(default=None, allow_inf_nan=False)
-    annual_simple_roi_percent: float | None = Field(default=None, allow_inf_nan=False)
+    annual_simple_roi_percent: float | None = Field(default=None, allow_inf_nan=False,
+        description='Annual net savings / positive upfront cost * 100. Null when required inputs are unknown, upfront cost is zero, or the calculated ROI cannot be represented as a finite API number; numerical-range nulls include a warning. No ROI cap is substituted.')
     confidence: str
     provenance: dict
     inputs_used: dict
@@ -148,7 +149,7 @@ class Recommendation(Contract):
     sources: list[str]
     next_action: str
     warnings: list[str] = Field(default_factory=list,
-        description='Nonblocking input-plausibility and evidence limitations. No numerical corrections or independent verification implied.')
+        description='Nonblocking input-plausibility, evidence and numerical-representation limitations. No numerical corrections or independent verification implied.')
     priority_group: Literal['financial', 'energy_only', 'investigation', 'not_applicable'] = 'investigation'
     priority_reason: str = ''
 
