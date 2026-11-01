@@ -749,6 +749,13 @@ button:disabled {
 .nav-item {
   border: 1px solid transparent;
 }
+.sidebar nav button svg {
+  color: var(--gp-text);
+  stroke-width: 2.25;
+}
+.sidebar nav .nav-active svg {
+  color: var(--gp-primary-hover);
+}
 .nav-item:hover {
   color: var(--gp-text);
   background: var(--gp-surface);
