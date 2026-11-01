@@ -595,7 +595,8 @@ input:focus-visible, summary:focus-visible { outline: 3px solid var(--gp-line); 
 .scenario-strip button { color: var(--gp-text); margin-left: auto; font-weight: 600; }
 .content-grid { grid-template-columns: minmax(0, 2fr) minmax(280px, 1fr); align-items: start; }
 .chart { height: 320px; }
-.cost-panel, .configuration, .comparison, .assistant { padding: 24px; }
+.cost-panel, .configuration, .comparison, .assistant, .what-if, .demand-preview { padding: 24px; }
+.demand-preview { margin-top: 20px; }
 .cost-panel > .muted, .configuration > .muted, .assistant > .muted, .comparison > .muted { font-size: 12px; line-height: 1.8; margin: 10px 0 20px; }
 .cost-list { margin: 24px 0 16px; font-size: 12px; }
 .cost-list > div { display: flex; justify-content: space-between; gap: 14px; padding: 13px 0; border-bottom: 1px solid var(--gp-line); }
@@ -647,7 +648,7 @@ legend { font-size: 13px; font-weight: 650; padding: 0 8px; }
   .scenario-strip { gap: 10px 20px; }
   .scenario-strip button { margin-left: 0; }
   .form-grid { grid-template-columns: 1fr; }
-  .configuration, .comparison, .assistant, .cost-panel { padding: 20px 16px; }
+  .configuration, .comparison, .assistant, .cost-panel, .what-if, .demand-preview { padding: 20px 16px; }
   .configuration .section-heading { flex-direction: column; gap: 16px; }
   .chart { height: 310px; }
   .empty-metrics, .comparison-metrics { grid-template-columns: 1fr; }
