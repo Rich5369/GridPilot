@@ -1,0 +1,116 @@
+{
+  "source": "Chromium, local Vite and real FastAPI; one injected Advisor reply, no live AI",
+  "checks": [
+    "Three metrics and one chart preserved; graph begins at 760px in 1440×1000 viewport",
+    "Cost exclusions and hourly/precision assumptions remain accessible; overlapping lines, table and actual values preserved",
+    "Advisor opens without a request, uses current result/business context, retains conversation/composer, closes to prior view with keyboard focus; stale warnings remain visible",
+    "Real backend infeasibility remains visible and distinct from failures",
+    "What-if calculates both actual backend scenarios",
+    "Savings Engine still calculates annual LED example; Advisor returns to Savings",
+    "Logo home navigation preserves exact saved data, Back/Forward and returning Get started; no Home button remains"
+  ],
+  "accessibility": [
+    {
+      "name": "empty",
+      "violations": []
+    },
+    {
+      "name": "ready",
+      "violations": []
+    },
+    {
+      "name": "mobile-ready",
+      "violations": []
+    },
+    {
+      "name": "mobile-stale",
+      "violations": []
+    },
+    {
+      "name": "mobile-advisor",
+      "violations": []
+    },
+    {
+      "name": "infeasible",
+      "violations": []
+    }
+  ],
+  "errors": [],
+  "advisorRequests": [
+    {
+      "request": "How should this café review peak demand?",
+      "history": [],
+      "profile": {
+        "business_type": "Hospitality",
+        "equipment": null,
+        "operating_hours": "8:00 AM–6:00 PM (end excluded)",
+        "employee_count": null,
+        "electricity_cost_and_period": null,
+        "goals": "Reduce energy costs, Manage peak demand"
+      },
+      "scenario": {
+        "operating_hours": {
+          "start_hour": 8,
+          "end_hour": 18
+        },
+        "building_max_demand_kw": 25,
+        "fixed_demand_kw": [
+          1.5,
+          1.5,
+          1.5,
+          1.5,
+          1.5,
+          1.5,
+          2.5,
+          3.5,
+          5.5,
+          6.5,
+          6.5,
+          7.5,
+          7.5,
+          7.5,
+          7.5,
+          6.5,
+          6.5,
+          5.5,
+          3.5,
+          2.5,
+          1.5,
+          1.5,
+          1.5,
+          1.5
+        ],
+        "electricity_prices_usd_per_kwh": [
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.28,
+          0.28,
+          0.28,
+          0.28,
+          0.28,
+          0.28,
+          0.12,
+          0.12,
+          0.12,
+          0.12
+        ],
+        "ev_requirements": [],
+        "flexible_equipment": []
+      },
+      "scheduling_mode": "joint",
+      "result_id": "ea17c9713ad74a4389807cea655e40d0"
+    }
+  ]
+}

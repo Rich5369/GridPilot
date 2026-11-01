@@ -31,3 +31,12 @@ it('shows the submitted site limit, zero and negative differences honestly and g
   result.operating_plan!.baseline_constraint_violations = ['Baseline exceeds limit']
   expect(render({result, scenario:example.scenario})).toContain('Comparison unavailable')
 })
+it('keeps ready-plan limitations in a closed disclosure and removes the duplicate Advisor control', () => {
+  const html = render({result:example.result as OptimizationResult, scenario:example.scenario})
+  expect(html).toContain('Your energy plan')
+  expect(html).toContain('<details class="calculation-details"><summary>Calculation details</summary>')
+  expect(html).toContain('Fixed and demand charges are excluded')
+  expect(html).not.toContain('Explain this result')
+  expect(html).not.toContain('<p role="status">')
+  expect(html).toContain('Power usage throughout the day (kW)')
+})

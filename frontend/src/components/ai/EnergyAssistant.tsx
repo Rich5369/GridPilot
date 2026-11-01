@@ -89,7 +89,7 @@ export function EnergyAssistant({ editor, onChange, resultScenario, onComparePro
   }
   const stale = snapshot !== JSON.stringify(editor) || JSON.stringify(draftScenario) !== JSON.stringify(resultScenario ?? draftScenario) || conversation !== contextKey
   return <section className="panel assistant advisor">
-    <header className="advisor-header"><div><span className="advisor-eyebrow">ENERGY INTELLIGENCE</span><h2>GridPilot Energy Advisor</h2><p>Understand your energy use. Review your next move.</p></div><span className="tag" role="status">{source}</span></header>
+    <header className="advisor-header"><h2 className="sr-only">GridPilot Energy Advisor</h2><span className="tag" role="status">{source}</span></header>
     <p className="advisor-boundary">Guidance and proposals for your submitted scenario. Only the optimizer calculates outcomes.</p>
     <section className="advisor-context" aria-labelledby="business-context-heading">
       <div className="section-heading"><h3 id="business-context-heading">Business context</h3><span className="advisor-caption">Building context · conversations stay in this session</span></div>
