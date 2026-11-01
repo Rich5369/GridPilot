@@ -1,5 +1,5 @@
 import { Zap } from 'lucide-react'
-import dashboardPreview from '../assets/dashboard-preview.png'
+import './landing.css'
 
 function Header() {
   return <header className="site-header welcome-header">
@@ -8,16 +8,36 @@ function Header() {
   </header>
 }
 export function Landing() {
-  return <div className="welcome-page">
+  const steps = [
+    ['Tell us about your building', 'Share basic details such as business type and operating hours.'],
+    ['Explore your opportunities', 'Review relevant energy recommendations or configure a daily energy plan.'],
+    ['Review your results', 'Understand modeled costs, possible improvements, and next steps.'],
+  ]
+  return <div className="welcome-page landing-page">
     <a className="skip-link" href="#welcome-main">Skip to main content</a>
     <Header />
-    <main id="welcome-main" className="welcome-main">
-      <div className="welcome-copy">
-        <h1>Smarter energy decisions for your building.</h1>
-        <p>Understand your energy use, discover ways to reduce costs, and plan around your business operations.</p>
-        <div className="welcome-actions"><a className="run-button" href="#setup">Get started</a><a className="secondary" href="#learn-more">Learn more</a></div>
-      </div>
-      <figure className="welcome-preview"><img src={dashboardPreview} alt="GridPilot hourly building demand chart, showing baseline and optimized demand for the verified synthetic example" width="760" height="700" /><figcaption>Illustrative example · synthetic building inputs</figcaption></figure>
+    <main id="welcome-main" className="landing-main">
+      <section className="landing-hero" aria-labelledby="landing-title">
+        <div className="welcome-copy landing-copy">
+          <h1 id="landing-title">Smarter energy decisions for your building.</h1>
+          <p>Understand your energy use, explore ways to lower costs, and plan around your business operations.</p>
+          <div className="welcome-actions">
+            <a className="run-button" href="#setup">Get started</a>
+            <a className="secondary" href="#learn-more">Learn more</a>
+          </div>
+        </div>
+        {/* The exact supplied powerline photograph is missing from the attachments.
+            Leave this column empty until the original is available; do not substitute imagery. */}
+      </section>
+      <section className="landing-steps" aria-labelledby="landing-steps-title">
+        <h2 id="landing-steps-title">Get started in 3 simple steps</h2>
+        <ol>
+          {steps.map(([title, description], index) => <li key={title}>
+            <span className="landing-step-number" aria-hidden="true">{index + 1}</span>
+            <div><h3>{title}</h3><p>{description}</p></div>
+          </li>)}
+        </ol>
+      </section>
     </main>
   </div>
 }

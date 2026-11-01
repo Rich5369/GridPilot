@@ -1,0 +1,23 @@
+{
+  "status": "partial: required reference images unavailable",
+  "photo": "No photograph supplied, generated or substituted; final image crop and reference comparison remain unverified.",
+  "checks": [
+    "Entire landing and three steps visible without scrolling at 1366×768",
+    "Entire landing and three steps visible without scrolling at 1440×900",
+    "Entire landing and three steps visible without scrolling at 1920×1080",
+    "Mobile stacks steps and allows scrolling; enlarged text at 320×480 remains accessible",
+    "Both CTA routes, Learn more home action, setup validation and logo navigation preserve exact saved draft",
+    "Existing example dashboard, Advisor return and Energy plan remain functional without replacing saved draft"
+  ],
+  "accessibility": [
+    {
+      "name": "desktop",
+      "violations": []
+    },
+    {
+      "name": "mobile",
+      "violations": []
+    }
+  ],
+  "errors": []
+}
