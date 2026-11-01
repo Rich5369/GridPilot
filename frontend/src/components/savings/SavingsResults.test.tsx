@@ -56,9 +56,9 @@ it("renders exact returned annual fields with units and provenance, without muta
       "42.79 % per year",
     );
     expect(card.textContent).toContain("Synthetic example");
-    expect(host.textContent).toContain("No Meta selection was requested");
+    expect(host.textContent).toContain("These are general suggestions");
     expect(host.textContent).toContain(
-      "Portfolio savings are intentionally withheld",
+      "Savings may overlap",
     );
     expect(r).toEqual(before);
   } finally {
@@ -128,7 +128,7 @@ it.each(["meta", "deterministic_fallback"] as const)(
       expect(host.querySelector(".savings-selection")!.textContent).toContain(
         source === "meta"
           ? "AI-assisted category selection"
-          : "AI selection unavailable · deterministic fallback",
+          : "AI unavailable · standard guidance",
       );
       expect(host.querySelector(".savings-general")!.textContent).toContain(
         "not selected",

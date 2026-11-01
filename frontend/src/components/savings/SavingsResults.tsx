@@ -13,7 +13,7 @@ const number = (v: number | null, unit: string, precision = 2) =>
 const usd = (v: number | null, period: string) =>
   v === null ? "Unknown — more information needed" : `${money(v)} ${period}`;
 const statuses = {
-  quantified: "Calculated · caller-reported measurements",
+  quantified: "Calculated · reported measurements",
   scenario_estimate: "Calculated · scenario estimate",
   needs_data: "Needs evidence · investigation only",
   not_applicable: "Excluded · not applicable",
@@ -59,7 +59,7 @@ function RecommendationCard({
       <div className="section-heading">
         <div>
           <p className="eyebrow">
-            ENGINE ORDER {rank} · {priorities[r.priority_group]}
+            Priority {rank} · {priorities[r.priority_group]}
           </p>
           <h3>{r.title}</h3>
           <p className="savings-project-id">Project: {r.id}</p>
@@ -195,11 +195,6 @@ function RecommendationCard({
           </dd>
         </div>
       </dl>
-      <p className="field-hint">
-        Net annual savings include documented recurring non-energy benefits when
-        supplied, less explicit incremental expenses. Financial evidence remains
-        caller-attributed; these values come from the backend.
-      </p>
       {!!r.warnings?.length && (
         <section
           className="savings-warning"
@@ -239,6 +234,7 @@ function RecommendationCard({
       )}
       <details className="savings-evidence">
         <summary>How this was calculated</summary>
+        <p>Net annual savings include documented recurring non-energy benefits when supplied, less additional annual expenses.</p>
         <h4>Inputs used (submitted values and units)</h4>
         <pre>{JSON.stringify(r.inputs_used, null, 2)}</pre>
         <h4>Evidence provenance</h4>
@@ -346,17 +342,11 @@ export function SavingsResults({
         </p>
       )}
       <p className="savings-no-total">
-        Standalone annual estimates — do not add these measures. Portfolio
-        savings are intentionally withheld. These are separate from daily
-        optimizer comparisons.
+        Modeled annual estimates — do not add these improvements together. Savings may overlap.
       </p>
       {!!globalWarnings.length && (
         <div className="savings-warning" role="note">
-          <h3>Calculation-engine warnings and overlap</h3>
-          <p>
-            These describe the deterministic calculation stage. Optional AI
-            category selection is labeled separately.
-          </p>
+          <h3>Important warnings and overlapping estimates</h3>
           <ul>
             {globalWarnings.map((w, i) => (
               <li key={i}>{w}</li>
@@ -369,12 +359,11 @@ export function SavingsResults({
           <h3>
             {conversation.source === "meta"
               ? "AI-assisted category selection"
-              : "AI selection unavailable · deterministic fallback"}
+              : "AI unavailable · standard guidance"}
           </h3>
           <p>{conversation.message}</p>
           <p>
-            Numerical results come from the deterministic calculation engine.
-            Category selection does not verify measurements or investment value.
+            AI suggestions do not verify measurements or guarantee savings.
           </p>
           <p>
             <strong>
@@ -407,10 +396,6 @@ export function SavingsResults({
         </section>
       )}
       <h2>Your submitted projects</h2>
-      <p>
-        Ordered by the backend’s priority and explanation. Each project keeps
-        its own identity, even within the same category.
-      </p>
       {projects.length ? (
         <div className="savings-card-grid">{cards(projects)}</div>
       ) : (
@@ -431,8 +416,8 @@ export function SavingsResults({
         </summary>
         <p>
           {conversation
-            ? "These categories were not selected for this submitted conversation."
-            : "No Meta selection was requested. Catalog guidance is not personalized investment advice."}{" "}
+            ? "These suggestions were not selected for your request."
+            : "These are general suggestions, not personalized investment advice."}{" "}
           Confirm relevance and provide evidence before estimating savings.
         </p>
         {general.map((r) => (
@@ -464,10 +449,7 @@ export function SavingsResults({
             Review exclusions · {excluded.length} not applicable
           </summary>
           <p>
-            These are excluded by submitted caller confirmations or the backend
-            response. Category-wide confirmations are sent only to the
-            conversation endpoint; the deterministic response remains unchanged
-            below.
+            These improvements do not apply based on your answers or the calculation results.
           </p>
           <div className="savings-card-grid">{cards(excluded)}</div>
         </details>
