@@ -1,3 +1,4 @@
+import type { SavingsDraft } from '../types/savings'
 import { exportEvidence } from '../services/exportEvidence'
 import { AnalysisSelect } from '../components/configuration/AnalysisSelect'
 import { analysisLabel, effectiveMode } from '../data/analysisOptions'
@@ -51,6 +52,11 @@ import {
 import type { DashboardView } from '../services/navigation'
 import type { ScenarioEditor } from '../types/dashboard'
 import type { Scenario, OptimizationResult } from '../types/api'
+const SavingsOpportunities = lazy(() =>
+  import('../components/savings/SavingsOpportunities').then((m) => ({
+    default: m.SavingsOpportunities,
+  })),
+)
 const DemandChart = lazy(() =>
   import('../components/DemandChart').then((module) => ({
     default: module.DemandChart,
@@ -71,6 +77,7 @@ const views = [
     label: 'Scenario configuration',
     icon: SlidersHorizontal,
   },
+  { id: 'savings', label: 'Savings opportunities', icon: Sparkles },
   { id: 'comparison', label: 'Optimization', icon: GitCompareArrows },
   { id: 'whatif', label: 'What-if scenarios', icon: GitCompareArrows },
   { id: 'assistant', label: 'AI assistant', icon: Sparkles },
@@ -89,9 +96,13 @@ export function Dashboard({
   selectedView,
   onNavigate,
   initialCalculation,
+  initialSavingsDraft,
+  onSavingsDraftChange,
   onInitialSettled,
   resumed = false,
 }: {
+  initialSavingsDraft?: SavingsDraft
+  onSavingsDraftChange?: (draft: SavingsDraft) => void
   initialCalculation?: InitialCalculation | null
   onInitialSettled?: () => void
   selectedView?: DashboardView
@@ -301,7 +312,7 @@ export function Dashboard({
           </div>
         </header>
         <main id="workspace-main" tabIndex={-1}>
-          {resumed && !result && (
+          {view !== 'savings' && resumed && !result && (
             <p className="workspace-result-notice" role="status">
               Building inputs restored. No optimizer result has been restored.
               Run optimization explicitly to calculate a new schedule.
@@ -320,99 +331,117 @@ export function Dashboard({
                 Clearer insights. Smarter scheduling.
               </p>
             </div>
-            <button
-              className="run-button"
-              onClick={runOptimization}
-              disabled={busy || invalid}
-              aria-busy={busy}
-              aria-describedby="optimization-help"
-            >
-              <Zap size={17} />
-              {busy ? 'Requesting optimization…' : 'Run optimization'}
-            </button>
+            {view !== 'savings' && (
+              <button
+                className="run-button"
+                onClick={runOptimization}
+                disabled={busy || invalid}
+                aria-busy={busy}
+                aria-describedby="optimization-help"
+              >
+                <Zap size={17} />
+                {busy ? 'Requesting optimization…' : 'Run optimization'}
+              </button>
+            )}
           </div>
-          <section className="workflow" aria-label="Energy planning workflow">
-            <div
-              className={`workflow-status ${stale ? 'is-stale' : ''}`}
-              role="status"
-            >
-              {busy
-                ? 'Calculating your submitted scenario…'
-                : !result
-                  ? 'Ready to configure · No backend result yet'
-                  : stale
-                    ? 'Inputs changed · Run optimization to update your results'
-                    : `Result available · ${analysisLabel(submittedEditor ?? editor, resultMode)} · ${result.feasibility_status}`}
-            </div>
-            <div className="workflow-actions">
-              <button
-                className="secondary"
-                onClick={() => setView('configuration')}
+          <div hidden={view === 'savings'}>
+            <section className="workflow" aria-label="Energy planning workflow">
+              <div
+                className={`workflow-status ${stale ? 'is-stale' : ''}`}
+                role="status"
               >
-                1. Configure scenario
-              </button>
-              <button
-                className="secondary"
-                onClick={() => setView('comparison')}
-              >
-                2. Review results
-              </button>
-              <button
-                className="secondary"
-                onClick={() => {
-                  setView('whatif')
+                {busy
+                  ? 'Calculating your submitted scenario…'
+                  : !result
+                    ? 'Ready to configure · No backend result yet'
+                    : stale
+                      ? 'Inputs changed · Run optimization to update your results'
+                      : `Result available · ${analysisLabel(submittedEditor ?? editor, resultMode)} · ${result.feasibility_status}`}
+              </div>
+              <div className="workflow-actions">
+                <button
+                  className="secondary"
+                  onClick={() => setView('configuration')}
+                >
+                  1. Configure scenario
+                </button>
+                <button
+                  className="secondary"
+                  onClick={() => setView('comparison')}
+                >
+                  2. Review results
+                </button>
+                <button
+                  className="secondary"
+                  onClick={() => {
+                    setView('whatif')
+                  }}
+                >
+                  3. Compare alternatives
+                </button>
+              </div>
+            </section>
+            <div className="mode-control field">
+              <AnalysisSelect
+                describedBy="scheduling-assumptions-label"
+                editor={editor}
+                mode={mode}
+                onChange={(next, nextMode) => {
+                  modeVersion.current += 1
+                  setModeRevision(modeVersion.current)
+                  setMode(nextMode)
+                  setEditorState(next)
+                  onInputsChange?.(next, nextMode)
+                  setResult(null)
+                  setResultScenario(null)
+                  setMessage('Analysis changed. Run again for new results.')
                 }}
+              />
+              <details className="mode-explanation">
+                <summary id="scheduling-assumptions-label">
+                  Scheduling assumptions · {analysisLabel(editor, mode)}
+                </summary>
+                <p>
+                  {mode === 'ev_only'
+                    ? 'Moves EV charging within arrival and completion times. Equipment and fixed building demand stay unchanged.'
+                    : 'Moves EV charging and eligible equipment within their allowed windows. Flexible equipment is modeled as interruptible and continuously adjustable: it can pause and vary power. Uninterrupted machine cycles are not modeled. Fixed building demand stays unchanged.'}
+                </p>
+              </details>
+            </div>
+            <p id="optimization-help" className="action-help">
+              {busy
+                ? `Optimization is running. This request can take up to ${OPTIMIZATION_TIMEOUT_MS / 1000} seconds. Please wait.`
+                : invalid
+                  ? 'Correct the scenario validation errors before submitting.'
+                  : 'Runs the current scenario on the backend. Results estimate one day of energy charges, excluding fixed and demand charges.'}
+            </p>
+            {message && (
+              <div
+                className={
+                  message ===
+                  'Backend result received for the submitted scenario.'
+                    ? 'sr-only'
+                    : 'request-message'
+                }
+                role="status"
               >
-                3. Compare alternatives
-              </button>
-            </div>
-          </section>
-          <div className="mode-control field">
-            <AnalysisSelect
-              describedBy="scheduling-assumptions-label"
-              editor={editor}
-              mode={mode}
-              onChange={(next, nextMode) => {
-                modeVersion.current += 1
-                setModeRevision(modeVersion.current)
-                setMode(nextMode)
-                setEditorState(next)
-                onInputsChange?.(next, nextMode)
-                setResult(null)
-                setResultScenario(null)
-                setMessage('Analysis changed. Run again for new results.')
-              }}
-            />
-            <details className="mode-explanation">
-              <summary id="scheduling-assumptions-label">
-                Scheduling assumptions · {analysisLabel(editor, mode)}
-              </summary>
-              <p>
-                {mode === 'ev_only'
-                  ? 'Moves EV charging within arrival and completion times. Equipment and fixed building demand stay unchanged.'
-                  : 'Moves EV charging and eligible equipment within their allowed windows. Flexible equipment is modeled as interruptible and continuously adjustable: it can pause and vary power. Uninterrupted machine cycles are not modeled. Fixed building demand stays unchanged.'}
-              </p>
-            </details>
+                {message}
+              </div>
+            )}
           </div>
-          <p id="optimization-help" className="action-help">
-            {busy
-              ? `Optimization is running. This request can take up to ${OPTIMIZATION_TIMEOUT_MS / 1000} seconds. Please wait.`
-              : invalid
-                ? 'Correct the scenario validation errors before submitting.'
-                : 'Runs the current scenario on the backend. Results estimate one day of energy charges, excluding fixed and demand charges.'}
-          </p>
-          {message && (
-            <div
-              className={
-                message ===
-                'Backend result received for the submitted scenario.'
-                  ? 'sr-only'
-                  : 'request-message'
-              }
-              role="status"
+          {view === 'savings' && (
+            <Suspense
+              fallback={<p role="status">Loading savings workspace…</p>}
             >
-              {message}
-            </div>
+              <SavingsOpportunities
+                workspaceName={workspaceName}
+                businessProfile={businessProfile}
+                onProfileChange={onBusinessContextChange}
+                initialDraft={initialSavingsDraft}
+                onDraftChange={onSavingsDraftChange}
+                onScheduling={() => setView('configuration')}
+              />
+            </Suspense>
           )}
           {view === 'overview' && (
             <CommandMetrics

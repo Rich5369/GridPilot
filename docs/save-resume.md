@@ -8,6 +8,9 @@ This feature is for review; it does not change main or production settings.
 See the [business-analysis follow-up](business-analysis-dashboard.md) for additive
 analysis-choice/custom-equipment drafts and the new explicit calculate action.
 Browser return continues to restore inputs without automatically solving.
+The [Savings opportunities follow-up](savings-frontend-integration.md) adds an
+optional validated savings input draft; annual responses and conversation history
+are not saved or automatically replayed.
 
 ## Retained inputs
 

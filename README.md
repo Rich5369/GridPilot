@@ -4,8 +4,10 @@ GridPilot is a commercial electricity cost advisor. Its deterministic business
 savings backend calculates supported annual energy and financial scenarios from
 explicit evidence; Meta selects investigation categories, while calculators
 remain authoritative. The [savings integration guide](docs/meta-savings-integration.md)
-is the canonical backend handoff. The frontend savings journey and genuine
-post-PR #51 production Meta acceptance remain release gates.
+is the canonical backend handoff. The [Savings opportunities frontend](docs/savings-frontend-integration.md)
+now provides typed evidence forms, annual recommendation cards and explicit optional
+AI selection, with local browser-to-backend verification. Hosted acceptance and
+genuine production Meta acceptance remain release gates.
 
 GridPilot also plans one day of commercial-building electricity demand using a
 deterministic baseline simulator, OR-Tools GLOP optimizer, FastAPI and a React

@@ -1,0 +1,426 @@
+{
+  "version": "1",
+  "categories": [
+    {
+      "category": "benchmark",
+      "title": "Commercial electricity benchmark",
+      "eligibility": "Any U.S. commercial business",
+      "business_types": [
+        "commercial; equipment evidence determines applicability"
+      ],
+      "required_inputs": [
+        "state"
+      ],
+      "optional_inputs": [
+        "rate",
+        "installation_cost_usd",
+        "annual_incremental_cost_usd"
+      ],
+      "calculation_method": "Investigation only in v1",
+      "sources": [
+        "https://www.eia.gov/electricity/monthly/epm_table_grapher.php?t=epmt_5_6_a"
+      ],
+      "data_quality_requirements": "Document source, units, equivalent service and baseline period; no nameplate-only consumption claims.",
+      "implementation_complexity": "low",
+      "numerical_savings_supported": false
+    },
+    {
+      "category": "tariff_comparison",
+      "title": "Compare eligible utility plans",
+      "eligibility": "Business with eligible alternative plans",
+      "business_types": [
+        "commercial; equipment evidence determines applicability"
+      ],
+      "required_inputs": [
+        "verified current and alternative tariffs",
+        "effective dates",
+        "utility eligibility",
+        "interval kWh and demand",
+        "seasonal, fixed, minimum and ratchet rules"
+      ],
+      "optional_inputs": [
+        "rate",
+        "installation_cost_usd",
+        "annual_incremental_cost_usd"
+      ],
+      "calculation_method": "Investigation only in v1",
+      "sources": [
+        "https://apps.openei.org/services/doc/rest/util_rates/"
+      ],
+      "data_quality_requirements": "Document source, units, equivalent service and baseline period; no nameplate-only consumption claims.",
+      "implementation_complexity": "high",
+      "numerical_savings_supported": false
+    },
+    {
+      "category": "led",
+      "title": "LED lighting replacement",
+      "eligibility": "Existing lighting with an equivalent replacement",
+      "business_types": [
+        "commercial; equipment evidence determines applicability"
+      ],
+      "required_inputs": [
+        "fixture_count",
+        "old_watts",
+        "new_watts",
+        "hours_per_day",
+        "days_per_year",
+        "equivalent_service_confirmed"
+      ],
+      "optional_inputs": [
+        "rate",
+        "installation_cost_usd",
+        "annual_incremental_cost_usd"
+      ],
+      "calculation_method": "fixture_count * (old_watts - new_watts) / 1000 * hours_per_day * days_per_year",
+      "sources": [
+        "https://www.energy.gov/energysaver/led-lighting"
+      ],
+      "data_quality_requirements": "Document source, units, equivalent service and baseline period; no nameplate-only consumption claims.",
+      "implementation_complexity": "medium",
+      "numerical_savings_supported": true
+    },
+    {
+      "category": "lighting_controls",
+      "title": "Lighting occupancy controls",
+      "eligibility": "Lighting operating in unoccupied spaces",
+      "business_types": [
+        "commercial; equipment evidence determines applicability"
+      ],
+      "required_inputs": [
+        "connected_load_kw",
+        "existing_hours_per_day",
+        "avoidable_hours_per_day",
+        "days_per_year",
+        "safe_to_switch_off",
+        "essential_service"
+      ],
+      "optional_inputs": [
+        "rate",
+        "installation_cost_usd",
+        "annual_incremental_cost_usd"
+      ],
+      "calculation_method": "connected_load_kw * avoidable_hours_per_day * days_per_year",
+      "sources": [
+        "https://www.energy.gov/femp/energy-efficient-products-and-energy-saving-technologies"
+      ],
+      "data_quality_requirements": "Document source, units, equivalent service and baseline period; no nameplate-only consumption claims.",
+      "implementation_complexity": "medium",
+      "numerical_savings_supported": true
+    },
+    {
+      "category": "shutdown",
+      "title": "After-hours equipment shutdown",
+      "eligibility": "Nonessential equipment running unnecessarily",
+      "business_types": [
+        "commercial; equipment evidence determines applicability"
+      ],
+      "required_inputs": [
+        "connected_load_kw",
+        "existing_hours_per_day",
+        "avoidable_hours_per_day",
+        "days_per_year",
+        "safe_to_switch_off",
+        "essential_service"
+      ],
+      "optional_inputs": [
+        "rate",
+        "installation_cost_usd",
+        "annual_incremental_cost_usd"
+      ],
+      "calculation_method": "connected_load_kw * avoidable_hours_per_day * days_per_year",
+      "sources": [
+        "https://www.energy.gov/femp/energy-efficient-products-and-energy-saving-technologies"
+      ],
+      "data_quality_requirements": "Document source, units, equivalent service and baseline period; no nameplate-only consumption claims.",
+      "implementation_complexity": "low",
+      "numerical_savings_supported": true
+    },
+    {
+      "category": "hvac_setpoints",
+      "title": "Review HVAC setpoints",
+      "eligibility": "Business with conditioned spaces",
+      "business_types": [
+        "commercial; equipment evidence determines applicability"
+      ],
+      "required_inputs": [
+        "equipment and occupancy",
+        "comfort, humidity, ventilation, inventory and freeze constraints",
+        "measured before/after data or validated model"
+      ],
+      "optional_inputs": [
+        "rate",
+        "installation_cost_usd",
+        "annual_incremental_cost_usd"
+      ],
+      "calculation_method": "Investigation only in v1",
+      "sources": [
+        "https://www.ncei.noaa.gov/products/land-based-station/us-climate-normals"
+      ],
+      "data_quality_requirements": "Document source, units, equivalent service and baseline period; no nameplate-only consumption claims.",
+      "implementation_complexity": "high",
+      "numerical_savings_supported": false
+    },
+    {
+      "category": "hvac_schedule",
+      "title": "Review HVAC operating schedules",
+      "eligibility": "HVAC runs outside occupancy or process needs",
+      "business_types": [
+        "commercial; equipment evidence determines applicability"
+      ],
+      "required_inputs": [
+        "occupancy and HVAC schedule",
+        "ventilation and process constraints",
+        "measured baseline or validated model"
+      ],
+      "optional_inputs": [
+        "rate",
+        "installation_cost_usd",
+        "annual_incremental_cost_usd"
+      ],
+      "calculation_method": "Investigation only in v1",
+      "sources": [
+        "https://www.ncei.noaa.gov/products/land-based-station/us-climate-normals"
+      ],
+      "data_quality_requirements": "Document source, units, equivalent service and baseline period; no nameplate-only consumption claims.",
+      "implementation_complexity": "medium",
+      "numerical_savings_supported": false
+    },
+    {
+      "category": "hvac_maintenance",
+      "title": "Investigate HVAC maintenance",
+      "eligibility": "Business with HVAC equipment",
+      "business_types": [
+        "commercial; equipment evidence determines applicability"
+      ],
+      "required_inputs": [
+        "equipment inventory",
+        "maintenance history",
+        "professional inspection",
+        "measured performance"
+      ],
+      "optional_inputs": [
+        "rate",
+        "installation_cost_usd",
+        "annual_incremental_cost_usd"
+      ],
+      "calculation_method": "Investigation only in v1",
+      "sources": [
+        "https://www.energy.gov/femp/energy-efficient-products-and-energy-saving-technologies"
+      ],
+      "data_quality_requirements": "Document source, units, equivalent service and baseline period; no nameplate-only consumption claims.",
+      "implementation_complexity": "medium",
+      "numerical_savings_supported": false
+    },
+    {
+      "category": "solar",
+      "title": "Rooftop solar feasibility",
+      "eligibility": "Business with roof access or site control",
+      "business_types": [
+        "commercial; equipment evidence determines applicability"
+      ],
+      "required_inputs": [
+        "validated site",
+        "roof assessment",
+        "capacity, tilt, azimuth, losses",
+        "generation model",
+        "interval consumption",
+        "tariff and export rules",
+        "capex and annual costs"
+      ],
+      "optional_inputs": [
+        "rate",
+        "installation_cost_usd",
+        "annual_incremental_cost_usd"
+      ],
+      "calculation_method": "Investigation only in v1",
+      "sources": [
+        "https://developer.nlr.gov/docs/solar/pvwatts/v8/"
+      ],
+      "data_quality_requirements": "Document source, units, equivalent service and baseline period; no nameplate-only consumption claims.",
+      "implementation_complexity": "high",
+      "numerical_savings_supported": false
+    },
+    {
+      "category": "envelope",
+      "title": "Insulation and air sealing assessment",
+      "eligibility": "Business with conditioned building envelope",
+      "business_types": [
+        "commercial; equipment evidence determines applicability"
+      ],
+      "required_inputs": [
+        "audit",
+        "envelope condition",
+        "ventilation, humidity and moisture constraints",
+        "validated building model"
+      ],
+      "optional_inputs": [
+        "rate",
+        "installation_cost_usd",
+        "annual_incremental_cost_usd"
+      ],
+      "calculation_method": "Investigation only in v1",
+      "sources": [
+        "https://www.energy.gov/femp/energy-efficient-products-and-energy-saving-technologies"
+      ],
+      "data_quality_requirements": "Document source, units, equivalent service and baseline period; no nameplate-only consumption claims.",
+      "implementation_complexity": "high",
+      "numerical_savings_supported": false
+    },
+    {
+      "category": "demand",
+      "title": "Investigate demand-charge reduction",
+      "eligibility": "Customer billed for demand",
+      "business_types": [
+        "commercial; equipment evidence determines applicability"
+      ],
+      "required_inputs": [
+        "applicable demand tariff",
+        "billing interval data",
+        "ratchets, minimums, periods and billing history"
+      ],
+      "optional_inputs": [
+        "rate",
+        "installation_cost_usd",
+        "annual_incremental_cost_usd"
+      ],
+      "calculation_method": "Investigation only in v1",
+      "sources": [
+        "https://apps.openei.org/services/doc/rest/util_rates/"
+      ],
+      "data_quality_requirements": "Document source, units, equivalent service and baseline period; no nameplate-only consumption claims.",
+      "implementation_complexity": "high",
+      "numerical_savings_supported": false
+    },
+    {
+      "category": "refrigeration",
+      "title": "Compare refrigeration consumption",
+      "eligibility": "Business using commercial refrigeration",
+      "business_types": [
+        "commercial; equipment evidence determines applicability"
+      ],
+      "required_inputs": [
+        "before_annual_kwh",
+        "after_annual_kwh",
+        "equivalent_service_confirmed"
+      ],
+      "optional_inputs": [
+        "rate",
+        "installation_cost_usd",
+        "annual_incremental_cost_usd"
+      ],
+      "calculation_method": "before_annual_kwh - after_annual_kwh",
+      "sources": [
+        "https://www.energy.gov/femp/energy-efficient-products-and-energy-saving-technologies"
+      ],
+      "data_quality_requirements": "Document source, units, equivalent service and baseline period; no nameplate-only consumption claims.",
+      "implementation_complexity": "medium",
+      "numerical_savings_supported": true
+    },
+    {
+      "category": "compressed_air",
+      "title": "Investigate compressed-air leaks",
+      "eligibility": "Business using compressed air",
+      "business_types": [
+        "commercial; equipment evidence determines applicability"
+      ],
+      "required_inputs": [
+        "measured leak flow and compressor performance",
+        "runtime",
+        "safe process constraints"
+      ],
+      "optional_inputs": [
+        "rate",
+        "installation_cost_usd",
+        "annual_incremental_cost_usd"
+      ],
+      "calculation_method": "Investigation only in v1",
+      "sources": [
+        "https://www.energy.gov/femp/energy-efficient-products-and-energy-saving-technologies"
+      ],
+      "data_quality_requirements": "Document source, units, equivalent service and baseline period; no nameplate-only consumption claims.",
+      "implementation_complexity": "medium",
+      "numerical_savings_supported": false
+    },
+    {
+      "category": "motor",
+      "title": "Compare motor/system consumption",
+      "eligibility": "Business using motors or driven systems",
+      "business_types": [
+        "commercial; equipment evidence determines applicability"
+      ],
+      "required_inputs": [
+        "before_annual_kwh",
+        "after_annual_kwh",
+        "equivalent_service_confirmed"
+      ],
+      "optional_inputs": [
+        "rate",
+        "installation_cost_usd",
+        "annual_incremental_cost_usd"
+      ],
+      "calculation_method": "before_annual_kwh - after_annual_kwh",
+      "sources": [
+        "https://www.energy.gov/femp/energy-efficient-products-and-energy-saving-technologies"
+      ],
+      "data_quality_requirements": "Document source, units, equivalent service and baseline period; no nameplate-only consumption claims.",
+      "implementation_complexity": "high",
+      "numerical_savings_supported": true
+    },
+    {
+      "category": "office",
+      "title": "Office equipment power management",
+      "eligibility": "Business with nonessential office devices",
+      "business_types": [
+        "commercial; equipment evidence determines applicability"
+      ],
+      "required_inputs": [
+        "device_count",
+        "active_watts",
+        "low_power_watts",
+        "existing_hours_per_day",
+        "avoidable_hours_per_day",
+        "days_per_year",
+        "safe_to_switch_off",
+        "essential_service"
+      ],
+      "optional_inputs": [
+        "rate",
+        "installation_cost_usd",
+        "annual_incremental_cost_usd"
+      ],
+      "calculation_method": "device_count * (active_watts - low_power_watts) / 1000 * avoidable_hours_per_day * days_per_year",
+      "sources": [
+        "https://www.energy.gov/femp/energy-efficient-products-and-energy-saving-technologies"
+      ],
+      "data_quality_requirements": "Document source, units, equivalent service and baseline period; no nameplate-only consumption claims.",
+      "implementation_complexity": "low",
+      "numerical_savings_supported": true
+    },
+    {
+      "category": "scheduling",
+      "title": "EV and flexible-load scheduling",
+      "eligibility": "Business with interruptible flexible loads or EVs",
+      "business_types": [
+        "commercial; equipment evidence determines applicability"
+      ],
+      "required_inputs": [
+        "validated Scenario",
+        "customer hourly tariff",
+        "equipment windows and safety constraints",
+        "POST /api/optimize"
+      ],
+      "optional_inputs": [
+        "rate",
+        "installation_cost_usd",
+        "annual_incremental_cost_usd"
+      ],
+      "calculation_method": "Investigation only in v1",
+      "sources": [
+        "https://www.energy.gov/femp/energy-efficient-products-and-energy-saving-technologies"
+      ],
+      "data_quality_requirements": "Document source, units, equivalent service and baseline period; no nameplate-only consumption claims.",
+      "implementation_complexity": "medium",
+      "numerical_savings_supported": false
+    }
+  ]
+}
