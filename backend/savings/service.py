@@ -3,6 +3,7 @@ from datetime import date
 from backend.savings.catalog import CATALOG, CALCULATED, METHODS
 from backend.savings.models import Recommendation, SavingsResponse
 from backend.savings.calculators import energy, financials, d, money
+from backend.savings.plausibility import input_warnings
 
 
 def recommend_measure(m, today):
@@ -17,6 +18,12 @@ def recommend_measure(m, today):
     assumptions.append('Recurring non-energy operating-cost savings are not included in this estimate; actual benefits are unknown.'
         if m.annual_operating_cost_savings_usd is None else
         'Recurring non-energy operating-cost savings are caller-supplied amounts, not independently verified; exclude electricity savings, one-time incentives and benefits already counted elsewhere.')
+    if m.category == 'led':
+        assumptions.append('Wattages are per fixture, not total facility load; hours are actual lighting runtime, not business opening hours unless identical.')
+    if m.category in ('office', 'shutdown', 'lighting_controls'):
+        assumptions.append('Power reduction is the average avoidable load throughout incremental avoidable hours, after existing controls, cycling, partial load and standby behavior; nameplate or active power alone may overstate savings.')
+    if m.category in ('motor', 'refrigeration'):
+        assumptions.append('Annual before/after consumption must represent comparable operating conditions; manufacturer specifications are projections, not site measurements. No normalization factors are inferred.')
     status = 'needs_data'
     applicable = 'confirmed' if m.applicable is True else 'possible'
     result = {}
@@ -67,7 +74,9 @@ def recommend_measure(m, today):
         inputs_used=m.model_dump(mode='json', exclude_none=True, include=set(required) |
             {'id','category','load_id','evidence_kind','evidence_reference','applicable','rate',
              'installation_cost_usd','annual_incremental_cost_usd',
-             'annual_operating_cost_savings_usd','operating_cost_savings_reference'}), assumptions=assumptions,
+             'annual_operating_cost_savings_usd','operating_cost_savings_reference',
+             'operating_baseline_confirmed','comparison_conditions_confirmed'}), assumptions=assumptions,
+        warnings=input_warnings(m),
         calculation_method=METHODS.get(m.category,'Investigation only; no numerical model in v1') +
             '; gross USD = kWh * customer USD/kWh; net = gross + supplied recurring non-energy operating-cost savings (omitted benefit not included) - annual incremental cost (required); payback = upfront/net when net > 0; annual simple ROI = net/upfront * 100 when upfront > 0',
         missing_information=list(dict.fromkeys(missing)), sources=c['sources'],
@@ -93,6 +102,8 @@ async def build_recommendations(request, retail_service, today=None):
         except (OSError, ValueError, RuntimeError):
             warnings.append('EIA service and saved release unavailable; benchmark unknown. Calculators remain available.')
     results = [recommend_measure(m, today) for m in request.measures]
+    for r in results:
+        warnings.extend(f'{r.id}: {warning}' for warning in r.warnings)
     present = {m.category for m in request.measures}
     from backend.savings.models import Measure
     for category in sorted(CATALOG.keys() - present):

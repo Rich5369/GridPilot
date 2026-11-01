@@ -39,7 +39,9 @@ METHODS = {
 CATALOG = {row[0]: dict(category=row[0], title=row[1], eligibility=row[2],
     business_types=['commercial; equipment evidence determines applicability'],
     required_inputs=row[3].split('; '), optional_inputs=['rate','installation_cost_usd','annual_incremental_cost_usd',
-        'annual_operating_cost_savings_usd','operating_cost_savings_reference'],
+        'annual_operating_cost_savings_usd','operating_cost_savings_reference',
+        *(['operating_baseline_confirmed'] if row[0] in ('office', 'shutdown', 'lighting_controls') else []),
+        *(['comparison_conditions_confirmed'] if row[0] in ('motor', 'refrigeration') else [])],
     calculation_method=METHODS.get(row[0], 'Investigation only in v1'), sources=[row[4]],
     data_quality_requirements='Document source, units, equivalent service and baseline period; no nameplate-only consumption claims.',
     implementation_complexity=row[5], numerical_savings_supported=row[0] in CALCULATED) for row in ROWS}

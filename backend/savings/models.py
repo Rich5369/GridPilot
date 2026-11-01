@@ -79,6 +79,11 @@ class Measure(Strict):
     after_annual_kwh: Number | None = None
     equivalent_service_confirmed: bool | None = None
 
+    operating_baseline_confirmed: bool | None = Field(default=None,
+        description='Caller confirms average avoidable power and incremental avoidable hours account for existing controls, standby, cycling and actual equipment runtime; not business opening hours alone.')
+    comparison_conditions_confirmed: bool | None = Field(default=None,
+        description='Caller confirms before/after annual kWh use comparable periods, runtime, capacity, output, service and ambient conditions, with specification-based projections identified in evidence_reference. Not independent verification.')
+
     @field_validator('operating_cost_savings_reference')
     @classmethod
     def nonblank_operating_cost_reference(cls, value):
@@ -142,6 +147,8 @@ class Recommendation(Contract):
     missing_information: list[str]
     sources: list[str]
     next_action: str
+    warnings: list[str] = Field(default_factory=list,
+        description='Nonblocking input-plausibility and evidence limitations. No numerical corrections or independent verification implied.')
     priority_group: Literal['financial', 'energy_only', 'investigation', 'not_applicable'] = 'investigation'
     priority_reason: str = ''
 
