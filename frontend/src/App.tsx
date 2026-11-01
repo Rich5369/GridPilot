@@ -2,6 +2,7 @@ import type { SavingsDraft } from "./types/savings";
 import { useCallback, useState, useRef } from "react";
 import { Zap } from "lucide-react";
 import { Dashboard } from "./pages/Dashboard";
+import { Landing, LearnMore } from "./pages/Welcome";
 import { Setup } from "./pages/Setup";
 import { useWorkspaceNavigation } from "./hooks/useWorkspaceNavigation";
 import { isDashboardRoute } from "./services/navigation";
@@ -198,6 +199,8 @@ export default function App() {
       )}
     </div>
   );
+  if (route === "home") return <Landing />;
+  if (route === "learn-more") return <LearnMore />;
   if (recovery)
     return (
       <div className="setup-page">
@@ -231,7 +234,7 @@ export default function App() {
       key={`${session}:${route === "setup" ? "edit" : "entry"}`}
       initial={workspace}
       initialStep={route === "setup" && record?.completed ? 0 : record?.step}
-      completed={route !== "setup" && record?.completed}
+      completed={record?.completed}
       entryMessage={
         isDashboardRoute(route) && !record?.completed
           ? "Finish or resume your building setup to open this dashboard section. No inputs have been replaced."

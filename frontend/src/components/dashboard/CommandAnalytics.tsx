@@ -38,7 +38,7 @@ function Sparkline({
             <Line
               dataKey="baseline"
               type="linear"
-              stroke="#8292aa"
+              stroke="var(--chart-baseline)"
               strokeWidth={1.2}
               strokeDasharray="3 3"
               dot={false}
@@ -86,7 +86,7 @@ export function CommandMetrics({
         ? `Baseline ${money(result.baseline_electricity_cost_usd)}`
         : 'Awaiting a submitted solver result',
       icon: DollarSign,
-      color: '#52d9ba',
+      color: 'var(--chart-primary)',
       values: profiles.optimized,
       comparison: profiles.baseline,
     },
@@ -97,7 +97,7 @@ export function CommandMetrics({
         ? `Baseline ${result.baseline_peak_demand_kw.toFixed(2)} kW`
         : 'Whole-building scheduled demand',
       icon: Gauge,
-      color: '#73a9e8',
+      color: 'var(--chart-secondary)',
       values: result?.optimized_demand_kw,
       comparison: result?.baseline_demand_kw,
     },
@@ -106,7 +106,7 @@ export function CommandMetrics({
       value: difference == null ? '—' : money(difference),
       context: 'Baseline minus optimized · energy only',
       icon: TrendingDown,
-      color: '#a58aff',
+      color: 'var(--chart-secondary)',
       values: profiles.difference,
     },
     {
@@ -116,7 +116,7 @@ export function CommandMetrics({
         ? `Submitted site limit ${scenario.building_max_demand_kw} kW`
         : 'Site limit minus optimized peak',
       icon: ShieldCheck,
-      color: '#7ec7bd',
+      color: 'var(--chart-primary)',
       values: profiles.headroom,
     },
   ]
@@ -229,14 +229,14 @@ export function ScenarioAnalytics({
             </strong>
           </div>
         </div>
-        <ChartLegend items={[{ label: 'Hourly tariff', color: '#aa8aff' }]} />
+        <ChartLegend items={[{ label: 'Hourly tariff', color: 'var(--chart-secondary)' }]} />
         <div className="analytics-chart">
           <ResponsiveContainer width="100%" height="100%">
             <LineChart
               data={rows}
               margin={{ left: 0, right: 12, top: 12, bottom: 0 }}
             >
-              <CartesianGrid vertical={false} stroke="#ffffff0c" />
+              <CartesianGrid vertical={false} stroke="var(--gp-line)" />
               <XAxis
                 dataKey="hour"
                 type="number"
@@ -262,9 +262,9 @@ export function ScenarioAnalytics({
                 dataKey="price"
                 name="Tariff"
                 type="linear"
-                stroke="#aa8aff"
+                stroke="var(--chart-secondary)"
                 dot={false}
-                activeDot={{ r: 3, stroke: '#101823', strokeWidth: 2 }}
+                activeDot={{ r: 3, stroke: 'var(--gp-surface)', strokeWidth: 2 }}
                 strokeWidth={1.6}
                 isAnimationActive={false}
               />
@@ -328,7 +328,7 @@ export function ScenarioAnalytics({
                 <ChartLegend
                   items={costSeries.map((s) => ({
                     label: s.label.replace(' hourly energy cost', ''),
-                    color: s.key === 'baseline' ? '#8292aa' : '#52d9ba',
+                    color: s.key === 'baseline' ? 'var(--chart-baseline)' : 'var(--chart-primary)',
                     dashed: s.key === 'baseline',
                   }))}
                 />
@@ -342,7 +342,7 @@ export function ScenarioAnalytics({
                       data={costRows}
                       margin={{ left: 0, right: 12, top: 12, bottom: 0 }}
                     >
-                      <CartesianGrid vertical={false} stroke="#ffffff0c" />
+                      <CartesianGrid vertical={false} stroke="var(--gp-line)" />
                       <XAxis
                         dataKey="hour"
                         type="number"
@@ -374,7 +374,7 @@ export function ScenarioAnalytics({
                           }
                           type="linear"
                           stroke={
-                            series.key === 'baseline' ? '#8292aa' : '#52d9ba'
+                            series.key === 'baseline' ? 'var(--chart-baseline)' : 'var(--chart-primary)'
                           }
                           strokeDasharray={
                             series.key === 'baseline' ? '4 3' : undefined
@@ -383,7 +383,7 @@ export function ScenarioAnalytics({
                           dot={false}
                           activeDot={{
                             r: 3,
-                            stroke: '#101823',
+                            stroke: 'var(--gp-surface)',
                             strokeWidth: 2,
                           }}
                           isAnimationActive={false}

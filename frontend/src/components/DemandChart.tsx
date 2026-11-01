@@ -14,14 +14,14 @@ import {
 } from 'recharts'
 import { intervalRows, type DemandSeries } from '../data/demandChart'
 const colors = [
-  '#52d9ba',
-  '#73a9e8',
-  '#b8a780',
-  '#aa8aff',
-  '#c77f91',
-  '#6ea5b1',
-  '#a8b58a',
-  '#9da7ba',
+  'var(--chart-primary)',
+  'var(--chart-secondary)',
+  'var(--chart-limit)',
+  'var(--chart-secondary)',
+  'var(--chart-rose)',
+  'var(--chart-cyan)',
+  'var(--chart-olive)',
+  'var(--chart-gray)',
 ]
 export function DemandChart({
   total,
@@ -122,10 +122,10 @@ export function DemandChart({
         <ChartLegend
           items={[
             ...(baseline
-              ? [{ label: baseline.label, color: '#8292aa', dashed: true }]
+              ? [{ label: baseline.label, color: 'var(--chart-baseline)', dashed: true }]
               : []),
-            { label: total.label, color: '#52d9ba' },
-            ...(fixed ? [{ label: fixed.label, color: '#73a9e8' }] : []),
+            { label: total.label, color: 'var(--chart-primary)' },
+            ...(fixed ? [{ label: fixed.label, color: 'var(--chart-secondary)' }] : []),
           ]}
         />
       )}
@@ -143,7 +143,7 @@ export function DemandChart({
           >
             <CartesianGrid
               vertical={false}
-              stroke="#ffffff0c"
+              stroke="var(--gp-line)"
               strokeDasharray="2 6"
             />
             <XAxis
@@ -176,7 +176,7 @@ export function DemandChart({
                   stroke={colors[sources.indexOf(s) % colors.length]}
                   strokeWidth={1.5}
                   dot={false}
-                  activeDot={{ r: 3, stroke: '#101823', strokeWidth: 2 }}
+                  activeDot={{ r: 3, stroke: 'var(--gp-surface)', strokeWidth: 2 }}
                   isAnimationActive={false}
                 />
               ))
@@ -187,9 +187,9 @@ export function DemandChart({
                     dataKey={fixed.key}
                     name={fixed.label}
                     type="linear"
-                    stroke="#73a9e8"
+                    stroke="var(--chart-secondary)"
                     dot={false}
-                    activeDot={{ r: 3, stroke: '#101823', strokeWidth: 2 }}
+                    activeDot={{ r: 3, stroke: 'var(--gp-surface)', strokeWidth: 2 }}
                     strokeWidth={1.5}
                     isAnimationActive={false}
                   />
@@ -199,10 +199,10 @@ export function DemandChart({
                     dataKey={baseline.key}
                     name={baseline.label}
                     type="linear"
-                    stroke="#8292aa"
+                    stroke="var(--chart-baseline)"
                     strokeDasharray="4 3"
                     dot={false}
-                    activeDot={{ r: 3, stroke: '#101823', strokeWidth: 2 }}
+                    activeDot={{ r: 3, stroke: 'var(--gp-surface)', strokeWidth: 2 }}
                     strokeWidth={1.5}
                     isAnimationActive={false}
                   />
@@ -211,10 +211,10 @@ export function DemandChart({
                   dataKey={total.key}
                   name={total.label}
                   type="linear"
-                  stroke="#52d9ba"
+                  stroke="var(--chart-primary)"
                   strokeWidth={1.8}
                   dot={false}
-                  activeDot={{ r: 3, stroke: '#101823', strokeWidth: 2 }}
+                  activeDot={{ r: 3, stroke: 'var(--gp-surface)', strokeWidth: 2 }}
                   isAnimationActive={false}
                 />
               </>
@@ -223,12 +223,12 @@ export function DemandChart({
               <ReferenceLine
                 y={limit}
                 ifOverflow="extendDomain"
-                stroke="#b8a780"
+                stroke="var(--chart-limit)"
                 strokeDasharray="6 4"
                 label={{
                   value: `Building limit ${limit} kW`,
                   position: 'insideTopRight',
-                  fill: '#b8a780',
+                  fill: 'var(--chart-limit)',
                   fontSize: 11,
                 }}
               />

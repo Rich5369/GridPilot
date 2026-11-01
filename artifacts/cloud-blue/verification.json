@@ -1,0 +1,71 @@
+{
+  "checks": [
+    "Home fits 1440×900, 1366×768, 1280×720 and 1024×768; both hero actions visible",
+    "Keyboard focus indicator visible",
+    "Essential actions accessible at 320×480 with enlarged hero text",
+    "Validation, days/ZIP local persistence, non-EV savings-first setup and real annual calculation",
+    "Real non-EV daily calculation and overview chart",
+    "Legacy deep links and Cloud Blue theme across plan, building, advisor, comparison, What-if and markets",
+    "Returning Get started offers saved workspace and explicit Edit building without overwriting"
+  ],
+  "accessibility": [
+    {
+      "name": "landing",
+      "violations": []
+    },
+    {
+      "name": "landing-mobile",
+      "violations": []
+    },
+    {
+      "name": "learn-more",
+      "violations": []
+    },
+    {
+      "name": "building-setup",
+      "violations": []
+    },
+    {
+      "name": "building-setup-mobile",
+      "violations": []
+    },
+    {
+      "name": "savings",
+      "violations": []
+    },
+    {
+      "name": "savings-mobile",
+      "violations": []
+    },
+    {
+      "name": "overview",
+      "violations": []
+    },
+    {
+      "name": "energy-plan",
+      "violations": []
+    },
+    {
+      "name": "my-building",
+      "violations": []
+    },
+    {
+      "name": "advisor",
+      "violations": []
+    },
+    {
+      "name": "comparison",
+      "violations": []
+    },
+    {
+      "name": "what-if",
+      "violations": []
+    },
+    {
+      "name": "markets",
+      "violations": []
+    }
+  ],
+  "errors": [],
+  "source": "Local Chromium and real FastAPI; AI blocked"
+}

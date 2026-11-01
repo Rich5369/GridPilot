@@ -185,7 +185,7 @@ export function isSavedWorkspace(value: unknown): value is SavedWorkspace {
         "editor",
         "mode",
       ],
-      ["businessContext", "savingsDraft", "startGoal"],
+      ["businessContext", "savingsDraft", "startGoal", "daysOpen", "zipCode"],
     ) ||
     !choice(w.kind, ["building", "demo"]) ||
     !text(w.name) ||
@@ -196,6 +196,8 @@ export function isSavedWorkspace(value: unknown): value is SavedWorkspace {
     !editor(w.editor)
   )
     return false;
+  if (w.daysOpen !== undefined && (!Array.isArray(w.daysOpen) || w.daysOpen.length > 7 || new Set(w.daysOpen).size !== w.daysOpen.length || !w.daysOpen.every(d => choice(d, ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"])))) return false;
+  if (w.zipCode !== undefined && (!text(w.zipCode, 10) || (w.zipCode !== "" && !/^[0-9-]*$/.test(w.zipCode)))) return false;
   if (w.startGoal !== undefined && !choice(w.startGoal, ["savings", "planning"])) return false;
   if (w.savingsDraft !== undefined && !validSavingsDraft(w.savingsDraft))
     return false;
