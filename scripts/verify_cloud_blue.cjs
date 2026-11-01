@@ -26,7 +26,7 @@ await shot('building-setup');await audit('building-setup');await p.setViewportSi
 await p.getByRole('radio',{name:/Find savings opportunities/}).check();await click('Continue');await p.getByRole('heading',{name:'Add an improvement',exact:true}).waitFor();await click('Load synthetic LED example');await click('Calculate savings');await p.locator('[data-financial="net"]').first().waitFor();await shot('savings-desktop');await audit('savings');
 report.checks.push('Validation, days/ZIP local persistence, non-EV savings-first setup and real annual calculation');
 await p.setViewportSize({width:390,height:844});await shot('savings-mobile');await audit('savings-mobile');await p.setViewportSize({width:1440,height:900});
-await nav('Energy plan');await click('Calculate energy plan');await p.getByRole('heading',{name:'Your daily energy plan is ready',exact:true}).waitFor();await nav('Overview');await shot('overview-desktop');await audit('overview');
+await nav('Energy plan');await click('Calculate energy plan');await p.getByRole('heading',{name:'Your energy plan',exact:true}).waitFor();await nav('Overview');await shot('overview-desktop');await audit('overview');
 report.checks.push('Real non-EV daily calculation and overview chart');
 for (const [hash,name] of [['configuration','energy-plan'],['building','my-building'],['assistant','advisor'],['comparison','comparison'],['whatif','what-if'],['markets','markets']]) {await p.goto('http://127.0.0.1:5173/#'+hash);await p.locator('.page-heading h1').waitFor();await audit(name);assert.equal(await p.evaluate(()=>getComputedStyle(document.body).backgroundColor),'rgb(234, 241, 248)');}
 report.checks.push('Legacy deep links and Cloud Blue theme across plan, building, advisor, comparison, What-if and markets');

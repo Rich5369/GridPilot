@@ -54,33 +54,14 @@ export function DemandChart({
         <button className="secondary" aria-pressed={presentation === 'chart'} onClick={() => setPresentation('chart')}>Chart</button>
         <button className="secondary" aria-pressed={presentation === 'table'} onClick={() => setPresentation('table')}>Table</button>
       </div>
-      <div
+      {sources.length > 0 && <div
         className="demand-chart-controls"
         role="group"
         aria-label="Demand chart view"
       >
-        <button
-          className="secondary"
-          aria-pressed={!breakdown}
-          onClick={() => setView('total')}
-        >
-          {baseline ? 'Total demand' : total.label}
-        </button>
-        {sources.length > 0 && (
-          <button
-            className="secondary"
-            aria-pressed={breakdown}
-            onClick={() => setView('sources')}
-          >
-            Breakdown by source
-          </button>
-        )}
-      </div>
-      <p className="muted">
-        {breakdown
-          ? 'Modeled or entered sources only, shown as separate hourly lines. Straight connections are visual interpolation, not subhourly readings. Hiding a source does not change building demand or the limit.'
-          : 'Hourly average electricity demand (kW). 24 hourly averages; straight connections are visual interpolation, not subhourly readings.'}
-      </p>
+        <button className="secondary" aria-pressed={!breakdown} onClick={() => setView('total')}>{baseline ? 'Total demand' : total.label}</button>
+        <button className="secondary" aria-pressed={breakdown} onClick={() => setView('sources')}>Breakdown by source</button>
+      </div>}
       {breakdown && (
         <div
           className="source-toggles"
@@ -114,8 +95,7 @@ export function DemandChart({
           (v, h) => Math.abs(v - total.values[h]) < 1e-6,
         ) && (
           <p className="field-hint">
-            Baseline and optimized demand overlap at this display precision.
-            Both series use the returned hourly values.
+            Lines overlap
           </p>
         )}
       {!breakdown && (
@@ -236,6 +216,12 @@ export function DemandChart({
           </ComposedChart>
         </ResponsiveContainer>
       </div>
+      <details className="chart-information">
+        <summary>Chart details</summary>
+        <p>Hourly average electricity demand (kW). 24 hourly averages; straight connections are visual interpolation, not subhourly readings. Display rounding does not change the returned values.</p>
+        {breakdown && <p>Modeled or entered sources only. Hiding a source does not change building demand or the limit.</p>}
+        {baseline && <p>If lines overlap, baseline and optimized values coincide at this display precision. Read the hourly table for the returned values.</p>}
+      </details>
       <details className="hourly-table" open={presentation === 'table'}>
         <summary>View all 24 hourly values</summary>
         <div className="table-scroll">

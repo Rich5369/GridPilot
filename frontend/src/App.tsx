@@ -205,10 +205,10 @@ export default function App() {
     return (
       <div className="setup-page">
         <header className="site-header">
-          <span className="brand">
+          <a className="brand" href="#home" aria-label="GridPilot home">
             <Zap />
             GridPilot
-          </span>
+          </a>
         </header>
         <main className="setup-main">
           <section className="setup-card workspace-recovery">

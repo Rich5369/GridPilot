@@ -287,7 +287,7 @@ it("retains edited advisor business context without storing its conversation", a
   expect(stored.workspace.businessContext.equipment).toBe("Warehouse vans");
   expect(stored).not.toHaveProperty("history");
   await reopen();
-  await click("Ask Energy Advisor");
+  expect(host.textContent).toContain("Close Energy Advisor");
   expect(
     host.querySelector<HTMLInputElement>(
       ".advisor-fields label:nth-child(2) input",
@@ -437,7 +437,7 @@ it("starts exactly one event-driven setup calculation in Strict Mode and opens p
     resolve(new Response(JSON.stringify(fixedResult(scenario)))),
   );
   expect(location.hash).toBe("#overview");
-  expect(host.textContent).toContain("Your daily energy plan is ready");
+  expect(host.textContent).toContain("Your energy plan");
   expect(host.textContent).toContain("$0.00");
   expect(host.textContent).not.toContain("Calculating your submitted scenario");
   expect(

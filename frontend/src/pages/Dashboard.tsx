@@ -78,7 +78,7 @@ const views = [
   { id: 'building', label: 'My building', icon: Building2 },
   { id: 'comparison', label: 'Optimization', icon: GitCompareArrows },
   { id: 'whatif', label: 'What-if scenarios', icon: GitCompareArrows },
-  { id: 'assistant', label: 'AI assistant', icon: Sparkles },
+  { id: 'assistant', label: 'Energy Advisor', icon: Sparkles },
   { id: 'markets', label: 'Electricity markets', icon: Globe2 },
 ] as const
 export function Dashboard({
@@ -132,6 +132,22 @@ export function Dashboard({
   const view = selectedView ?? localView
   const [savingsVisited, setSavingsVisited] = useState(view === 'savings')
   if (view === 'savings' && !savingsVisited) setSavingsVisited(true)
+  const previousView = useRef<DashboardView>('overview')
+  const advisorTrigger = useRef<HTMLButtonElement>(null)
+  const advisorClose = useRef<HTMLButtonElement>(null)
+  const wasAdvisor = useRef(false)
+  useEffect(() => {
+    if (view === 'assistant') {
+      if (!wasAdvisor.current) advisorClose.current?.focus()
+    } else {
+      previousView.current = view
+      if (wasAdvisor.current) advisorTrigger.current?.focus()
+    }
+    wasAdvisor.current = view === 'assistant'
+  }, [view])
+  function closeAdvisor() {
+    setView(previousView.current)
+  }
   const primaryView = ['configuration', 'comparison', 'whatif'].includes(view) ? 'configuration' : view
   function setView(next: DashboardView) {
     setLocalView(next)
@@ -237,11 +253,8 @@ export function Dashboard({
       <aside className="sidebar">
         <a
           className="brand"
-          href="#overview"
-          onClick={(e) => {
-            e.preventDefault()
-            setView('overview')
-          }}
+          href="#home"
+          aria-label="GridPilot home"
         >
           <span className="brand-icon">
             <Zap size={23} fill="currentColor" />
@@ -271,19 +284,6 @@ export function Dashboard({
             </button>
           ))}
         </nav>
-        <div className="sidebar-note">
-          <span className="tag">SCENARIO WORKSPACE</span>
-          <p>
-            Understand demand.
-            <br />
-            Plan with confidence.
-          </p>
-          <span>
-            24 hourly intervals
-            <br />
-            Commercial energy analytics
-          </span>
-        </div>
         <div className="sidebar-bottom">
           <span className="avatar">GP</span>
           <div>
@@ -299,12 +299,6 @@ export function Dashboard({
             <strong>{views.find((v) => v.id === view)?.label}</strong>
           </span>
           <div className="topbar-actions">
-            <button className="secondary" onClick={() => setView('assistant')}>Ask Energy Advisor</button>
-            {onNavigate && (
-              <a className="secondary home-link" href="#home">
-                Home
-              </a>
-            )}
             {onSetup && (
               <button
                 className="secondary"
@@ -317,7 +311,12 @@ export function Dashboard({
             <BackendStatus />
           </div>
         </header>
-        <main id="workspace-main" tabIndex={-1}>
+        <main id="workspace-main" tabIndex={-1} onKeyDown={event => {
+          if (view === 'assistant' && event.key === 'Escape') {
+            event.preventDefault()
+            closeAdvisor()
+          }
+        }}>
           {example && <section className="panel example-notice"><h2>Example snapshot · synthetic building</h2><p>This checked local optimizer result is an illustration, not a fresh calculation for your building. Its rates are synthetic assumptions: $0.12/kWh off peak and $0.28/kWh from 2 PM–8 PM; no market date or customer tariff is claimed.</p><details><summary>Example inputs, device schedules and calculation quality</summary><pre>{JSON.stringify(examplePlan, null, 2)}</pre></details><p>Run a real calculation before requesting advice about an exact backend result. No saved result identifier is used.</p></section>}
           {view !== 'savings' && resumed && !result && (
             <p className="workspace-result-notice" role="status">
@@ -327,29 +326,36 @@ export function Dashboard({
           )}
           <div className="page-heading">
             <div>
-              <p className="eyebrow">GRIDPILOT / ENERGY INTELLIGENCE</p>
               <h1>
                 {view === 'overview'
-                  ? 'Your energy, in focus'
+                  ? 'Energy overview'
                   : views.find((v) => v.id === view)?.label}
               </h1>
               <p className="muted">
-                <strong className="workspace-name">{workspaceName}</strong> ·
-                Clearer insights. Smarter scheduling.
+                <span className="workspace-name">{workspaceName}</span>
               </p>
             </div>
-            {['overview', 'configuration', 'comparison', 'whatif'].includes(view) && (
-              <button
-                className="run-button"
-                onClick={runOptimization}
-                disabled={busy || invalid}
-                aria-busy={busy}
-                aria-describedby="optimization-help"
-              >
-                <Zap size={17} />
-                {busy ? 'Calculating energy plan…' : 'Calculate energy plan'}
-              </button>
-            )}
+            <div className="page-heading-actions">
+              {view === 'assistant' ? (
+                <button ref={advisorClose} className="secondary" onClick={closeAdvisor}>Close Energy Advisor</button>
+              ) : (
+                <button ref={advisorTrigger} className="run-button advisor-trigger" aria-controls="energy-advisor" onClick={() => setView('assistant')}>
+                  <Sparkles size={17} aria-hidden="true" />Ask Energy Advisor
+                </button>
+              )}
+              {['overview', 'configuration', 'comparison', 'whatif'].includes(view) && (
+                <button
+                  className="secondary calculate-plan"
+                  onClick={runOptimization}
+                  disabled={busy || invalid}
+                  aria-busy={busy}
+                  aria-describedby="optimization-help"
+                >
+                  <Zap size={17} />
+                  {busy ? 'Calculating energy plan…' : 'Calculate energy plan'}
+                </button>
+              )}
+            </div>
           </div>
           {['configuration', 'comparison', 'whatif'].includes(view) && <nav className="plan-tabs" aria-label="Energy plan views">{[['configuration', 'Inputs'], ['comparison', 'Results and equipment'], ['whatif', 'What-if comparisons']].map(([id, label]) => <button key={id} className="secondary" aria-current={view === id ? 'page' : undefined} onClick={() => setView(id as DashboardView)}>{label}</button>)}</nav>}
           <div hidden={!['configuration', 'comparison', 'whatif'].includes(view)}>
@@ -689,40 +695,26 @@ export function Dashboard({
                 view === 'overview' ? 'command-advisor' : 'full-advisor'
               }
               hidden={view !== 'assistant'}
+              id="energy-advisor"
               aria-label="Energy Advisor"
             >
-              <details className="advisor-disclosure" open>
-                <summary>
-                  AI Energy Advisor <span>Scenario guidance</span>
-                </summary>
-                {
-                  <div>
-                    <EnergyAssistant
-                      schedulingMode={result ? resultMode : mode}
-                      onCompareProposal={(next) => {
-                        setWhatIfSession((session) => session + 1)
-                        setAlternative(next)
-                        setView('whatif')
-                      }}
-                      editor={editor}
-                      onChange={setEditor}
-                      resultScenario={example ? null : resultScenario}
-                      resultId={example ? undefined : result?.result_id}
-                      initialProfile={businessProfile}
-                      onProfileChange={onBusinessContextChange}
-                      initialProfileLabel={businessContextLabel}
-                    />
-                  </div>
-                }
-              </details>
+              <EnergyAssistant
+                schedulingMode={result ? resultMode : mode}
+                onCompareProposal={(next) => {
+                  setWhatIfSession((session) => session + 1)
+                  setAlternative(next)
+                  setView('whatif')
+                }}
+                editor={editor}
+                onChange={setEditor}
+                resultScenario={example ? null : resultScenario}
+                resultId={example ? undefined : result?.result_id}
+                initialProfile={businessProfile}
+                onProfileChange={onBusinessContextChange}
+                initialProfileLabel={businessContextLabel}
+              />
             </aside>
           </div>
-          <footer>
-            <span>GridPilot · Commercial energy intelligence</span>
-            <span>
-              Building-local hours · USD · Daily plans and annual improvements are separate estimates
-            </span>
-          </footer>
         </main>
       </div>
     </div>

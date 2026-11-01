@@ -50,14 +50,14 @@ async function click(label: string) {
   await act(async () => b.click())
 }
 async function input(id: string, value: string) {
-  const element = container.querySelector<HTMLInputElement | HTMLSelectElement>(
+  const element = container.querySelector<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>(
     `#${id}`,
   )!
   await act(async () => {
     Object.getOwnPropertyDescriptor(
       element.tagName === 'SELECT'
         ? HTMLSelectElement.prototype
-        : HTMLInputElement.prototype,
+        : element.tagName === 'TEXTAREA' ? HTMLTextAreaElement.prototype : HTMLInputElement.prototype,
       'value',
     )!.set!.call(element, value)
     element.dispatchEvent(
@@ -619,4 +619,26 @@ it('keeps insights on submitted prices and cap across stale edits and clears on 
     select.dispatchEvent(new Event('change', { bubbles: true }))
   })
   expect(panel()).toBeNull()
+})
+it('opens one Advisor entry, returns to the previous view and retains the composer without sending', async () => {
+  await act(async () => root.render(<Dashboard workspaceName="Riverside Café" />))
+  expect(container.querySelector('.brand')!.getAttribute('href')).toBe('#home')
+  expect(container.querySelector('.brand')!.getAttribute('aria-label')).toBe('GridPilot home')
+  expect(container.querySelector('.home-link')).toBeNull()
+  expect(container.querySelector('h1')!.textContent).toBe('Energy overview')
+  expect(container.textContent).not.toContain('Clearer insights. Smarter scheduling.')
+  await click('Energy plan')
+  await input('limit', '19')
+  await click('Ask Energy Advisor')
+  expect(document.activeElement?.textContent).toBe('Close Energy Advisor')
+  await input('ai-request', 'How can my café manage peak demand?')
+  await click('Close Energy Advisor')
+  expect(container.querySelector('h1')!.textContent).toBe('Energy plan')
+  expect(container.querySelector<HTMLInputElement>('#limit')!.value).toBe('19')
+  expect(document.activeElement?.textContent).toBe('Ask Energy Advisor')
+  await click('Ask Energy Advisor')
+  expect(container.querySelector<HTMLTextAreaElement>('#ai-request')!.value).toBe('How can my café manage peak demand?')
+  await act(async () => container.querySelector('#ai-request')!.dispatchEvent(new KeyboardEvent('keydown', {key:'Escape', bubbles:true})))
+  expect(container.querySelector('h1')!.textContent).toBe('Energy plan')
+  expect(fetchMock.mock.calls.filter(([u]) => String(u).includes('/api/ai/'))).toHaveLength(0)
 })

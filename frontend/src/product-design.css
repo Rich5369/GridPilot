@@ -1575,3 +1575,22 @@ input[type="checkbox"], input[type="radio"] { accent-color: var(--gp-primary); }
 .welcome-header { flex: 0 0 auto; margin: 0 auto; }
 .welcome-header .brand { display: inline-flex; }
 .welcome-preview img { object-fit: contain; max-height: none; filter: brightness(.96); }
+
+/* Focused workspace header and compact calculation/chart disclosures. */
+.page-heading-actions { display: flex; align-items: center; justify-content: flex-end; flex-wrap: wrap; gap: 10px; }
+.page-heading-actions > button { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; padding: 10px 16px; }
+.page-heading-actions .advisor-trigger { font-size: 14px; }
+.overview-next { padding: 16px 24px; }
+.overview-next h2 { margin: 0 0 10px; }
+.overview-next .plan-tabs { margin: 8px 0; }
+.calculation-details, .chart-information { font-size: 12px; color: var(--gp-muted); }
+.calculation-details summary, .chart-information summary { cursor: pointer; width: fit-content; padding: 6px 0; }
+.calculation-details p, .chart-information p { max-width: 85ch; margin: 8px 0; font-size: 13px; }
+.chart-information { margin-top: 10px; }
+.sidebar-bottom { margin-top: auto; }
+@media (max-width: 700px) {
+  .page-heading { align-items: flex-start; flex-wrap: wrap; gap: 16px; }
+  .page-heading-actions { justify-content: flex-start; width: 100%; }
+  .page-heading-actions > button { flex: 1 1 auto; }
+  .overview-next { padding: 16px 18px; }
+}
