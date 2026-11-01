@@ -27,6 +27,7 @@ def recommend_measure(m, today):
     status = 'needs_data'
     applicable = 'confirmed' if m.applicable is True else 'possible'
     result = {}
+    warnings = input_warnings(m)
     if m.applicable is False:
         status, applicable = 'not_applicable', 'not_applicable'
     elif m.category in CALCULATED:
@@ -49,7 +50,7 @@ def recommend_measure(m, today):
             elif not (m.rate.customer_applicability_confirmed and m.rate.flat_avoidable_energy_rate_confirmed):
                 missing.append('rate: confirm customer applicability and flat avoidable energy charges')
             else:
-                result.update(financials(kwh, m))
+                result.update(financials(kwh, m, warnings=warnings))
             if m.annual_incremental_cost_usd is None:
                 missing.append('annual_incremental_cost_usd: explicitly provide zero if none; needed for net savings and payback')
             if m.installation_cost_usd is None:
@@ -76,7 +77,7 @@ def recommend_measure(m, today):
              'installation_cost_usd','annual_incremental_cost_usd',
              'annual_operating_cost_savings_usd','operating_cost_savings_reference',
              'operating_baseline_confirmed','comparison_conditions_confirmed'}), assumptions=assumptions,
-        warnings=input_warnings(m),
+        warnings=warnings,
         calculation_method=METHODS.get(m.category,'Investigation only; no numerical model in v1') +
             '; gross USD = kWh * customer USD/kWh; net = gross + supplied recurring non-energy operating-cost savings (omitted benefit not included) - annual incremental cost (required); payback = upfront/net when net > 0; annual simple ROI = net/upfront * 100 when upfront > 0',
         missing_information=list(dict.fromkeys(missing)), sources=c['sources'],
