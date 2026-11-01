@@ -1,6 +1,8 @@
 # Savings UI test fixtures
 
-`savingsCatalog.json` copies the actual v1 backend catalog.
+`savingsCatalog.json` copies the actual v1 backend catalog at merged PR #52.
+The fixtures intentionally retain the older additive-field shape for compatibility
+coverage; final real-browser checks use the current backend through PR #54.
 `warehouseSavingsConversation.json` was generated from
 `docs/verification/meta-savings-acceptance-request.json` by the unchanged backend
 Savings Engine, with `backend.ai.savings.generate` patched to return a deterministic

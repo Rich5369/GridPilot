@@ -852,6 +852,57 @@ async function fixtureBanner() {
     report.checks.push(
       "all six supported numerical category forms submit typed actual evidence to the real endpoint; safety/equivalent-service confirmations are explicit and financial unknowns stay null",
     );
+    // PR #54: default-unknown evidence warnings are advisory, never numerical corrections.
+    for (const id of [
+      "controls",
+      "shutdown",
+      "office-power",
+      "motor",
+      "refrigeration",
+    ]) {
+      assert(
+        all.response.recommendations
+          .find((r) => r.id === id)
+          .warnings.some((w) => w.startsWith("Evidence limitation:")),
+      );
+      assert.equal(
+        await page
+          .locator(`[aria-label="Advisory evidence warnings for ${id}"]`)
+          .count(),
+        1,
+      );
+    }
+    await field("savings-0-connected_load_kw", "1000");
+    await field("savings-0-operating_baseline_confirmed", "yes");
+    const advisory = await calculate(
+      "plausibility-advisory-confirmed-operating-baseline",
+    );
+    const controls = advisory.response.recommendations.find(
+      (r) => r.id === "controls",
+    );
+    near(controls.annual_kwh_saved, 500000);
+    assert(controls.warnings.some((w) => w.startsWith("Plausibility:")));
+    assert(
+      !controls.warnings.some((w) => w.startsWith("Evidence limitation:")),
+    );
+    assert.equal(
+      advisory.request.measures[0].operating_baseline_confirmed,
+      true,
+    );
+    assert(
+      !("comparison_conditions_confirmed" in advisory.request.measures[0]),
+    );
+    await shot("advisory-warnings-desktop");
+    await page.setViewportSize({ width: 390, height: 844 });
+    await shot("advisory-warnings-mobile");
+    await audit(
+      "mobile optional operating evidence and warnings",
+      ".savings-workspace",
+    );
+    report.checks.push(
+      "PR #54 real advisory warnings appear once beside affected cards; independent unknown confirmations omit request fields; explicit operating-baseline Yes removes only that limitation, while a legitimate 1000 kW input remains unchanged and triggers unit review without blocking the 500,000 kWh calculation",
+    );
+
     assert.equal(report.errors.length, 0);
     assert(
       report.accessibility.every((a) => a.violations.length === 0),

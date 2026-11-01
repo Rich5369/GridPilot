@@ -245,3 +245,24 @@ it("requires separately attributed positive non-energy benefits and preserves om
       .annual_operating_cost_savings_usd,
   ).toBe(0);
 });
+
+it("keeps new operating evidence attestations independent, unknown and omitted until explicitly answered", () => {
+  const d = emptySavingsDraft(),
+    m = newSavingsMeasure("office", "office");
+  m.load_id = "computers";
+  m.evidence_reference = "Fictional operating evidence";
+  d.measures = [m];
+  let built = buildSavingsRequest(d, {}).request.measures![0];
+  expect(built).not.toHaveProperty("operating_baseline_confirmed");
+  expect(built.safe_to_switch_off).toBeNull();
+  m.confirmations.operating_baseline_confirmed = "yes";
+  built = buildSavingsRequest(d, {}).request.measures![0];
+  expect(built.operating_baseline_confirmed).toBe(true);
+  expect(built.safe_to_switch_off).toBeNull();
+  m.category = "motor";
+  m.confirmations.comparison_conditions_confirmed = "no";
+  built = buildSavingsRequest(d, {}).request.measures![0];
+  expect(built).not.toHaveProperty("operating_baseline_confirmed");
+  expect(built.comparison_conditions_confirmed).toBe(false);
+  expect(built.equivalent_service_confirmed).toBeNull();
+});

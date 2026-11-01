@@ -57,6 +57,10 @@ export const booleanLabels = {
   safe_to_switch_off: "Confirmed safe to switch off?",
   essential_service: "Does it provide an essential service?",
   equivalent_service_confirmed: "Equivalent service confirmed?",
+  operating_baseline_confirmed:
+    "Avoidable power and incremental hours account for existing controls, standby, cycling and actual equipment runtime?",
+  comparison_conditions_confirmed:
+    "Annual comparisons cover comparable periods, runtime, capacity, service and ambient conditions?",
 };
 export const calculationFields = {
   led: [
@@ -122,6 +126,8 @@ export function newSavingsMeasure(
       safe_to_switch_off: "",
       essential_service: "",
       equivalent_service_confirmed: "",
+      operating_baseline_confirmed: "",
+      comparison_conditions_confirmed: "",
     },
     rateEnabled: false,
     rate: {
@@ -388,6 +394,16 @@ export function buildSavingsRequest(
         : (["safe_to_switch_off", "essential_service"] as const)),
     ];
     for (const k of activeFlags) result[k] = confirmation(m.confirmations[k]);
+    // Optional PR #54 attestations are independent of safety/service gates.
+    const evidenceFlag = ["office", "shutdown", "lighting_controls"].includes(
+      m.category,
+    )
+      ? "operating_baseline_confirmed"
+      : ["motor", "refrigeration"].includes(m.category)
+        ? "comparison_conditions_confirmed"
+        : null;
+    if (evidenceFlag && m.confirmations[evidenceFlag] !== "")
+      result[evidenceFlag] = confirmation(m.confirmations[evidenceFlag]);
     if (draft.applicability[m.category] === "no" && result.applicable !== false)
       fail(
         "applicable",

@@ -184,3 +184,30 @@ it.each([undefined, null, 0, 300])(
     }
   },
 );
+
+it("shows per-project advisory warnings beside results once, preserving global overlap notices and raw values", async () => {
+  const r = structuredClone(response) as SavingsResponse;
+  const rec = r.recommendations[0];
+  rec.warnings = [
+    "Plausibility: confirm W versus kW; legitimate values remain accepted.",
+  ];
+  r.warnings = [
+    `${rec.id}: ${rec.warnings[0]}`,
+    "Potential overlapping baseline: do not sum.",
+  ];
+  const { host, close } = await render(r);
+  try {
+    const warning = host.querySelector(
+      `[aria-label="Advisory evidence warnings for ${rec.id}"]`,
+    )!;
+    expect(warning.textContent).toContain("Nonblocking guidance");
+    expect(warning.textContent).toContain("Plausibility:");
+    expect(host.textContent!.match(/Plausibility:/g)).toHaveLength(1);
+    expect(host.textContent).toContain("Potential overlapping baseline");
+    expect(host.querySelector("[data-financial=energy]")!.textContent).toBe(
+      "12,500.00 kWh/year",
+    );
+  } finally {
+    await close();
+  }
+});

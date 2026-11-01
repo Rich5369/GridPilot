@@ -186,6 +186,10 @@ export function SavingsMeasureForm({
         <div className="form-grid">
           {isCalculatedCategory(m.category) &&
             calculationFields[m.category].map(number)}
+          {["office", "shutdown", "lighting_controls"].includes(m.category) &&
+            bool("operating_baseline_confirmed")}
+          {["motor", "refrigeration"].includes(m.category) &&
+            bool("comparison_conditions_confirmed")}
           {equivalent ? (
             bool("equivalent_service_confirmed")
           ) : (
@@ -195,6 +199,15 @@ export function SavingsMeasureForm({
             </>
           )}
         </div>
+        {m.category !== "led" && (
+          <p className="field-hint">
+            Optional evidence confirmations do not replace safety or
+            equivalent-service requirements. Unknown or No retains the backend's
+            advisory limitations without correcting values or blocking otherwise
+            eligible calculations. Describe specification projections and actual
+            operating conditions in the evidence reference.
+          </p>
+        )}
         {!equivalent && (
           <p className="savings-warning">
             Never switch off critical refrigeration, security, ventilation,

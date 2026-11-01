@@ -277,6 +277,7 @@ function validRecommendation(v: unknown): v is SavingsRecommendation {
       "investigation",
       "not_applicable",
     ]) ||
+    (v.warnings !== undefined && !strings(v.warnings)) ||
     !recommendationNumbers.every((k) => nullableNumber(v[k])) ||
     !object(v.provenance) ||
     !json(v.provenance) ||
@@ -419,6 +420,7 @@ export function matchesSavings(
       "annual_incremental_cost_usd",
       "annual_operating_cost_savings_usd",
       "operating_cost_savings_reference",
+      ...measureBooleans,
       ...(isCalculatedCategory(m.category)
         ? calculationFields[m.category]
         : []),

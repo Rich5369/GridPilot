@@ -175,3 +175,26 @@ it("supports additive recurring benefit fields and old responses while rejecting
   rec.annual_operating_cost_savings_usd = -1;
   expect(isSavingsResponse(res)).toBe(false);
 });
+
+it("validates additive advisory warnings and strict independent operating-evidence booleans", () => {
+  const req = structuredClone(request) as SavingsRequest;
+  req.measures![0].operating_baseline_confirmed = false;
+  expect(isSavingsRequest(req)).toBe(true);
+  expect(
+    isSavingsRequest({
+      ...req,
+      measures: [
+        { ...req.measures![0], operating_baseline_confirmed: "false" },
+      ],
+    }),
+  ).toBe(false);
+  const res = structuredClone(response) as SavingsResponse;
+  res.recommendations[0].warnings = ["Plausibility: confirm units"];
+  expect(isSavingsResponse(res)).toBe(true);
+  expect(
+    isSavingsResponse({
+      ...res,
+      recommendations: [{ ...res.recommendations[0], warnings: [42] }],
+    }),
+  ).toBe(false);
+});

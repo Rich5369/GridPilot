@@ -200,6 +200,23 @@ function RecommendationCard({
         supplied, less explicit incremental expenses. Financial evidence remains
         caller-attributed; these values come from the backend.
       </p>
+      {!!r.warnings?.length && (
+        <section
+          className="savings-warning"
+          aria-label={`Advisory evidence warnings for ${r.id}`}
+        >
+          <h4>Review inputs and operating evidence</h4>
+          <p>
+            Nonblocking guidance — no values were corrected or independently
+            verified.
+          </p>
+          <ul>
+            {r.warnings.map((warning, i) => (
+              <li key={i}>{warning}</li>
+            ))}
+          </ul>
+        </section>
+      )}
       <p className="savings-priority">{r.priority_reason}</p>
       {!!r.missing_information.length && (
         <section aria-label={`Missing evidence for ${r.id}`}>
@@ -305,6 +322,16 @@ export function SavingsResults({
       />
     ));
   const b = response.benchmark;
+  // PR #54 copies per-project warnings to the global list for legacy clients.
+  // Show each beside its project and retain global overlap/service notices.
+  const copiedWarnings = new Set(
+    response.recommendations.flatMap((r) =>
+      (r.warnings ?? []).map((w) => `${r.id}: ${w}`),
+    ),
+  );
+  const globalWarnings = response.warnings.filter(
+    (w) => !copiedWarnings.has(w),
+  );
   return (
     <section
       id="savings-results"
@@ -323,7 +350,7 @@ export function SavingsResults({
         savings are intentionally withheld. These are separate from daily
         optimizer comparisons.
       </p>
-      {!!response.warnings.length && (
+      {!!globalWarnings.length && (
         <div className="savings-warning" role="note">
           <h3>Calculation-engine warnings and overlap</h3>
           <p>
@@ -331,7 +358,7 @@ export function SavingsResults({
             category selection is labeled separately.
           </p>
           <ul>
-            {response.warnings.map((w, i) => (
+            {globalWarnings.map((w, i) => (
               <li key={i}>{w}</li>
             ))}
           </ul>

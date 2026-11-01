@@ -73,6 +73,8 @@ export const measureBooleans = [
   "safe_to_switch_off",
   "essential_service",
   "equivalent_service_confirmed",
+  "operating_baseline_confirmed",
+  "comparison_conditions_confirmed",
 ] as const;
 export type MeasureNumber = (typeof measureNumbers)[number];
 export type MeasureBoolean = (typeof measureBooleans)[number];
@@ -134,6 +136,8 @@ export type SavingsRecommendation = {
     "quantified" | "scenario_estimate" | "needs_data" | "not_applicable";
   // Optional for compatibility with v1 deployments predating PR #53.
   annual_operating_cost_savings_usd?: number | null;
+  // Additive advisory evidence limitations; absent on older v1 responses.
+  warnings?: string[];
   confidence: string;
   provenance: Record<string, JsonValue>;
   inputs_used: Record<string, JsonValue>;
