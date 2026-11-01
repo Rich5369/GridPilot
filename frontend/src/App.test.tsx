@@ -57,6 +57,9 @@ async function reopen() {
   await mount();
 }
 async function click(label: string) {
+  if (label === "Continue to your building" && host.querySelector(".welcome-page")) {
+    await act(async () => { history.pushState(null, "", "#setup"); window.dispatchEvent(new HashChangeEvent("hashchange")); });
+  }
   const button = [...host.querySelectorAll("button")].find(
     (b) => b.textContent?.trim() === label,
   )!;
@@ -82,7 +85,7 @@ async function input(selector: string, value: string) {
 }
 beforeEach(() => {
   localStorage.clear();
-  window.history.replaceState(null, "", "/");
+  window.history.replaceState(null, "", "/#setup");
   host = document.createElement("div");
   document.body.append(host);
   root = createRoot(host);
@@ -145,7 +148,7 @@ it("offers Continue and persists real dashboard input/mode changes and Edit buil
   expect(
     host.querySelector<HTMLInputElement>("[name=businessName]")!.value,
   ).toBe("Northstar");
-  await click("Continue to energy profile");
+  await click("Continue");
   expect(host.querySelector<HTMLInputElement>("#limit")!.value).toBe("19.5");
   value = JSON.parse(localStorage.getItem(WORKSPACE_KEY)!);
   expect(value.completed).toBe(false);
@@ -627,7 +630,7 @@ it("opens savings first with incomplete daily inputs and retains the selected go
   draft.workspace.editor.limit = "";
   seed(draft);
   await mount();
-  await click("Continue to savings opportunities");
+  await click("Continue");
   expect(location.hash).toBe("#savings");
   expect(JSON.parse(localStorage.getItem(WORKSPACE_KEY)!).workspace.editor.limit).toBe("");
   expect(host.textContent).toContain("Add an improvement");
@@ -635,4 +638,17 @@ it("opens savings first with incomplete daily inputs and retains the selected go
   expect(location.hash).toBe("#savings");
   expect(JSON.parse(localStorage.getItem(WORKSPACE_KEY)!).workspace.startGoal).toBe("savings");
   expect(fetchMock.mock.calls.filter(([u]) => /api\/(optimize|ai)/.test(String(u)))).toHaveLength(0);
+});
+it("opens a quiet public home and separate Learn more page without modifying saved inputs", async () => {
+  seed(saved(true));
+  const original = localStorage.getItem(WORKSPACE_KEY);
+  history.replaceState(null, "", "#home");
+  await mount();
+  expect(host.querySelector('h1')!.textContent).toBe('Smarter energy decisions for your building.');
+  expect([...host.querySelectorAll('.welcome-actions a')].map(a => a.textContent)).toEqual(['Get started', 'Learn more']);
+  expect(host.querySelector('.setup-card')).toBeNull();
+  await act(async () => { history.pushState(null, '', '#learn-more'); window.dispatchEvent(new HashChangeEvent('hashchange')); });
+  expect([...host.querySelectorAll('main h2')].map(h => h.textContent)).toEqual(['What is GridPilot?', 'How does it work?', 'What can GridPilot help with?']);
+  expect(localStorage.getItem(WORKSPACE_KEY)).toBe(original);
+  expect(fetchMock).not.toHaveBeenCalled();
 });

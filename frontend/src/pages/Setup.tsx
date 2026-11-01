@@ -10,8 +10,6 @@ import {
   Building2,
   Check,
   CheckCircle2,
-  ChevronRight,
-  Clock3,
   Gauge,
   Leaf,
   ShieldCheck,
@@ -21,7 +19,6 @@ import {
 import { ScenarioPanel } from "../components/configuration/ScenarioPanel";
 import { profileSource, validateEditor } from "../data/demoScenario";
 
-import buildingImage from "../assets/commercial-building.webp";
 
 import type { WorkspaceSetup } from "../types/workspace";
 import {
@@ -111,6 +108,10 @@ export function Setup({
       setError("Enter a business name and choose a business type.");
       return;
     }
+    if (step === 0 && !(Number(draft.editor.closing) > Number(draft.editor.opening))) {
+      setError("Closing time must follow opening time on the same day.");
+      return;
+    }
     if (step === 0 && draft.startGoal === "savings") {
       onComplete({ ...draft, name: draft.name.trim() });
       return;
@@ -149,83 +150,15 @@ export function Setup({
           </span>
           GridPilot
         </a>
-        <nav aria-label="Website navigation">
-          <a href="#how-it-works">How it works</a>
-          <a href="#the-model">The planning model</a>
-        </nav>
-        <button className="setup-demo" onClick={onDemo}>
-          Preview an example <ArrowRight size={15} />
-        </button>
+        <nav aria-label="Website navigation"><a href="#home">Back to home</a><a href="#learn-more">Learn more</a></nav>
       </header>
       <main className="setup-main">
-        <div className="setup-heading">
-          <p className="eyebrow">
-            <span className="status-dot" />
-            COMMERCIAL ENERGY, CLEARER
-          </p>
-          <h1>
-            From insight to impact.
-            <br />
-            <span>A smarter energy plan.</span>
-          </h1>
-          <p>
-            A clearer picture of your building. A practical plan for your
-            energy.
-          </p>
-        </div>
         {entryMessage && (
           <p className="workspace-result-notice" role="status">
             {entryMessage}
           </p>
         )}
         <div className="setup-layout">
-          <aside className="setup-intro">
-            <div className="intro-copy">
-              <span className="section-kicker">
-                BUILT AROUND YOUR OPERATIONS
-              </span>
-              <h2>
-                Better energy decisions.
-                <br />A little less guesswork.
-              </h2>
-              <p>
-                Bring your building, charging needs and electricity rates
-                together. See what can shift, what it costs, and where your
-                limits are.
-              </p>
-              <div className="intro-benefits">
-                <span>
-                  <Gauge size={18} />
-                  Understand your peaks
-                </span>
-                <span>
-                  <Clock3 size={18} />
-                  Plan around your hours
-                </span>
-                <span>
-                  <ShieldCheck size={18} />
-                  Check every constraint
-                </span>
-              </div>
-            </div>
-            <figure className="building-figure">
-              <img
-                src={buildingImage}
-                alt="Illustrative commercial building at dusk with delivery vans and EV charging stations"
-              />
-              <figcaption>
-                <span>
-                  <Building2 size={15} />A more resilient working day
-                </span>
-                <small>Illustrative site · not a connected facility</small>
-              </figcaption>
-            </figure>
-            <p className="intro-footnote">
-              <ShieldCheck size={16} />
-              Your building stays in this browser. No account, cross-device sync
-              or hardware connection required.
-            </p>
-          </aside>
           <section className="setup-card" aria-labelledby="setup-title">
             <div className="setup-card-top">
               <span className="section-kicker">YOUR ENERGY WORKSPACE</span>
@@ -233,7 +166,6 @@ export function Setup({
                 {completed ? "Building saved" : `Step ${step + 1} of 4`}
               </span>
             </div>
-            {workspaceControls}
             {completed ? (
               <div className="workspace-resume">
                 <div className="ready-icon">
@@ -249,6 +181,7 @@ export function Setup({
                   Your building inputs are ready. Optimizer results are not
                   restored; run optimization explicitly for fresh results.
                 </p>
+                {workspaceControls}
                 <button
                   type="button"
                   className="run-button"
@@ -259,6 +192,7 @@ export function Setup({
                 <button type="button" className="secondary" onClick={onEdit}>
                   Edit building
                 </button>
+                <button type="button" className="secondary" onClick={onDemo}>Preview an example</button>
               </div>
             ) : (
               <>
@@ -336,6 +270,7 @@ export function Setup({
                         <label>
                           Opening time
                           <HourSelect
+                            id="setup-opening"
                             value={draft.editor.opening}
                             end={false}
                             onChange={(value) =>
@@ -348,6 +283,7 @@ export function Setup({
                         <label>
                           Closing time
                           <HourSelect
+                            id="setup-closing"
                             value={draft.editor.closing}
                             end={true}
                             onChange={(value) =>
@@ -357,6 +293,14 @@ export function Setup({
                             }
                           />
                         </label>
+                        <label>ZIP code <small>Optional</small>
+                          <input name="zipCode" autoComplete="postal-code" inputMode="numeric" pattern="[0-9]{5}(-[0-9]{4})?" maxLength={10} placeholder="e.g. 53703" value={draft.zipCode ?? ""} onChange={e => update({zipCode: e.target.value})} />
+                        </label>
+                      </div>
+                      <fieldset className="days-open"><legend>Days open</legend>
+                        {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map(day => <label key={day}><input type="checkbox" checked={(draft.daysOpen ?? ["Mon", "Tue", "Wed", "Thu", "Fri"]).includes(day)} onChange={e => update({daysOpen: e.target.checked ? [...(draft.daysOpen ?? ["Mon", "Tue", "Wed", "Thu", "Fri"]), day] : (draft.daysOpen ?? ["Mon", "Tue", "Wed", "Thu", "Fri"]).filter(d => d !== day)})} />{day}</label>)}
+                      </fieldset>
+                      <details className="additional-details"><summary>Additional details</summary><div className="setup-fields">
                         <label>
                           Number of employees <small>Optional</small>
                           <input
@@ -387,12 +331,9 @@ export function Setup({
                             />
                           </div>
                         </label>
-                      </div>
+                      </div></details>
                       <p className="field-hint">
-                        Use whole hours in building-local time, e.g. 8:00
-                        AM–6:00 PM. End times are excluded. Overnight windows
-                        are not supported. Business context does not generate or
-                        replace measured demand.
+                        Use building-local hours. Closing must follow opening on the same day. Days open and ZIP code are saved as context; daily calculations use the hours above.
                       </p>
                       <fieldset className="start-goal">
                         <legend>What would you like to do first?</legend>
@@ -416,6 +357,7 @@ export function Setup({
                         mode={draft.mode}
                         onChange={(editor, mode) => update({ editor, mode })}
                       />
+                      <button type="button" className="secondary" onClick={onDemo}>Preview an example</button>
                       <p className="setup-notice">
                         <Sparkles size={16} />
                         Example demand and rates are prefilled. They are
@@ -564,7 +506,7 @@ export function Setup({
                     <button className="run-button" type="submit">
                       {
                         [
-                          draft.startGoal === "savings" ? "Continue to savings opportunities" : "Continue to energy profile",
+                          "Continue",
                           "Continue to your goals",
                           "Review workspace",
                           "Create workspace and calculate",
@@ -573,6 +515,7 @@ export function Setup({
                       <ArrowRight size={17} />
                     </button>
                   </div>
+                  {workspaceControls}
                   <p className="setup-bottom-note">
                     <ShieldCheck size={12} />
                     Planning only. No equipment is controlled or connected.
@@ -582,61 +525,7 @@ export function Setup({
             )}
           </section>
         </div>
-        <section id="how-it-works" className="setup-how">
-          <div>
-            <p className="section-kicker">A CLEARER WAY FORWARD</p>
-            <h2>Your building. Your constraints. Your plan.</h2>
-          </div>
-          <div className="how-grid">
-            {[
-              [
-                "01",
-                "Bring your context",
-                "Set your building profile, rates and operating constraints.",
-              ],
-              [
-                "02",
-                "See the possibilities",
-                "Run the real optimizer to compare baseline demand and a verified schedule.",
-              ],
-              [
-                "03",
-                "Choose your next move",
-                "Explore what-if scenarios and review the tradeoffs before making a decision.",
-              ],
-            ].map(([n, title, copy]) => (
-              <article key={n}>
-                <span>{n}</span>
-                <h3>{title}</h3>
-                <p>{copy}</p>
-              </article>
-            ))}
-          </div>
-        </section>
-        <section id="the-model" className="setup-model">
-          <ShieldCheck size={22} />
-          <div>
-            <h2>Clarity includes knowing the limits.</h2>
-            <p>
-              GridPilot models one day with hourly averages, fixed building
-              demand, EV charging and interruptible equipment. Results estimate
-              energy charges—not full utility bills or measured savings. AI
-              guidance supports your review; the optimizer supplies the numbers.
-            </p>
-          </div>
-          <a href="#setup-form">
-            Build your plan <ChevronRight size={16} />
-          </a>
-        </section>
       </main>
-      <footer className="site-footer">
-        <span className="brand">
-          <Zap size={19} fill="currentColor" />
-          GridPilot
-        </span>
-        <span>Commercial energy planning, with a clearer view.</span>
-        <span>Plan thoughtfully. Act with confidence.</span>
-      </footer>
     </div>
   );
 }

@@ -53,7 +53,7 @@ async function click(text: string) {
 async function company() {
   await change("[name=businessName]", "Northstar Logistics");
   await change(".setup-fields select", "Warehouse & logistics");
-  await click("Continue to energy profile");
+  await click("Continue");
   await change("#setup-analysis-choice", "joint");
 }
 it("completes setup with original fractional energy, edited inputs and bounded goals", async () => {
@@ -112,7 +112,19 @@ it("blocks invalid windows and resets energy inputs without submitting the setup
   );
 });
 it("offers an explicit demonstration without creating a business workspace", async () => {
+  await company();
   await click("Preview an example");
   expect(demo).toHaveBeenCalledOnce();
+  expect(complete).not.toHaveBeenCalled();
+});
+it('rejects reversed operating hours before entering the savings workflow', async () => {
+  await change('[name=businessName]', 'Local shop');
+  await change('.setup-fields select', 'Retail');
+  await change('#setup-opening', '18');
+  await change('#setup-closing', '8');
+  const radio = container.querySelector<HTMLInputElement>('[name=startGoal]')!;
+  await act(async () => radio.click());
+  await click('Continue');
+  expect(container.querySelector('[role=alert]')!.textContent).toContain('Closing time must follow opening');
   expect(complete).not.toHaveBeenCalled();
 });

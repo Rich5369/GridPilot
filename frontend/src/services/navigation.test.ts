@@ -23,3 +23,4 @@ it('supports new primary aliases and the isolated offline example', () => {
 it.each(dashboardViews)('preserves example subview %s for refresh and history', view => {
   expect(parseRoute('#example/' + view)).toBe('example/' + view)
 })
+it('recognizes the separate information page', () => expect(parseRoute('#learn-more')).toBe('learn-more'))

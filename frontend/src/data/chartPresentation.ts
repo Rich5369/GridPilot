@@ -1,5 +1,5 @@
 import { formatWindow } from "./time";
-export const chartAxis = { fontSize: 11, fill: "#95a5ba" };
+export const chartAxis = { fontSize: 11, fill: "var(--gp-muted)" };
 export const chartCursor = {
   stroke: "#7b8ba3",
   strokeWidth: 1,

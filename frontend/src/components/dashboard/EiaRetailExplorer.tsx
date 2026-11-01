@@ -7,7 +7,7 @@ import { isRetailPrices, type RetailPrices } from '../../services/retailPrices'
 
 const month = (value: string) => new Date(`${value}-01T00:00:00Z`).toLocaleDateString('en-US', { month: 'long', year: 'numeric', timeZone: 'UTC' })
 const date = (value: string) => new Date(value.length === 10 ? `${value}T00:00:00Z` : value).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' })
-const color = (value?: number | null) => value == null ? '#213342' : value < 10 ? '#1c5c66' : value < 15 ? '#248889' : value < 20 ? '#43b9a7' : value < 25 ? '#aec99a' : '#e5bf7c'
+const color = (value?: number | null) => value == null ? 'var(--gp-line)' : value < 10 ? '#dceeff' : value < 15 ? '#acd1ee' : value < 20 ? '#79b4df' : value < 25 ? '#468ec4' : '#225e92'
 
 export function EiaRetailExplorer() {
   const [data, setData] = useState<RetailPrices | null>(null)

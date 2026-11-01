@@ -119,8 +119,8 @@ export function MarketExplorer() {
               <path
                 key={s.name}
                 d={s.path}
-                fill="#142635"
-                stroke="#344656"
+                fill="var(--gp-soft)"
+                stroke="var(--gp-muted)"
                 strokeWidth="0.9"
               />
             ))}
