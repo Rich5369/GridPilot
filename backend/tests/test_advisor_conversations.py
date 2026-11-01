@@ -18,8 +18,7 @@ def test_warehouse_multiturn(provider):
         equipment='four electric forklifts', goals='cut our electricity expenses by 50%').model_dump()
     evidence = {key: WAREHOUSE for key, value in profile.items() if value is not None}
     answer = 'Charging flexibility may offer a useful starting point. Your bill reduction goal needs measured consumption and a tariff breakdown before we can assess it.'
-    questions = ['Do you have interval electricity consumption data? It helps distinguish steady demand from charging peaks.',
-                 'Does your bill include demand charges? That determines whether peak power affects your total bill.']
+    questions = ['Does your bill include charges for your highest power use?']
     provider[1](answer=answer, category='clarification_required', profile=profile,
                 profile_evidence=evidence, follow_up_questions=questions, fact_keys=[])
     response = client.post('/api/ai/conversation', json={'request': WAREHOUSE, 'scenario': SAMPLE}).json()
@@ -44,7 +43,7 @@ def test_reject_unsupported_quantities(provider, text):
 
 
 def test_question_limits_and_profile_evidence(provider):
-    provider[1](follow_up_questions=['Question?']*3)
+    provider[1](follow_up_questions=['Question?']*2)
     assert ask().status_code == 502
     provider[1](profile={'consumption_and_units':'100 kWh'}, profile_evidence={'consumption_and_units':'100 kWh'})
     assert ask(history=[{'role':'assistant','content':'100 kWh'}]).status_code == 502

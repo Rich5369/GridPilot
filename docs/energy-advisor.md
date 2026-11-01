@@ -1,5 +1,28 @@
 # GridPilot Energy Advisor
 
+## Concise business-owner replies
+
+Normal replies lead with a direct answer, target 30–60 words across the answer,
+optional `next_step`, and at most one necessary `follow_up_questions` entry.
+The backend rejects ordinary model prose above 80 words, multiple question marks,
+and raw object/array formatting instead of truncating potentially important advice.
+Explicit requests for details or technical explanations allow up to 300 words.
+All generated prose fields retain the existing numerical-claim validation.
+
+The response card separates the answer, optional next step, necessary question,
+and important notices. It does not render Scenario Evidence, raw prices, or device
+configuration objects. `facts` remain in the API for diagnostics and source
+tracking and are supplied to the model on each request; they are excluded from
+frontend conversation state and echoed chat history. Visible `warnings` preserve
+missing-result disclosures, infeasibility reasons in plain language, and solver
+validity warnings independently of model prose. Result-cost explanations remain
+server authored and grounded in the exact retained execution, with a short default
+and a longer explanation on request. The optimizer and calculations are unchanged.
+
+Presentation regressions are covered by `test_advisor_presentation.py` and
+`EnergyAssistant.test.tsx`. Provider-injected tests validate policy and orchestration;
+they do not measure live Meta response quality.
+
 ## Architecture audit
 
 Audited origin/main at eafd88e (PR #32 merged R2 deterministic insights), including R1.1 submitted-snapshot isolation and E1 same-solve device schedules (PR #30). Fetched origin and checked open PRs: none returned at audit time. Existing R2 and demand/product worktrees are separate; no teammate solver files changed.

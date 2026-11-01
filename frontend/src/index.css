@@ -897,6 +897,11 @@ button { transition: background-color 140ms ease, border-color 140ms ease; }
 .advisor-message-heading strong { font-size: 13px; color: #234b37; }
 .advisor-message-heading span { font-size: 11px; color: #52655c; }
 .advisor-message p { white-space: pre-wrap; overflow-wrap: anywhere; font-size: 14px; line-height: 1.8; margin: 12px 0 0; color: #2f4539; }
+.advisor-message > p, .advisor-reply-section { max-width: 68ch; }
+.advisor-reply-section { margin-top: 18px; }
+.advisor-reply-section h4 { font-size: 12px; margin: 0; color: inherit; }
+.advisor-message .advisor-reply-section p { margin-top: 6px; }
+.advisor-reply-notice { padding-left: 12px; border-left: 2px solid #a16b14; }
 .advisor-evidence { margin-top: 18px; border-top: 1px solid #e0e7e2; padding-top: 14px; }
 .advisor-evidence h4 { font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: #52655c; margin: 0 0 10px; }
 .advisor-evidence p { font-size: 13px; }

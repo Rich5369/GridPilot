@@ -101,8 +101,7 @@ def test_detailed_warehouse_onboarding_success_fixture(provider, caplog):
         equipment='four electric forklifts',goals='cut our electricity expenses by 50%').model_dump()
     provider[1](category='clarification_required',answer='Charging flexibility is worth exploring after collecting consumption and tariff details.',
         profile=profile,profile_evidence={k:WAREHOUSE for k,v in profile.items() if v is not None},
-        follow_up_questions=['Can you obtain interval consumption data? It distinguishes steady demand from charging peaks.',
-                             'Does the bill include demand charges? They affect what the energy-only model can explain.'])
+        follow_up_questions=['Can you obtain electricity use readings throughout the day?'])
     response=client.post('/api/ai/conversation',json={'request':WAREHOUSE,'scenario':SAMPLE})
     assert response.status_code==200
     assert response.json()['profile']==profile
