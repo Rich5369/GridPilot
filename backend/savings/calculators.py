@@ -25,7 +25,10 @@ def energy(m: Measure):
 
 def financials(kwh, m):
     gross = kwh * d(m.rate.usd_per_kwh)
-    net = None if m.annual_incremental_cost_usd is None else gross - d(m.annual_incremental_cost_usd)
+    # Omission excludes this benefit from the projection; it does not assert
+    # that the customer's actual recurring savings are zero.
+    operating_savings = d(0) if m.annual_operating_cost_savings_usd is None else d(m.annual_operating_cost_savings_usd)
+    net = None if m.annual_incremental_cost_usd is None else gross + operating_savings - d(m.annual_incremental_cost_usd)
     cost = None if m.installation_cost_usd is None else d(m.installation_cost_usd)
     return dict(annual_energy_charge_savings_usd=money(gross),
         annual_net_savings_usd=None if net is None else money(net),

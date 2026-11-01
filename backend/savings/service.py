@@ -2,7 +2,7 @@
 from datetime import date
 from backend.savings.catalog import CATALOG, CALCULATED, METHODS
 from backend.savings.models import Recommendation, SavingsResponse
-from backend.savings.calculators import energy, financials
+from backend.savings.calculators import energy, financials, d, money
 
 
 def recommend_measure(m, today):
@@ -10,10 +10,13 @@ def recommend_measure(m, today):
     required = c['required_inputs'] if m.category in CALCULATED else []
     missing = [name for name in required if getattr(m, name) is None]
     assumptions = ['Standalone estimate against supplied baseline. Do not sum overlapping measures.',
-        'Energy charges only; no demand, fixed-charge, tax, incentive or escalation savings assumed.',
+        'Electricity savings cover energy charges only; no demand, fixed-charge, tax, incentive or escalation savings assumed.',
         'Evidence and customer applicability are caller attestations; not independently audited.',
         'Annual projection holds the supplied operating schedule and current flat rate constant; future rates are unknown.',
         'Installation cost is caller-supplied net upfront cost; no incentives or tax benefits inferred.']
+    assumptions.append('Recurring non-energy operating-cost savings are not included in this estimate; actual benefits are unknown.'
+        if m.annual_operating_cost_savings_usd is None else
+        'Recurring non-energy operating-cost savings are caller-supplied amounts, not independently verified; exclude electricity savings, one-time incentives and benefits already counted elsewhere.')
     status = 'needs_data'
     applicable = 'confirmed' if m.applicable is True else 'possible'
     result = {}
@@ -28,6 +31,8 @@ def recommend_measure(m, today):
         if not missing:
             kwh = energy(m)
             result['annual_kwh_saved'] = float(kwh)
+            if m.annual_operating_cost_savings_usd is not None:
+                result['annual_operating_cost_savings_usd'] = money(d(m.annual_operating_cost_savings_usd))
             applicable = 'confirmed'
             status = 'quantified' if m.evidence_kind == 'measured' else 'scenario_estimate'
             if m.rate is None:
@@ -57,12 +62,14 @@ def recommend_measure(m, today):
         upfront_cost_usd=m.installation_cost_usd,
         confidence='caller-reported measured evidence' if m.evidence_kind == 'measured' else 'unverified caller scenario',
         provenance={'kind':m.evidence_kind, 'reference':m.evidence_reference, 'load_id':m.load_id,
-            'rate_source':m.rate.source if m.rate else None},
+            'rate_source':m.rate.source if m.rate else None,
+            'operating_cost_savings_reference':m.operating_cost_savings_reference},
         inputs_used=m.model_dump(mode='json', exclude_none=True, include=set(required) |
             {'id','category','load_id','evidence_kind','evidence_reference','applicable','rate',
-             'installation_cost_usd','annual_incremental_cost_usd'}), assumptions=assumptions,
+             'installation_cost_usd','annual_incremental_cost_usd',
+             'annual_operating_cost_savings_usd','operating_cost_savings_reference'}), assumptions=assumptions,
         calculation_method=METHODS.get(m.category,'Investigation only; no numerical model in v1') +
-            '; gross USD = kWh * customer USD/kWh; net = gross - annual incremental cost; payback = upfront/net when net > 0; annual simple ROI = net/upfront * 100 when upfront > 0',
+            '; gross USD = kWh * customer USD/kWh; net = gross + supplied recurring non-energy operating-cost savings (omitted benefit not included) - annual incremental cost (required); payback = upfront/net when net > 0; annual simple ROI = net/upfront * 100 when upfront > 0',
         missing_information=list(dict.fromkeys(missing)), sources=c['sources'],
         next_action='Provide: ' + '; '.join(dict.fromkeys(missing)) if missing else 'Validate baseline, equivalent service and costs before implementation.',
         priority_group=group, priority_reason=reason, **result)

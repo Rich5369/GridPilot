@@ -52,9 +52,14 @@ No category selection establishes savings, safety or feasibility. For broad requ
 def numerical_fact(r):
     def value(number, unit):
         return 'unknown' if number is None else f'{number} {unit}'
+    operating_benefit = ('not included in estimate' if r.annual_operating_cost_savings_usd is None else
+        f'{r.annual_operating_cost_savings_usd} USD/year (caller supplied, not independently verified; source: '
+        f'{r.provenance["operating_cost_savings_reference"] or "explicit zero"})')
     return (f'{r.id} [{r.calculation_status}; {r.confidence}]: '
             f'annual energy reduction {value(r.annual_kwh_saved, "kWh/year")}; '
             f'annual gross energy-charge savings {value(r.annual_energy_charge_savings_usd, "USD/year")}; '
+            f'annual recurring non-energy operating-cost savings {operating_benefit}; '
+            f'annual incremental operating expenses {value(r.inputs_used.get("annual_incremental_cost_usd"), "USD/year")}; '
             f'annual net savings {value(r.annual_net_savings_usd, "USD/year")}; '
             f'upfront cost {value(r.upfront_cost_usd, "USD")}; '
             f'simple payback {value(r.simple_payback_years, "years")}.')
