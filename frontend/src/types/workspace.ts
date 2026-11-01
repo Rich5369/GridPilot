@@ -1,9 +1,11 @@
+import type { SavingsDraft } from "./savings";
 import type { ScenarioEditor } from "./dashboard";
 import type { SchedulingMode } from "../services/api";
 
 export interface WorkspaceSetup {
   kind: "building" | "demo";
   businessContext?: Record<string, string | number | null>;
+  savingsDraft?: SavingsDraft;
   name: string;
   businessType: string;
   employees: string;

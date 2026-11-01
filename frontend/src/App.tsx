@@ -1,3 +1,4 @@
+import type { SavingsDraft } from "./types/savings";
 import { useCallback, useState, useRef } from "react";
 import { Zap } from "lucide-react";
 import { Dashboard } from "./pages/Dashboard";
@@ -59,6 +60,19 @@ export default function App() {
           ? {
               ...previous,
               workspace: { ...previous.workspace, businessContext: profile },
+            }
+          : previous,
+      );
+    },
+    [setRecord],
+  );
+  const saveSavingsDraft = useCallback(
+    (draft: SavingsDraft) => {
+      setRecord((previous) =>
+        previous
+          ? {
+              ...previous,
+              workspace: { ...previous.workspace, savingsDraft: draft },
             }
           : previous,
       );
@@ -246,6 +260,8 @@ export default function App() {
     />
   ) : (
     <Dashboard
+      initialSavingsDraft={workspace.savingsDraft}
+      onSavingsDraftChange={saveSavingsDraft}
       initialCalculation={initialCalculation}
       onInitialSettled={consumeInitial}
       selectedView={route}

@@ -1414,3 +1414,49 @@ button:disabled {
   font-size: 14px;
   border: 1px solid #2e4a5d;
 }
+/* Annual savings evidence stays visually and numerically separate from daily runs. */
+.savings-workspace { display: grid; gap: 20px; min-width: 0; }
+.savings-workspace > .panel, .savings-projects, .savings-context, .savings-applicability, .savings-conversation { padding: 24px; }
+.savings-workspace p, .savings-workspace li { font-size: 13px; line-height: 1.8; }
+.savings-workspace h2 { margin: 0 0 12px; font-size: 20px; }
+.savings-workspace h3 { font-size: 17px; margin: 12px 0; }
+.savings-workspace h4 { font-size: 13px; margin: 16px 0 8px; }
+.savings-workspace summary { cursor: pointer; color: #d2e4ed; font-size: 14px; line-height: 1.7; padding: 10px 0; }
+.savings-workspace .form-grid { grid-template-columns: repeat(2,minmax(0,1fr)); gap: 18px; margin: 18px 0; }
+.savings-workspace .field { min-width: 0; }
+.savings-workspace .field label { display: block; color: #b5cad6; font-size: 12px; line-height: 1.6; margin-bottom: 7px; }
+.savings-workspace input, .savings-workspace select, .savings-workspace textarea { width: 100%; min-width: 0; min-height: 42px; background: #091c29; color: #e0edf3; padding: 10px 12px; border: 1px solid #335363; border-radius: 6px; font: inherit; font-size: 14px; }
+.savings-workspace [aria-invalid=true] { border-color: #dfad79; }
+.savings-workspace .field-error { color: #ffcf9e; }
+.savings-boundary, .savings-no-total { border-left: 3px solid #20c5ac; padding: 12px 16px; background: #0d2c31; color: #c5e5df; }
+.savings-warning { background: #292718; border: 1px solid #72603e; border-radius: 8px; padding: 16px; color: #f0d6ad; overflow-wrap: anywhere; }
+.savings-project-form { border: 1px solid #2a4657; border-radius: 8px; padding: 12px 18px; margin-top: 16px; min-width: 0; }
+.savings-project-body { min-width: 0; }
+.savings-workspace .section-heading { align-items: flex-start; gap: 14px; flex-wrap: wrap; }
+.savings-workspace .section-heading .tag { white-space: normal; line-height: 1.7; max-width: 100%; }
+.savings-add, .savings-actions { display: flex; align-items: flex-end; flex-wrap: wrap; gap: 14px; margin: 18px 0 8px; }
+.savings-add .field { flex: 1; min-width: min(240px,100%); }
+.savings-financial { margin-top: 16px; border-top: 1px solid #294757; padding-top: 10px; }
+.savings-check { display: flex; align-items: flex-start; gap: 10px; font-size: 13px; line-height: 1.8; margin: 16px 0; }
+.savings-check input { width: 17px; min-height: 17px; height: 17px; flex: 0 0 17px; margin-top: 4px; accent-color: #19d3b3; }
+.savings-card-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 18px; margin: 20px 0; }
+.savings-card { padding: 22px; min-width: 0; overflow-wrap: anywhere; }
+.savings-card h3 { margin: 4px 0; }
+.savings-project-id { color: #9db8c7; font-size: 12px!important; }
+.savings-values { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 15px; margin: 22px 0; }
+.savings-values > div { border-top: 1px solid #294455; padding-top: 12px; min-width: 0; }
+.savings-values dt { color: #9fbacb; font-size: 12px; line-height: 1.6; }
+.savings-values dd { margin: 8px 0 0; color: #dff7ef; font-size: 17px; line-height: 1.6; overflow-wrap: anywhere; }
+.savings-priority { color: #a7d7ca; }
+.savings-evidence pre { white-space: pre-wrap; overflow-wrap: anywhere; font-size: 11px; line-height: 1.8; padding: 12px; background: #071621; border-radius: 6px; }
+.savings-results { min-width: 0; }
+.savings-general, .savings-excluded, .savings-benchmark, .savings-selection, .savings-investigation { padding: 22px; margin: 20px 0; }
+.savings-general > section { border-top: 1px solid #294757; padding: 14px 0; }
+.savings-empty { padding: 20px; color: #b3cad6; }
+.savings-request-status { border-left: 3px solid #39c8b0; padding: 14px; background: #0d2a30; }
+.savings-workspace a { color: #89e8d8; text-decoration: underline; text-underline-offset: 3px; }
+.savings-workspace button { max-width: 100%; white-space: normal; line-height: 1.6; }
+@media(max-width:1000px){.savings-card-grid { grid-template-columns: minmax(0,1fr); }}
+@media(max-width:600px){.savings-workspace .form-grid { grid-template-columns: minmax(0,1fr); }.savings-workspace > .panel, .savings-projects, .savings-context, .savings-applicability, .savings-conversation, .savings-card { padding: 18px; }.savings-values { grid-template-columns: minmax(0,1fr); }.savings-actions > button { width: 100%; }}
+.savings-values dd[data-value-state=unknown] { color: #b8cad6; font-size: 14px; }
+.savings-values dd[data-value-state=negative] { color: #f1c88f; }

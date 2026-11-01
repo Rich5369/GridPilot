@@ -1,3 +1,4 @@
+import { validSavingsDraft } from "../data/savingsDraft";
 import { defaultEditor, sourceCategories } from "../data/demoScenario";
 import type { SavedWorkspace, WorkspaceSetup } from "../types/workspace";
 
@@ -184,7 +185,7 @@ export function isSavedWorkspace(value: unknown): value is SavedWorkspace {
         "editor",
         "mode",
       ],
-      ["businessContext"],
+      ["businessContext", "savingsDraft"],
     ) ||
     !choice(w.kind, ["building", "demo"]) ||
     !text(w.name) ||
@@ -194,6 +195,8 @@ export function isSavedWorkspace(value: unknown): value is SavedWorkspace {
     !choice(w.mode, ["ev_only", "joint"]) ||
     !editor(w.editor)
   )
+    return false;
+  if (w.savingsDraft !== undefined && !validSavingsDraft(w.savingsDraft))
     return false;
   if (w.businessContext !== undefined) {
     const c = w.businessContext;

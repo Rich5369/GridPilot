@@ -562,3 +562,65 @@ it.each(["mode", "leave"] as const)(
     ).toHaveLength(1);
   },
 );
+it("saves annual savings drafts and corrected business context without restoring annual responses", async () => {
+  const value = saved(true);
+  value.workspace.businessContext = {
+    employee_count: 43,
+    equipment: "Office lighting",
+  };
+  seed(value);
+  const annual = await import("../../docs/verification/savings-response.json");
+  const catalog = await import("./testFixtures/savingsCatalog.json");
+  fetchMock.mockImplementation(
+    async (url: string) =>
+      new Response(
+        JSON.stringify(
+          String(url).includes("/api/savings/catalog")
+            ? catalog.default
+            : String(url).includes("/api/savings/recommendations")
+              ? annual.default
+              : { status: "ok", project: "GridPilot" },
+        ),
+      ),
+  );
+  await mount();
+  await click("Continue to your building");
+  await click("Savings opportunities");
+  await act(async () => {
+    await import("./components/savings/SavingsOpportunities");
+  });
+  expect(
+    (host.querySelector("#savings-profile-employee_count") as HTMLInputElement)
+      .value,
+  ).toBe("43");
+  await click("Load synthetic LED example");
+  await input("#savings-profile-employee_count", "44");
+  await input("#savings-location-state", "Wisconsin");
+  await click("Calculate savings without AI");
+  expect(host.querySelector("[data-financial=net]")!.textContent).toContain(
+    "$2,500.00",
+  );
+  const stored = JSON.parse(localStorage.getItem(WORKSPACE_KEY)!);
+  expect(stored.workspace.businessContext.employee_count).toBe(44);
+  expect(stored.workspace.savingsDraft.location.state).toBe("Wisconsin");
+  expect(
+    stored.workspace.savingsDraft.measures[0].numbers
+      .annual_incremental_cost_usd,
+  ).toBe("0");
+  expect(localStorage.getItem(WORKSPACE_KEY)).not.toContain(
+    "annual_net_savings_usd",
+  );
+  await reopen();
+  expect(host.textContent).toContain(
+    "No annual savings have been calculated yet",
+  );
+  expect(
+    (host.querySelector("#savings-profile-employee_count") as HTMLInputElement)
+      .value,
+  ).toBe("44");
+  expect(
+    fetchMock.mock.calls.filter(([u]) =>
+      String(u).includes("/api/savings/recommendations"),
+    ),
+  ).toHaveLength(1);
+});
