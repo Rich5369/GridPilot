@@ -12,7 +12,7 @@ type Proposal = {
   proposed_scenario: Scenario | null
 }
 type Profile = Record<string, string | number | null>
-type Advisor = Omit<Proposal, 'status'> & { category: 'answer' | 'clarification_required' | 'scenario_proposal' | 'unavailable_or_unsupported'; facts: string[]; follow_up_questions?: string[]; missing_information?: string[]; profile: Profile }
+type Advisor = Omit<Proposal, 'status'> & { category: 'answer' | 'clarification_required' | 'scenario_proposal' | 'unavailable_or_unsupported'; next_step?: string | null; warnings?: string[]; follow_up_questions?: string[]; missing_information?: string[]; profile: Profile }
 
 const profileFields = ['business_type', 'employee_count', 'operating_hours', 'electricity_cost_and_period', 'consumption_and_units', 'equipment', 'goals', 'restrictions']
 const fieldLabel = (key: string) => ({ electricity_cost_and_period: 'Electricity cost & billing period', consumption_and_units: 'Consumption & units' }[key] ?? key.replaceAll('_', ' '))
@@ -23,7 +23,7 @@ export function EnergyAssistant({ editor, onChange, resultScenario, onComparePro
   const [request, setRequest] = useState('')
   const [proposal, setProposal] = useState<Proposal | null>(null)
   const [snapshot, setSnapshot] = useState('')
-  const [history, setHistory] = useState<{role: 'user' | 'assistant'; content: string; category?: Advisor['category']; message?: string; facts?: string[]; questions?: string[]}[]>([])
+  const [history, setHistory] = useState<{role: 'user' | 'assistant'; content: string; category?: Advisor['category']; message?: string; nextStep?: string | null; warnings?: string[]; questions?: string[]}[]>([])
   const [profile, setProfile] = useState<Profile>(initialProfile ?? {})
   const [edited, setEdited] = useState<Profile>({})
   // User corrections made while a reply is pending take precedence over extraction.
@@ -56,7 +56,7 @@ export function EnergyAssistant({ editor, onChange, resultScenario, onComparePro
       if (!active.current) return
       if (contextRef.current !== submittedKey) { setError('Scenario changed during the request. Please send again.'); return }
       setConversation(submittedKey)
-      setHistory([...prior, { role: 'user', content: request }, { role: 'assistant', category: response.category, message: response.message, facts: response.facts ?? [], questions: response.follow_up_questions ?? [], content: [response.message, ...(response.follow_up_questions ?? []), ...(response.facts ?? [])].join('\n\n').slice(0, 3000) }].slice(-12) as typeof history)
+      setHistory([...prior, { role: 'user', content: request }, { role: 'assistant', category: response.category, message: response.message, nextStep: response.next_step, warnings: response.warnings ?? [], questions: response.follow_up_questions ?? [], content: [response.message, response.next_step, ...(response.warnings ?? []), ...(response.follow_up_questions ?? [])].filter(Boolean).join('\n\n').slice(0, 3000) }].slice(-12) as typeof history)
       const nextProfile = {...response.profile, ...editedRef.current}
       setProfile(nextProfile)
       onProfileChange?.(nextProfile)
@@ -103,11 +103,12 @@ export function EnergyAssistant({ editor, onChange, resultScenario, onComparePro
     <div className="advisor-history" role="log" aria-label="Energy advisor conversation" aria-live="polite" aria-busy={busy}>{history.map((turn, i) => <article className={`advisor-message ${turn.role} ${turn.category ?? ''}`} key={i}>
       <div className="advisor-message-heading"><strong>{turn.role === 'user' ? 'You' : 'Energy Advisor'}</strong>{turn.role === 'assistant' && <span>{turn.category === 'clarification_required' ? 'Clarification needed' : turn.category === 'scenario_proposal' ? 'Proposal · review required' : turn.category === 'unavailable_or_unsupported' ? 'Supported scope' : 'Scenario guidance'}</span>}</div>
       <p>{turn.message ?? turn.content}</p>
-      {!!turn.questions?.length && <section aria-label="Follow-up questions"><h4>Next questions</h4><ul>{turn.questions.map(question => <li key={question}>{question}</li>)}</ul></section>}
-      {!!turn.facts?.length && <section className="advisor-evidence" aria-label="Scenario evidence"><h4>Scenario evidence</h4>{turn.facts.map((fact, index) => <div className={fact.startsWith('Verified submitted ') ? 'advisor-verified' : 'advisor-fact'} key={index}>{fact.startsWith('Verified submitted ') && <span className="advisor-evidence-label">Verified solver result</span>}<p>{fact}</p></div>)}</section>}
+      {turn.nextStep && <section className="advisor-reply-section" aria-label="Suggested next step"><h4>Next step</h4><p>{turn.nextStep}</p></section>}
+      {!!turn.warnings?.length && <section className="advisor-reply-section advisor-reply-notice" aria-label="Important information"><h4>Keep in mind</h4>{turn.warnings.map(warning => <p key={warning}>{warning}</p>)}</section>}
+      {!!turn.questions?.length && <section className="advisor-reply-section" aria-label="Follow-up question"><h4>One question</h4><p>{turn.questions[0]}</p></section>}
     </article>)}</div>
-    {proposal && <div className="advisor-proposal" aria-label="Proposed scenario changes"><span className="advisor-eyebrow">REVIEW SCENARIO CHANGES</span><h3>Proposed operational change</h3><p className="advisor-caption">Not yet applied · feasibility and savings have not been calculated for this proposal.</p><p>{proposal.message}</p>
-      <dl>{Object.entries(proposal.changes).filter(([, v]) => v != null).map(([k, v]) => <div key={k}><dt>{{ building_max_demand_kw: 'Site power cap', all_ev_deadline_hour: 'All EVs ready by', peak_price_increase_percent: 'Highest tariff increase' }[k] ?? k}</dt><dd>{v}{k === 'building_max_demand_kw' ? ' kW' : k === 'all_ev_deadline_hour' ? ':00' : '%'}</dd></div>)}</dl>
+    {proposal && <div className="advisor-proposal" aria-label="Proposed scenario changes"><span className="advisor-eyebrow">REVIEW SCENARIO CHANGES</span><h3>Proposed operational change</h3><p className="advisor-caption">Not yet applied · feasibility and savings have not been calculated for this proposal.</p>
+      <dl>{Object.entries(proposal.changes).filter(([, v]) => v != null).map(([k, v]) => <div key={k}><dt>{{ building_max_demand_kw: "Building’s power limit", all_ev_deadline_hour: 'All vehicles ready by', peak_price_increase_percent: 'Highest electricity price increase' }[k] ?? k}</dt><dd>{v}{k === 'building_max_demand_kw' ? ' kW' : k === 'all_ev_deadline_hour' ? ':00' : '%'}</dd></div>)}</dl>
       {stale && <p>Draft differs from submitted context. Restore the submitted draft or request a new proposal after submitting it.</p>}
       <button className="run-button" onClick={() => apply()} disabled={stale || busy}>Apply Changes</button> {onCompareProposal && <button onClick={() => apply(true)} disabled={stale || busy}>Compare as alternative</button>} <button onClick={() => setProposal(null)}>Cancel</button>
     </div>}
