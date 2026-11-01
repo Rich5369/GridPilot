@@ -60,7 +60,7 @@ Response excerpt (other categories depend on provider selection):
 {
   "source": "meta",
   "selected_categories": ["led"],
-  "facts": ["lights [scenario_estimate; unverified caller scenario]: annual energy reduction 12500.0 kWh/year; annual gross energy-charge savings unknown; annual net savings unknown; upfront cost 2500.0 USD; simple payback unknown."],
+  "facts": ["lights [scenario_estimate; unverified caller scenario]: annual energy reduction 12500.0 kWh/year; annual gross energy-charge savings unknown; annual recurring non-energy operating-cost savings not included in estimate; annual incremental operating expenses 0.0 USD/year; annual net savings unknown; upfront cost 2500.0 USD; simple payback unknown."],
   "follow_up_questions": ["Investigation only: for LED lighting replacement (lights), provide or confirm: rate: current customer-specific flat avoidable USD/kWh energy rate?"],
   "savings": {"version": "1", "portfolio_savings_usd": null}
 }
@@ -82,6 +82,8 @@ For a non-AI form, submit the `evidence` object directly to `/api/savings/recomm
 | Motor / refrigeration | Comparable before/after annual kWh and equivalent-service confirmation |
 
 Customer rate enables gross monetary savings. Explicit annual incremental cost (zero only if confirmed) enables net savings. Upfront cost enables payback/ROI. Unknowns remain null, never zero. Opening hours do not automatically establish device runtime; monthly spend does not establish USD/kWh. Reuse onboarding context, then ask the caller to confirm each structured measurement, applicability, safety flag, tariff and cost.
+
+Measures may optionally supply `annual_operating_cost_savings_usd` and `operating_cost_savings_reference`. A positive recurring non-energy benefit requires a nonblank source/basis reference; Meta cannot supply either field. Net savings add this supplied benefit to gross energy-charge savings before subtracting explicit incremental expenses. Omitted/null benefits are **not included**, rather than asserted zero; missing expenses or an unusable rate still leave net/payback/ROI null. Server-owned facts distinguish the benefit, source and incremental expenses, including on deterministic fallback. The benefit is caller supplied, never independently verified by its presence. Do not enter electricity savings or one-time incentives here. See [request/response examples and handoff](recurring-operating-cost-savings.md).
 
 `quantified` means complete caller-reported measured energy evidence, not an independent audit. `scenario_estimate` means a hypothetical/user-entered energy scenario. Both can still have unknown financial results. `needs_data` requests missing evidence; `not_applicable` must not be promoted as an investment. Preserve `provenance`, `inputs_used`, `confidence`, assumptions, missing information, next action and warnings.
 

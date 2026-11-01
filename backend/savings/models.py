@@ -58,6 +58,10 @@ class Measure(Strict):
     rate: Rate | None = None
     installation_cost_usd: Number | None = None
     annual_incremental_cost_usd: Number | None = None
+    annual_operating_cost_savings_usd: Number | None = Field(default=None,
+        description='Caller-supplied annual recurring non-energy expense reduction. Excludes electricity savings and one-time incentives. Null means not included, not zero actual savings.')
+    operating_cost_savings_reference: str | None = Field(default=None, min_length=1, max_length=500,
+        description='Source and basis for the recurring non-energy benefit; required for a positive amount. Caller evidence, not independent verification.')
     fixture_count: int | None = Field(default=None, ge=1, le=10000000)
     old_watts: Number | None = None
     new_watts: Number | None = None
@@ -74,6 +78,20 @@ class Measure(Strict):
     before_annual_kwh: Number | None = None
     after_annual_kwh: Number | None = None
     equivalent_service_confirmed: bool | None = None
+
+    @field_validator('operating_cost_savings_reference')
+    @classmethod
+    def nonblank_operating_cost_reference(cls, value):
+        if value is not None and not value.strip():
+            raise ValueError('Operating-cost savings reference must not be blank')
+        return value
+
+    @model_validator(mode='after')
+    def documented_operating_cost_savings(self):
+        if self.annual_operating_cost_savings_usd is not None and self.annual_operating_cost_savings_usd > 0:
+            if self.operating_cost_savings_reference is None:
+                raise ValueError('Positive annual_operating_cost_savings_usd requires operating_cost_savings_reference documenting a recurring non-energy benefit')
+        return self
 
     @model_validator(mode='after')
     def physical_bounds(self):
@@ -109,7 +127,10 @@ class Recommendation(Contract):
     calculation_status: Literal['quantified', 'scenario_estimate', 'needs_data', 'not_applicable']
     annual_kwh_saved: float | None = Field(default=None, allow_inf_nan=False)
     annual_energy_charge_savings_usd: float | None = Field(default=None, allow_inf_nan=False)
-    annual_net_savings_usd: float | None = Field(default=None, allow_inf_nan=False)
+    annual_operating_cost_savings_usd: float | None = Field(default=None, allow_inf_nan=False,
+        description='Supplied recurring non-energy benefit, rounded to cents after energy eligibility passes. Null means not included; does not establish net savings or independent verification.')
+    annual_net_savings_usd: float | None = Field(default=None, allow_inf_nan=False,
+        description='Gross annual energy-charge savings plus supplied recurring non-energy savings minus explicit annual incremental expenses. Null when required energy, rate or expense evidence is missing.')
     upfront_cost_usd: float | None = Field(default=None, allow_inf_nan=False)
     simple_payback_years: float | None = Field(default=None, allow_inf_nan=False)
     annual_simple_roi_percent: float | None = Field(default=None, allow_inf_nan=False)
