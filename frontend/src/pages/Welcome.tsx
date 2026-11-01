@@ -1,5 +1,6 @@
 import { Zap } from 'lucide-react'
 import './landing.css'
+import powerlinePhoto from '../assets/powerline.png'
 
 function Header() {
   return <header className="site-header welcome-header">
@@ -26,8 +27,9 @@ export function Landing() {
             <a className="secondary" href="#learn-more">Learn more</a>
           </div>
         </div>
-        {/* The exact supplied powerline photograph is missing from the attachments.
-            Leave this column empty until the original is available; do not substitute imagery. */}
+        <figure className="landing-photo">
+          <img src={powerlinePhoto} width="1013" height="672" alt="Electricity transmission towers and overhead powerlines beneath a blue, clouded sky, with a yellow field in the foreground" fetchPriority="high" />
+        </figure>
       </section>
       <section className="landing-steps" aria-labelledby="landing-steps-title">
         <h2 id="landing-steps-title">Get started in 3 simple steps</h2>

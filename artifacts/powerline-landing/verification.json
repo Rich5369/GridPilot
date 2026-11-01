@@ -1,6 +1,6 @@
 {
-  "status": "partial: required reference images unavailable",
-  "photo": "No photograph supplied, generated or substituted; final image crop and reference comparison remain unverified.",
+  "status": "complete",
+  "photo": "Exact supplied PNG copied unchanged to frontend/src/assets/powerline.png; SHA-256 3ff8f7586dd260586d1d83a36609a981c999d9189b87dc50f599bad0f493e377. Tower and yellow field checked against the supplied references.",
   "checks": [
     "Entire landing and three steps visible without scrolling at 1366×768",
     "Entire landing and three steps visible without scrolling at 1440×900",
