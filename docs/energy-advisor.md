@@ -2,14 +2,24 @@
 
 ## Concise business-owner replies
 
-Normal replies lead with a direct answer, target 30–60 words across the answer,
-optional `next_step`, and at most one necessary `follow_up_questions` entry.
-The backend rejects ordinary model prose above 80 words, multiple question marks,
+Normal replies lead with a direct answer and target around four short sentences
+in two brief paragraphs (50–90 words in the main answer). Simple replies can be
+shorter. Optional `summary_bullets` contain one or two short takeaways from the
+answer; very short replies need no bullets. At most one necessary follow-up
+question is allowed. The backend rejects ordinary model prose above 120 words
+across the answer, bullets and follow-up question, multiple question marks,
 and raw object/array formatting instead of truncating potentially important advice.
 Explicit requests for details or technical explanations allow up to 300 words.
 All generated prose fields retain the existing numerical-claim validation.
+For specific advice, the model can reference named `scenario_specifics` tokens.
+Only the backend inserts their exact price and charging-window sentences; model
+prose still cannot supply quantities. Flat prices explicitly rule out savings
+from timing alone. Cheapest charging windows are input comparisons, not verified
+schedules. Configured equipment stays separate from the user's business profile.
+Unknown or unavailable tokens are rejected, and expanded replies retain the word
+budget. No new optimization is performed to produce these details.
 
-The response card separates the answer, optional next step, necessary question,
+The response card separates the short paragraphs, optional takeaway bullets, necessary question,
 and important notices. It does not render Scenario Evidence, raw prices, or device
 configuration objects. `facts` remain in the API for diagnostics and source
 tracking and are supplied to the model on each request; they are excluded from

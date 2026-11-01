@@ -11,14 +11,22 @@ def wants_details(request):
         r'tell me more|explain more|go deeper|elaborate)\b', request, re.I))
 
 
-def validate_reply(answer, next_step, questions, detailed):
+def validate_reply(answer, bullets, questions, detailed):
     """Reject an invalid completion rather than cutting off advice or a warning."""
-    prose = ' '.join([answer, next_step or '', *questions])
-    if (len(prose.split()) > (300 if detailed else 80)
+    prose = ' '.join([answer, *bullets, *questions])
+    if (len(prose.split()) > (300 if detailed else 120)
             or prose.count('?') > 1
             or any(mark in prose for mark in ('{', '}', '[', ']', '```'))):
         raise fail(502, 'ai_invalid_response',
                    'The advisor could not format a clear reply. Please try again. No changes were applied.')
+
+
+def format_answer(answer):
+    """Keep complete sentences and quantities while breaking up dense replies."""
+    if '\n\n' in answer:
+        return answer
+    sentences = re.split(r'(?<=[.!?])\s+(?=[A-Z])', answer.strip())
+    return '\n\n'.join(' '.join(sentences[i:i + 2]) for i in range(0, len(sentences), 2))
 
 
 def brief_cost_answer(result):
@@ -33,7 +41,8 @@ def brief_cost_answer(result):
             f'${result.baseline_electricity_cost_usd:.2f} before and '
             f'${result.optimized_electricity_cost_usd:.2f} with this plan. '
             'The comparison uses your electricity prices and scheduled power use. '
-            'It does not mean your equipment used less energy or predict your full electricity bill.')
+            'This does not mean your equipment used less energy. '
+            'It does not predict your full electricity bill.')
 
 
 def result_notices(result, keys):
