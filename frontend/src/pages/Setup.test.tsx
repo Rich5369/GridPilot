@@ -53,8 +53,8 @@ async function click(text: string) {
 async function company() {
   await change("[name=businessName]", "Northstar Logistics");
   await change(".setup-fields select", "Warehouse & logistics");
-  await change("#setup-analysis-choice", "joint");
   await click("Continue to energy profile");
+  await change("#setup-analysis-choice", "joint");
 }
 it("completes setup with original fractional energy, edited inputs and bounded goals", async () => {
   await company();
@@ -112,7 +112,7 @@ it("blocks invalid windows and resets energy inputs without submitting the setup
   );
 });
 it("offers an explicit demonstration without creating a business workspace", async () => {
-  await click("Explore demo");
+  await click("Preview an example");
   expect(demo).toHaveBeenCalledOnce();
   expect(complete).not.toHaveBeenCalled();
 });

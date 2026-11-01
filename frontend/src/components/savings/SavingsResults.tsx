@@ -220,7 +220,7 @@ function RecommendationCard({
       <p className="savings-priority">{r.priority_reason}</p>
       {!!r.missing_information.length && (
         <section aria-label={`Missing evidence for ${r.id}`}>
-          <h4>Information needed</h4>
+          <h4>Add these details to calculate this estimate</h4>
           <ul>
             {r.missing_information.map((m, i) => (
               <li key={i}>{m}</li>
@@ -234,11 +234,11 @@ function RecommendationCard({
       </p>
       {r.calculation_status !== "not_applicable" && confirmed !== false && (
         <button type="button" className="secondary" onClick={onAnswer}>
-          Provide evidence for this opportunity
+          {r.annual_kwh_saved === null ? 'Add missing details' : r.annual_energy_charge_savings_usd === null ? 'Add electricity price' : r.upfront_cost_usd === null ? 'Add installation cost' : 'Edit this improvement'}
         </button>
       )}
       <details className="savings-evidence">
-        <summary>Inputs, provenance and calculation details</summary>
+        <summary>How this was calculated</summary>
         <h4>Inputs used (submitted values and units)</h4>
         <pre>{JSON.stringify(r.inputs_used, null, 2)}</pre>
         <h4>Evidence provenance</h4>

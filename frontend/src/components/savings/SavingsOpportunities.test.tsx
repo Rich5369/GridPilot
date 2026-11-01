@@ -98,7 +98,7 @@ it("reads catalog only on mount; explicit calculation sends profile/evidence, ne
   await mount();
   expect(calculateSavings).not.toHaveBeenCalled();
   expect(converseSavings).not.toHaveBeenCalled();
-  await click("Calculate savings without AI");
+  await click("Calculate savings");
   expect(calculateSavings).toHaveBeenCalledTimes(1);
   const request = vi.mocked(calculateSavings).mock.calls[0][0];
   expect(request.profile).toMatchObject({
@@ -121,7 +121,7 @@ it("guards duplicate submissions, preserves corrections while pending and marks 
   );
   await mount();
   const button = [...host.querySelectorAll("button")].find(
-    (b) => b.textContent === "Calculate savings without AI",
+    (b) => b.textContent === "Calculate savings",
   )!;
   await act(async () => {
     button.click();
@@ -150,10 +150,10 @@ it("cancels without losing form state and cannot accept an older reply after a n
       }),
   );
   await mount();
-  await click("Calculate savings without AI");
+  await click("Calculate savings");
   await click("Cancel savings request");
   expect(host.textContent).toContain("server may still be processing");
-  await click("Calculate savings without AI");
+  await click("Calculate savings");
   expect(host.querySelector("[data-financial=net]")!.textContent).toContain(
     "$2,500.00",
   );
@@ -177,25 +177,25 @@ it("shows 422 paths, retains values and makes the non-AI retry explicit", async 
     }),
   );
   await mount();
-  await click("Calculate savings without AI");
+  await click("Calculate savings");
   expect(host.textContent).toContain("HTTP 422");
   expect(host.textContent).toContain("Review source");
   expect(
     (host.querySelector("#savings-0-fixture_count") as HTMLInputElement).value,
   ).toBe("100");
-  await click("Calculate savings without AI");
+  await click("Calculate savings");
   expect(calculateSavings).toHaveBeenCalledTimes(2);
 });
 it("lets missing measurements reach the engine but blocks nonfinite or schema-invalid fields before HTTP", async () => {
   const d = draft();
   d.measures[0].numbers.fixture_count = "";
   await mount(d);
-  await click("Calculate savings without AI");
+  await click("Calculate savings");
   expect(
     vi.mocked(calculateSavings).mock.calls[0][0].measures![0].fixture_count,
   ).toBeNull();
   await input("savings-0-fixture_count", "1.5");
-  await click("Calculate savings without AI");
+  await click("Calculate savings");
   expect(calculateSavings).toHaveBeenCalledTimes(1);
   expect(
     host
@@ -223,7 +223,7 @@ it("does not infer scheduling exclusion, omits unknown applicability and labels 
   expect(host.textContent).toContain(
     "AI selection unavailable · deterministic fallback",
   );
-  await click("Calculate savings without AI");
+  await click("Calculate savings");
   expect(calculateSavings).toHaveBeenCalledTimes(1);
 });
 it("ignores a reply after leaving this building and keeps estimates useful if the catalog read fails", async () => {
@@ -237,7 +237,7 @@ it("ignores a reply after leaving this building and keeps estimates useful if th
   );
   await mount();
   expect(host.textContent).toContain("Catalog unavailable");
-  await click("Calculate savings without AI");
+  await click("Calculate savings");
   await act(async () => root.unmount());
   root = createRoot(host);
   await act(async () => resolve(response as SavingsResponse));

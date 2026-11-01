@@ -308,24 +308,11 @@ export function SavingsOpportunities({
     <div className="savings-workspace">
       <section className="panel savings-intro">
         <p className="eyebrow">BUILDING OPPORTUNITIES · ANNUAL ESTIMATES</p>
-        <h2>Savings opportunities for {workspaceName}</h2>
-        <p>
-          Start with relevant equipment and evidence. The deterministic engine
-          calculates standalone annual estimates; AI selection is optional. No
-          EVs, daily optimizer result or AI credential is required for these
-          calculations.
-        </p>
-        <p className="field-hint">
-          Project inputs, relevance confirmations and location stay saved in
-          this browser. Results and conversation history stay in this session;
-          returning never automatically calculates or requests AI.
-        </p>
-        <p className="savings-boundary">
-          Keep annual project estimates separate from daily optimization. No
-          portfolio total is calculated. Opening hours, staff counts, monthly
-          bills and EIA state prices do not supply equipment measurements or a
-          customer tariff.
-        </p>
+        <p>Explore improvements for your building. Add the details you know to estimate energy savings, costs, and payback.</p>
+        <p className="field-hint">Modeled annual estimates for individual improvements. Unknown values stay unknown; estimates are not added into a portfolio total.</p>
+        <p><strong>{workspaceName}</strong> · {profile.business_type ?? 'Business type not provided'}</p>
+        <a className="secondary" href="#savings-building-context" onClick={(e) => { e.preventDefault(); const details = document.getElementById('savings-building-context') as HTMLDetailsElement; details.open = true; details.scrollIntoView?.({block:'start'}); details.querySelector('input')?.focus(); }}>Edit building summary</a>
+        <details><summary>How annual estimates work</summary><p>Inputs are saved in this browser; results stay in this session. Annual improvements do not require a daily plan. Opening hours, monthly spending and regional benchmarks do not establish equipment measurements or your electricity rate.</p></details>
         {catalogError && (
           <p className="savings-warning" role="status">
             Catalog unavailable: {catalogError} The supported project forms and
@@ -348,8 +335,8 @@ export function SavingsOpportunities({
           void submit("calculation");
         }}
       >
-        <details className="panel savings-context">
-          <summary>Building context and location</summary>
+        <details id="savings-building-context" className="panel savings-context">
+          <summary>About your building</summary>
           <p>
             Reused from your saved setup and corrections. This is caller
             context, not measurement evidence. Changes are saved in this browser
@@ -442,7 +429,7 @@ export function SavingsOpportunities({
           </div>
         </details>
         <details className="panel savings-applicability">
-          <summary>Confirm equipment relevance · Yes / No / Not sure</summary>
+          <summary>Which equipment does your building have?</summary>
           <p>
             Do not infer ownership from business type or the daily analysis
             mode. No EVs alone does not exclude scheduling: non-EV interruptible
@@ -478,8 +465,8 @@ export function SavingsOpportunities({
         <section className="panel savings-projects">
           <div className="section-heading">
             <div>
-              <p className="eyebrow">YOUR STRUCTURED EVIDENCE</p>
-              <h2>Project inputs</h2>
+              <p className="eyebrow">CHOOSE AN IMPROVEMENT</p>
+              <h2>Add an improvement</h2>
             </div>
             <button
               type="button"
@@ -495,7 +482,7 @@ export function SavingsOpportunities({
             <div className="savings-warning" role="alert">
               <p>
                 Replace your current projects with a clearly labeled fictional
-                LED example? Building context and location stay unchanged.
+                LED example? About your building stay unchanged.
               </p>
               <button type="button" className="secondary" onClick={loadExample}>
                 Replace with synthetic LED example
@@ -516,7 +503,7 @@ export function SavingsOpportunities({
           </p>
           <div className="savings-add">
             <div className="field">
-              <label htmlFor="savings-new-category">Calculation category</label>
+              <label htmlFor="savings-new-category">What would you like to improve?</label>
               <select
                 id="savings-new-category"
                 value={category}
@@ -537,7 +524,7 @@ export function SavingsOpportunities({
               onClick={() => add(category)}
               disabled={draft.measures.length >= 100}
             >
-              Add project
+              Add improvement
             </button>
           </div>
           {!draft.measures.length && (
@@ -579,7 +566,7 @@ export function SavingsOpportunities({
               disabled={!!busy}
               aria-busy={busy === "calculation"}
             >
-              Calculate savings without AI
+              Calculate savings
             </button>
             {busy && (
               <button className="secondary" type="button" onClick={cancel}>
@@ -594,14 +581,9 @@ export function SavingsOpportunities({
           </p>
         </section>
       </form>
-      <section className="panel savings-conversation">
-        <h2>Optional opportunity selection</h2>
-        <p>
-          This is separate from the exact-result Energy Advisor. No optimizer
-          Scenario or result ID is sent. AI can select categories; only the
-          engine supplies numbers. You can always use the non-AI calculation
-          above.
-        </p>
+      <details className="panel savings-conversation">
+        <summary>Help me find opportunities</summary>
+        <p>Ask for help choosing an improvement. Optional AI selects relevant opportunities; the calculation engine supplies annual estimates. For daily plan advice, use Ask Energy Advisor.</p>
         <form
           onSubmit={(e) => {
             e.preventDefault();
@@ -635,7 +617,7 @@ export function SavingsOpportunities({
             Ask AI to select opportunities
           </button>
         </form>
-      </section>
+      </details>
       {!!Object.keys(errors).length && (
         <div className="savings-warning" role="alert">
           <h3>Review savings inputs</h3>

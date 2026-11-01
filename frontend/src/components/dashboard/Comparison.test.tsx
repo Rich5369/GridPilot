@@ -35,3 +35,14 @@ it('explains infeasibility without inventing optimized metrics', async () => {
   expect(container.textContent).toContain('Unavailable')
   await act(async () => root.unmount())
 })
+it('retains the calculated cost but withholds differences for an invalid baseline', async () => {
+  const example = (await import('../../data/examplePlan.json')).default
+  const invalid = structuredClone(example.result) as OptimizationResult
+  invalid.operating_plan!.baseline_constraint_violations = ['Baseline exceeds site limit']
+  const container = document.createElement('div'), root = createRoot(container)
+  await act(async () => root.render(<Comparison result={invalid} limit={25} stale={false} />))
+  expect(container.textContent).toContain('$20.58')
+  expect(container.textContent).toContain('Unavailable — baseline comparison is not valid')
+  expect(container.textContent).not.toContain('lower energy charges for this day')
+  await act(async () => root.unmount())
+})

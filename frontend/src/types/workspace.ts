@@ -3,6 +3,7 @@ import type { ScenarioEditor } from "./dashboard";
 import type { SchedulingMode } from "../services/api";
 
 export interface WorkspaceSetup {
+  startGoal?: "savings" | "planning";
   kind: "building" | "demo";
   businessContext?: Record<string, string | number | null>;
   savingsDraft?: SavingsDraft;

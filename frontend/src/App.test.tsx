@@ -6,7 +6,6 @@ import captures from "../../artifacts/product-redesign/verification.json";
 import App from "./App";
 import {
   emptyWorkspace,
-  demoWorkspace,
   WORKSPACE_KEY,
 } from "./services/workspaceStorage";
 import type { SavedWorkspace } from "./types/workspace";
@@ -132,7 +131,7 @@ it("offers Continue and persists real dashboard input/mode changes and Edit buil
   await mount();
   await click("Continue to your building");
   expect(host.textContent).toContain("No optimizer result has been restored");
-  await click("Scenario configuration");
+  await click("Energy plan");
   await input("#limit", "19.5");
   const select = host.querySelector<HTMLSelectElement>("#analysis-choice")!;
   await act(async () => {
@@ -169,7 +168,7 @@ it("restores inputs without replaying optimizer results, result IDs or execution
   );
   await mount();
   await click("Continue to your building");
-  await click("Run optimization");
+  await click("Calculate energy plan");
   // Flush the existing lazy comparison module, without starting another request.
   await act(async () => {
     await import("./components/dashboard/Comparison");
@@ -261,28 +260,23 @@ it("confirms clearing, removes only this saved workspace and stays cleared on re
   await reopen();
   expect(localStorage.getItem(WORKSPACE_KEY)).toBeNull();
 });
-it("labels demo workspaces and requires explicit replacement of existing saved inputs", async () => {
+it("previews a checked example without replacing saved inputs or replaying a request", async () => {
   seed(saved(true));
   await mount();
-  await click("Explore demo");
-  expect(JSON.parse(localStorage.getItem(WORKSPACE_KEY)!).workspace.name).toBe(
-    "Northstar",
-  );
-  await click("Keep workspace");
-  await click("Explore demo");
-  await click("Replace with demonstration");
-  expect(JSON.parse(localStorage.getItem(WORKSPACE_KEY)!).workspace).toEqual(
-    demoWorkspace(),
-  );
-  expect(host.textContent).toContain("Demonstration workspace");
+  const original = localStorage.getItem(WORKSPACE_KEY);
+  await click("Preview an example");
+  expect(localStorage.getItem(WORKSPACE_KEY)).toBe(original);
+  expect(host.textContent).toContain("Example snapshot · synthetic building");
+  expect(location.hash).toBe("#example");
   await reopen();
-  expect(host.textContent).toContain("Demonstration workspace");
+  expect(host.textContent).toContain("Example snapshot · synthetic building");
+  expect(fetchMock.mock.calls.filter(([u]) => /api\/(optimize|ai)/.test(String(u)))).toHaveLength(0);
 });
 it("retains edited advisor business context without storing its conversation", async () => {
   seed(saved(true));
   await mount();
   await click("Continue to your building");
-  await click("AI assistant");
+  await click("Ask Energy Advisor");
   await input(".advisor-fields label:nth-child(2) input", "43");
   await input(".advisor-fields label:nth-child(6) input", "Warehouse vans");
   const stored = JSON.parse(localStorage.getItem(WORKSPACE_KEY)!);
@@ -290,7 +284,7 @@ it("retains edited advisor business context without storing its conversation", a
   expect(stored.workspace.businessContext.equipment).toBe("Warehouse vans");
   expect(stored).not.toHaveProperty("history");
   await reopen();
-  await click("AI assistant");
+  await click("Ask Energy Advisor");
   expect(
     host.querySelector<HTMLInputElement>(
       ".advisor-fields label:nth-child(2) input",
@@ -360,7 +354,7 @@ it("restores a dashboard section directly, handles history and Home Continue wit
   await mount();
   expect(host.querySelector<HTMLInputElement>("#limit")!.value).toBe("17");
   expect(host.textContent).toContain("No optimizer result has been restored");
-  await click("AI assistant");
+  await click("Ask Energy Advisor");
   expect(location.hash).toBe("#assistant");
   await act(async () => {
     history.replaceState(null, "", "#configuration");
@@ -440,8 +434,8 @@ it("starts exactly one event-driven setup calculation in Strict Mode and opens p
     resolve(new Response(JSON.stringify(fixedResult(scenario)))),
   );
   expect(location.hash).toBe("#overview");
-  expect(host.textContent).toContain("No schedulable equipment is configured");
-  expect(host.textContent).toContain("0.0 kWh");
+  expect(host.textContent).toContain("Your daily energy plan is ready");
+  expect(host.textContent).toContain("$0.00");
   expect(host.textContent).not.toContain("Calculating your submitted scenario");
   expect(
     JSON.stringify(JSON.parse(localStorage.getItem(WORKSPACE_KEY)!)),
@@ -475,20 +469,22 @@ it("keeps late setup results tied to their snapshot and recalculates only on exp
   await mount();
   await click("Create workspace and calculate");
   const original = scenario!;
-  await click("Scenario configuration");
+  await click("Energy plan");
   await input("#limit", "12");
   await act(async () =>
     resolve(new Response(JSON.stringify(fixedResult(original)))),
   );
-  await click("Energy overview");
+  await click("Overview");
   expect(host.textContent).toContain("Inputs changed");
+  await click("Energy plan");
+  await click("Results and equipment");
   expect(
     host.querySelector('[aria-label="Submitted snapshot"]')!.textContent,
   ).toContain("17 kW");
   expect(
     host.querySelector('[aria-label="Editable draft"]')!.textContent,
   ).toContain("12 kW");
-  await click("Run optimization");
+  await click("Calculate energy plan");
   expect(scenario!.building_max_demand_kw).toBe(12);
   await act(async () =>
     resolve(new Response(JSON.stringify(fixedResult(scenario)))),
@@ -517,11 +513,11 @@ it("reports setup solver failure with preserved inputs and explicit retry, never
   await click("Create workspace and calculate");
   expect(host.textContent).toContain("Feasibility was not determined");
   expect(host.textContent).not.toContain("No feasible schedule");
-  await click("Scenario configuration");
+  await click("Energy plan");
   expect(host.querySelector<HTMLInputElement>("#limit")!.value).toBe("17");
   expect(
     [...host.querySelectorAll("button")].find(
-      (b) => b.textContent?.trim() === "Run optimization",
+      (b) => b.textContent?.trim() === "Calculate energy plan",
     )!.disabled,
   ).toBe(false);
 });
@@ -596,7 +592,7 @@ it("saves annual savings drafts and corrected business context without restoring
   await click("Load synthetic LED example");
   await input("#savings-profile-employee_count", "44");
   await input("#savings-location-state", "Wisconsin");
-  await click("Calculate savings without AI");
+  await click("Calculate savings");
   expect(host.querySelector("[data-financial=net]")!.textContent).toContain(
     "$2,500.00",
   );
@@ -623,4 +619,20 @@ it("saves annual savings drafts and corrected business context without restoring
       String(u).includes("/api/savings/recommendations"),
     ),
   ).toHaveLength(1);
+});
+it("opens savings first with incomplete daily inputs and retains the selected goal across refresh", async () => {
+  const draft = saved();
+  draft.step = 0;
+  draft.workspace.startGoal = "savings";
+  draft.workspace.editor.limit = "";
+  seed(draft);
+  await mount();
+  await click("Continue to savings opportunities");
+  expect(location.hash).toBe("#savings");
+  expect(JSON.parse(localStorage.getItem(WORKSPACE_KEY)!).workspace.editor.limit).toBe("");
+  expect(host.textContent).toContain("Add an improvement");
+  await reopen();
+  expect(location.hash).toBe("#savings");
+  expect(JSON.parse(localStorage.getItem(WORKSPACE_KEY)!).workspace.startGoal).toBe("savings");
+  expect(fetchMock.mock.calls.filter(([u]) => /api\/(optimize|ai)/.test(String(u)))).toHaveLength(0);
 });

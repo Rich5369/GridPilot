@@ -1,3 +1,6 @@
+import { DemandChart } from '../components/DemandChart'
+import examplePlan from '../data/examplePlan.json'
+import { Overview } from '../components/dashboard/Overview'
 import type { SavingsDraft } from '../types/savings'
 import { exportEvidence } from '../services/exportEvidence'
 import { AnalysisSelect } from '../components/configuration/AnalysisSelect'
@@ -23,7 +26,6 @@ import {
 } from 'lucide-react'
 import { ElectricityPriceExplorer } from '../components/dashboard/ElectricityPriceExplorer'
 import {
-  CommandMetrics,
   ScenarioAnalytics,
 } from '../components/dashboard/CommandAnalytics'
 import { BackendStatus } from '../components/BackendStatus'
@@ -57,11 +59,6 @@ const SavingsOpportunities = lazy(() =>
     default: m.SavingsOpportunities,
   })),
 )
-const DemandChart = lazy(() =>
-  import('../components/DemandChart').then((module) => ({
-    default: module.DemandChart,
-  })),
-)
 const Comparison = lazy(() =>
   import('../components/dashboard/Comparison').then((module) => ({
     default: module.Comparison,
@@ -71,19 +68,21 @@ const WhatIf = lazy(() =>
   import('../components/dashboard/WhatIf').then((m) => ({ default: m.WhatIf })),
 )
 const views = [
-  { id: 'overview', label: 'Energy overview', icon: LayoutDashboard },
+  { id: 'overview', label: 'Overview', icon: LayoutDashboard },
   {
     id: 'configuration',
-    label: 'Scenario configuration',
+    label: 'Energy plan',
     icon: SlidersHorizontal,
   },
   { id: 'savings', label: 'Savings opportunities', icon: Sparkles },
+  { id: 'building', label: 'My building', icon: Building2 },
   { id: 'comparison', label: 'Optimization', icon: GitCompareArrows },
   { id: 'whatif', label: 'What-if scenarios', icon: GitCompareArrows },
   { id: 'assistant', label: 'AI assistant', icon: Sparkles },
   { id: 'markets', label: 'Electricity markets', icon: Globe2 },
 ] as const
 export function Dashboard({
+  preview = false,
   initialEditor,
   initialMode = 'ev_only',
   workspaceName = 'Scenario workspace',
@@ -119,6 +118,7 @@ export function Dashboard({
   workspaceName?: string
   businessProfile?: Record<string, string | number | null>
   onSetup?: (editor: ScenarioEditor, mode: SchedulingMode) => void
+  preview?: boolean
 } = {}) {
   const [mode, setMode] = useState<SchedulingMode>(
     effectiveMode(initialEditor ?? defaultEditor, initialMode),
@@ -130,6 +130,9 @@ export function Dashboard({
   const [appliedBilling, setAppliedBilling] = useState(defaultBillingInputs)
   const [localView, setLocalView] = useState<DashboardView>('overview')
   const view = selectedView ?? localView
+  const [savingsVisited, setSavingsVisited] = useState(view === 'savings')
+  if (view === 'savings' && !savingsVisited) setSavingsVisited(true)
+  const primaryView = ['configuration', 'comparison', 'whatif'].includes(view) ? 'configuration' : view
   function setView(next: DashboardView) {
     setLocalView(next)
     onNavigate?.(next)
@@ -150,11 +153,12 @@ export function Dashboard({
   const [alternative, setAlternative] = useState<ScenarioEditor | null>(null)
   // An AI handoff starts a new comparison and captures the current Restore snapshot.
   const [whatIfSession, setWhatIfSession] = useState(0)
-  const [result, setResult] = useState<OptimizationResult | null>(null)
-  const [submitted, setSubmitted] = useState('')
-  const [resultScenario, setResultScenario] = useState<Scenario | null>(null)
+  const [result, setResult] = useState<OptimizationResult | null>(preview ? examplePlan.result as OptimizationResult : null)
+  const [submitted, setSubmitted] = useState(preview ? JSON.stringify(initialEditor ?? defaultEditor) : '')
+  const [resultScenario, setResultScenario] = useState<Scenario | null>(preview ? examplePlan.scenario : null)
   const [busy, setBusy] = useState(Boolean(initialCalculation))
   const inFlight = useRef(Boolean(initialCalculation))
+  const [example, setExample] = useState(preview)
   const [message, setMessage] = useState('')
   const invalid = Object.keys(validateEditor(editor)).length > 0
   const stale = Boolean(result) && submitted !== JSON.stringify(editor)
@@ -199,6 +203,7 @@ export function Dashboard({
     const snapshot = JSON.stringify(editor)
     const version = modeVersion.current
     const submittedMode = mode
+    if (example) { setExample(false); setResult(null); setResultScenario(null); }
     setBusy(true)
     setMessage('')
     try {
@@ -208,7 +213,7 @@ export function Dashboard({
       setResult(response)
       setResultScenario(toScenario(JSON.parse(snapshot)))
       setSubmitted(snapshot)
-      setView('comparison')
+      setView('overview')
       setMessage('Backend result received for the submitted scenario.')
     } catch (error) {
       if (version === modeVersion.current) setMessage(optimizationError(error))
@@ -247,16 +252,16 @@ export function Dashboard({
           <Building2 size={20} />
           <div>
             <strong>{workspaceName}</strong>
-            <span>Single-day energy planning</span>
+            <span>Building energy workspace</span>
           </div>
         </div>
         <p className="nav-label">WORKSPACE</p>
         <nav aria-label="Main navigation">
-          {views.map(({ id, label, icon: Icon }) => (
+          {views.filter(({ id }) => ['overview', 'savings', 'configuration', 'building'].includes(id)).sort((a, b) => ['overview', 'savings', 'configuration', 'building'].indexOf(a.id) - ['overview', 'savings', 'configuration', 'building'].indexOf(b.id)).map(({ id, label, icon: Icon }) => (
             <button
               key={id}
-              className={view === id ? 'nav-active' : 'nav-item'}
-              aria-current={view === id ? 'page' : undefined}
+              className={primaryView === id ? 'nav-active' : 'nav-item'}
+              aria-current={primaryView === id ? 'page' : undefined}
               onClick={() => {
                 setView(id)
               }}
@@ -283,7 +288,7 @@ export function Dashboard({
           <span className="avatar">GP</span>
           <div>
             <strong>{workspaceName}</strong>
-            <span>24-hour scenario planning</span>
+            <span>Saved building inputs</span>
           </div>
         </div>
       </aside>
@@ -294,6 +299,7 @@ export function Dashboard({
             <strong>{views.find((v) => v.id === view)?.label}</strong>
           </span>
           <div className="topbar-actions">
+            <button className="secondary" onClick={() => setView('assistant')}>Ask Energy Advisor</button>
             {onNavigate && (
               <a className="secondary home-link" href="#home">
                 Home
@@ -312,10 +318,11 @@ export function Dashboard({
           </div>
         </header>
         <main id="workspace-main" tabIndex={-1}>
+          {example && <section className="panel example-notice"><h2>Example snapshot · synthetic building</h2><p>This checked local optimizer result is an illustration, not a fresh calculation for your building. Its rates are synthetic assumptions: $0.12/kWh off peak and $0.28/kWh from 2 PM–8 PM; no market date or customer tariff is claimed.</p><details><summary>Example inputs, device schedules and calculation quality</summary><pre>{JSON.stringify(examplePlan, null, 2)}</pre></details><p>Run a real calculation before requesting advice about an exact backend result. No saved result identifier is used.</p></section>}
           {view !== 'savings' && resumed && !result && (
             <p className="workspace-result-notice" role="status">
               Building inputs restored. No optimizer result has been restored.
-              Run optimization explicitly to calculate a new schedule.
+              Calculate energy plan explicitly to calculate a new schedule.
             </p>
           )}
           <div className="page-heading">
@@ -331,7 +338,7 @@ export function Dashboard({
                 Clearer insights. Smarter scheduling.
               </p>
             </div>
-            {view !== 'savings' && (
+            {['overview', 'configuration', 'comparison', 'whatif'].includes(view) && (
               <button
                 className="run-button"
                 onClick={runOptimization}
@@ -340,11 +347,12 @@ export function Dashboard({
                 aria-describedby="optimization-help"
               >
                 <Zap size={17} />
-                {busy ? 'Requesting optimization…' : 'Run optimization'}
+                {busy ? 'Calculating energy plan…' : 'Calculate energy plan'}
               </button>
             )}
           </div>
-          <div hidden={view === 'savings'}>
+          {['configuration', 'comparison', 'whatif'].includes(view) && <nav className="plan-tabs" aria-label="Energy plan views">{[['configuration', 'Inputs'], ['comparison', 'Results and equipment'], ['whatif', 'What-if comparisons']].map(([id, label]) => <button key={id} className="secondary" aria-current={view === id ? 'page' : undefined} onClick={() => setView(id as DashboardView)}>{label}</button>)}</nav>}
+          <div hidden={!['configuration', 'comparison', 'whatif'].includes(view)}>
             <section className="workflow" aria-label="Energy planning workflow">
               <div
                 className={`workflow-status ${stale ? 'is-stale' : ''}`}
@@ -355,7 +363,7 @@ export function Dashboard({
                   : !result
                     ? 'Ready to configure · No backend result yet'
                     : stale
-                      ? 'Inputs changed · Run optimization to update your results'
+                      ? 'Inputs changed · Calculate energy plan to update your results'
                       : `Result available · ${analysisLabel(submittedEditor ?? editor, resultMode)} · ${result.feasibility_status}`}
               </div>
               <div className="workflow-actions">
@@ -429,7 +437,7 @@ export function Dashboard({
               </div>
             )}
           </div>
-          {view === 'savings' && (
+          {savingsVisited && <div hidden={view !== 'savings'}>
             <Suspense
               fallback={<p role="status">Loading savings workspace…</p>}
             >
@@ -442,23 +450,29 @@ export function Dashboard({
                 onScheduling={() => setView('configuration')}
               />
             </Suspense>
-          )}
-          {view === 'overview' && (
-            <CommandMetrics
-              result={result}
-              busy={busy}
-              scenario={resultScenario}
-              stale={stale}
-            />
-          )}
+          </div>}
+          {view === 'building' && <section className="panel building-summary">
+            <h2>About your building</h2>
+            <p>{workspaceName} · {String(businessProfile?.business_type ?? 'Business type not provided')}</p>
+            <p>Operating hours: {String(businessProfile?.operating_hours ?? 'Not provided')}</p>
+            <p>Equipment: {String(businessProfile?.equipment ?? 'Review equipment in your energy inputs or confirm it in Savings opportunities.')}</p>
+            <p>Electricity spending: {String(businessProfile?.electricity_cost_and_period ?? 'Not provided')} · Spending does not establish an electricity rate.</p>
+            <div className="plan-tabs">
+              <button className="secondary" onClick={() => onSetup?.(editor, mode)}>Edit building information</button>
+              <button className="secondary" onClick={() => setView('configuration')}>Equipment, hourly demand and rates</button>
+              <button className="secondary" onClick={() => setView('markets')}>Electricity market information</button>
+            </div>
+            <p>Inputs are retained in this browser. Accounts and cross-device synchronization are not provided.</p>
+          </section>}
+          {view === 'overview' && <Overview result={result} scenario={resultScenario} stale={stale} busy={busy} invalid={invalid} message={message} onNavigate={setView} />}
           {view === 'markets' && <ElectricityPriceExplorer />}
-          <div className={view === 'overview' ? 'command-layout' : ''}>
+          <div>
             <div
               className={
                 view === 'assistant' ? 'advisor-main-hidden' : 'command-primary'
               }
             >
-              {(view === 'overview' || view === 'comparison') && (
+              {view === 'comparison' && (
                 <>
                   <Suspense fallback={<p role="status">Loading comparison…</p>}>
                     <Comparison
@@ -607,7 +621,7 @@ export function Dashboard({
                         <h2>Fixed building demand preview</h2>
                         <p>
                           Draft inputs only · excludes vehicle charging and
-                          shiftable equipment schedules. Run optimization to see
+                          shiftable equipment schedules. Calculate energy plan to see
                           whole-building demand.
                         </p>
                         <DemandChart
@@ -674,7 +688,7 @@ export function Dashboard({
               className={
                 view === 'overview' ? 'command-advisor' : 'full-advisor'
               }
-              hidden={view !== 'overview' && view !== 'assistant'}
+              hidden={view !== 'assistant'}
               aria-label="Energy Advisor"
             >
               <details className="advisor-disclosure" open>
@@ -692,8 +706,8 @@ export function Dashboard({
                       }}
                       editor={editor}
                       onChange={setEditor}
-                      resultScenario={resultScenario}
-                      resultId={result?.result_id}
+                      resultScenario={example ? null : resultScenario}
+                      resultId={example ? undefined : result?.result_id}
                       initialProfile={businessProfile}
                       onProfileChange={onBusinessContextChange}
                       initialProfileLabel={businessContextLabel}
@@ -706,8 +720,7 @@ export function Dashboard({
           <footer>
             <span>GridPilot · Commercial energy intelligence</span>
             <span>
-              Building-local hours · USD · No verified savings without solver
-              results
+              Building-local hours · USD · Daily plans and annual improvements are separate estimates
             </span>
           </footer>
         </main>

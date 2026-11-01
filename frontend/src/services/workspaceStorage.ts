@@ -185,7 +185,7 @@ export function isSavedWorkspace(value: unknown): value is SavedWorkspace {
         "editor",
         "mode",
       ],
-      ["businessContext", "savingsDraft"],
+      ["businessContext", "savingsDraft", "startGoal"],
     ) ||
     !choice(w.kind, ["building", "demo"]) ||
     !text(w.name) ||
@@ -196,6 +196,7 @@ export function isSavedWorkspace(value: unknown): value is SavedWorkspace {
     !editor(w.editor)
   )
     return false;
+  if (w.startGoal !== undefined && !choice(w.startGoal, ["savings", "planning"])) return false;
   if (w.savingsDraft !== undefined && !validSavingsDraft(w.savingsDraft))
     return false;
   if (w.businessContext !== undefined) {

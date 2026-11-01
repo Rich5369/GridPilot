@@ -143,14 +143,14 @@ export function SavingsMeasureForm({
           </button>
         </div>
         <div className="form-grid">
-          {field("id", "Project ID", m.id, 100, (value) =>
+          {field("id", "Improvement reference", m.id, 100, (value) =>
             onChange({ ...m, id: value }),
           )}
-          {field("load_id", "Load / equipment ID", m.load_id, 100, (value) =>
+          {field("load_id", "Equipment reference (same equipment, same reference)", m.load_id, 100, (value) =>
             onChange({ ...m, load_id: value }),
           )}
           <div className="field">
-            <label htmlFor={id("evidence_kind")}>Evidence kind</label>
+            <label htmlFor={id("evidence_kind")}>Where did this information come from?</label>
             <select
               id={id("evidence_kind")}
               value={m.evidence_kind}

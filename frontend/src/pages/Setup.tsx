@@ -111,7 +111,11 @@ export function Setup({
       setError("Enter a business name and choose a business type.");
       return;
     }
-    if (Object.keys(validateEditor(draft.editor)).length) {
+    if (step === 0 && draft.startGoal === "savings") {
+      onComplete({ ...draft, name: draft.name.trim() });
+      return;
+    }
+    if (step > 0 && Object.keys(validateEditor(draft.editor)).length) {
       setError(
         "Check the energy profile: hours must be within one day and all values must be valid.",
       );
@@ -150,7 +154,7 @@ export function Setup({
           <a href="#the-model">The planning model</a>
         </nav>
         <button className="setup-demo" onClick={onDemo}>
-          Explore demo <ArrowRight size={15} />
+          Preview an example <ArrowRight size={15} />
         </button>
       </header>
       <main className="setup-main">
@@ -390,12 +394,18 @@ export function Setup({
                         are not supported. Business context does not generate or
                         replace measured demand.
                       </p>
-                      <AnalysisSelect
-                        id="setup-analysis-choice"
-                        editor={draft.editor}
-                        mode={draft.mode}
-                        onChange={(editor, mode) => update({ editor, mode })}
-                      />
+                      <fieldset className="start-goal">
+                        <legend>What would you like to do first?</legend>
+                        <label><input type="radio" name="startGoal" checked={draft.startGoal === "savings"} onChange={() => update({ startGoal: "savings" })} />
+                          <strong>Find savings opportunities</strong>
+                          <span>Evaluate improvements such as lighting upgrades or reducing unnecessary equipment use.</span>
+                        </label>
+                        <label><input type="radio" name="startGoal" checked={draft.startGoal !== "savings"} onChange={() => update({ startGoal: "planning" })} />
+                          <strong>Plan daily energy use</strong>
+                          <span>Review hourly electricity costs, building power limits, and equipment schedules.</span>
+                        </label>
+                        <p className="field-hint">Both workflows are available later. Annual improvements do not require a daily energy plan.</p>
+                      </fieldset>
                     </>
                   )}
                   {step === 1 && (
@@ -554,7 +564,7 @@ export function Setup({
                     <button className="run-button" type="submit">
                       {
                         [
-                          "Continue to energy profile",
+                          draft.startGoal === "savings" ? "Continue to savings opportunities" : "Continue to energy profile",
                           "Continue to your goals",
                           "Review workspace",
                           "Create workspace and calculate",

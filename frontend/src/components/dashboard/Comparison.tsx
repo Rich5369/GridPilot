@@ -14,8 +14,9 @@ export function Comparison({
   limit?: number
   stale: boolean
 }) {
+  const baselineInvalid = Boolean(result?.operating_plan?.baseline_constraint_violations.length)
   const costDifference =
-    result?.optimized_electricity_cost_usd != null
+    result?.optimized_electricity_cost_usd != null && !baselineInvalid
       ? result.baseline_electricity_cost_usd -
         result.optimized_electricity_cost_usd
       : null
@@ -110,8 +111,8 @@ export function Comparison({
             <span>
               Estimated cost difference
               <strong>
-                {result.optimized_electricity_cost_usd === null
-                  ? 'Unavailable'
+                {result.optimized_electricity_cost_usd === null || baselineInvalid
+                  ? 'Unavailable — baseline comparison is not valid'
                   : money(
                       result.baseline_electricity_cost_usd -
                         result.optimized_electricity_cost_usd,
@@ -121,7 +122,7 @@ export function Comparison({
             <span>
               Peak demand reduction
               <strong>
-                {result.optimized_peak_demand_kw === null
+                {result.optimized_peak_demand_kw === null || baselineInvalid
                   ? 'Unavailable'
                   : `${(result.baseline_peak_demand_kw - result.optimized_peak_demand_kw).toFixed(2)} kW`}
               </strong>
