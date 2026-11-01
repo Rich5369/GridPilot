@@ -340,6 +340,9 @@ export function buildSavingsRequest(
     for (const k of measureNumbers) {
       if (!activeNumbers.has(k)) continue;
       const value = m.numbers[k].trim();
+      // Omit unanswered additive fields so legacy servers can still accept
+      // the original evidence-only request. Explicit zero is retained.
+      if (k === "annual_operating_cost_savings_usd" && value === "") continue;
       const n = value === "" ? null : Number(value);
       const maximum = [
         "hours_per_day",
@@ -367,9 +370,8 @@ export function buildSavingsRequest(
       result[k] = n;
     }
     const benefitReference = m.operating_cost_savings_reference;
-    result.operating_cost_savings_reference = benefitReference.trim()
-      ? benefitReference
-      : null;
+    if (benefitReference.trim())
+      result.operating_cost_savings_reference = benefitReference;
     if (
       benefitReference.length > 500 ||
       ((result.annual_operating_cost_savings_usd ?? 0) > 0 &&

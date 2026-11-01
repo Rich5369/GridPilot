@@ -216,7 +216,10 @@ it("requires separately attributed positive non-energy benefits and preserves om
   expect(
     buildSavingsRequest(d, {}).request.measures![0]
       .annual_operating_cost_savings_usd,
-  ).toBeNull();
+  ).toBeUndefined();
+  expect(buildSavingsRequest(d, {}).request.measures![0]).not.toHaveProperty(
+    "operating_cost_savings_reference",
+  );
   m.numbers.annual_operating_cost_savings_usd = "300";
   expect(
     buildSavingsRequest(d, {}).errors[
