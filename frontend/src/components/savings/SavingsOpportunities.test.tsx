@@ -221,7 +221,7 @@ it("does not infer scheduling exclusion, omits unknown applicability and labels 
   });
   expect(req).not.toHaveProperty("scenario");
   expect(host.textContent).toContain(
-    "AI selection unavailable · deterministic fallback",
+    "AI unavailable · standard guidance",
   );
   await click("Calculate savings");
   expect(calculateSavings).toHaveBeenCalledTimes(1);

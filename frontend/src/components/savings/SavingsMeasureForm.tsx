@@ -135,8 +135,7 @@ export function SavingsMeasureForm({
       <div className="savings-project-body">
         <div className="section-heading">
           <p className="muted">
-            Evidence for one standalone project. Use the same load ID for
-            projects affecting the same equipment.
+            Use the same equipment reference for improvements affecting the same equipment.
           </p>
           <button type="button" className="secondary" onClick={onRemove}>
             Remove project
@@ -179,9 +178,7 @@ export function SavingsMeasureForm({
           {bool("applicable")}
         </div>
         <p className="field-hint">
-          Equipment runtime is not inferred from business opening hours.
-          Measurements and safety confirmations are your attestations, not
-          independent verification.
+          Enter equipment operating hours, which may differ from your business opening hours.
         </p>
         <div className="form-grid">
           {isCalculatedCategory(m.category) &&
@@ -201,11 +198,7 @@ export function SavingsMeasureForm({
         </div>
         {m.category !== "led" && (
           <p className="field-hint">
-            Optional evidence confirmations do not replace safety or
-            equivalent-service requirements. Unknown or No retains the backend's
-            advisory limitations without correcting values or blocking otherwise
-            eligible calculations. Describe specification projections and actual
-            operating conditions in the evidence reference.
+            Include actual operating conditions and any estimated specifications in your evidence source.
           </p>
         )}
         {!equivalent && (
@@ -322,9 +315,7 @@ export function SavingsMeasureForm({
             </div>
           )}
           <p className="field-hint">
-            Expired, future or unconfirmed rates leave monetary results unknown;
-            the backend evaluates validity. Dates are never repaired
-            automatically.
+            Expired, future or unconfirmed rates cannot be used to estimate financial savings.
           </p>
         </details>
       </div>

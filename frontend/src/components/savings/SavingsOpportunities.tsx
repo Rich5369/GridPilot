@@ -53,10 +53,10 @@ const titles: Record<CalculatedCategory, string> = {
 const profileLabels: Record<keyof SavingsProfile, string> = {
   business_type: "Business type",
   employee_count: "Employee count",
-  operating_hours: "Business operating hours (context only)",
+  operating_hours: "Business operating hours",
   electricity_cost_and_period:
-    "Electricity spending and billing period (context only)",
-  consumption_and_units: "Reported consumption and units (context only)",
+    "Electricity spending and billing period",
+  consumption_and_units: "Reported consumption and units",
   equipment: "Equipment descriptions",
   goals: "Goals",
   restrictions: "Restrictions",
@@ -204,7 +204,7 @@ export function SavingsOpportunities({
     setActiveProject(0);
     setReplaceExample(false);
     setMessage(
-      "Synthetic LED example loaded. It is not customer evidence. Review its fictional rate validity dates before calculating.",
+      "Synthetic LED example loaded. Review its fictional rate dates before calculating.",
     );
   }
   async function submit(kind: "calculation" | "conversation") {
@@ -267,7 +267,7 @@ export function SavingsOpportunities({
             { role: "assistant", content: conversation.message.slice(0, 3000) },
           ].slice(-12) as { role: "user" | "assistant"; content: string }[],
         });
-      setMessage("Savings response received for the submitted evidence.");
+      setMessage("Savings estimates ready.");
     } catch (e) {
       if (!mounted.current || id !== sequence.current) return;
       const failure = savingsFailure(e);
@@ -309,10 +309,9 @@ export function SavingsOpportunities({
       <section className="panel savings-intro">
         <p className="eyebrow">BUILDING OPPORTUNITIES · ANNUAL ESTIMATES</p>
         <p>Explore improvements for your building. Add the details you know to estimate energy savings, costs, and payback.</p>
-        <p className="field-hint">Modeled annual estimates for individual improvements. Unknown values stay unknown; estimates are not added into a portfolio total.</p>
         <p><strong>{workspaceName}</strong> · {profile.business_type ?? 'Business type not provided'}</p>
         <a className="secondary" href="#savings-building-context" onClick={(e) => { e.preventDefault(); const details = document.getElementById('savings-building-context') as HTMLDetailsElement; details.open = true; details.scrollIntoView?.({block:'start'}); details.querySelector('input')?.focus(); }}>Edit building summary</a>
-        <details><summary>How annual estimates work</summary><p>Inputs are saved in this browser; results stay in this session. Annual improvements do not require a daily plan. Opening hours, monthly spending and regional benchmarks do not establish equipment measurements or your electricity rate.</p></details>
+        <details><summary>How this was calculated</summary><p>Modeled annual estimates are for individual improvements and must not be added into a portfolio total. Inputs are saved in this browser; results stay in this session. Annual improvements do not require a daily plan. Opening hours, monthly spending and regional benchmarks do not establish equipment measurements or your electricity rate.</p></details>
         {catalogError && (
           <p className="savings-warning" role="status">
             Catalog unavailable: {catalogError} The supported project forms and
@@ -337,11 +336,6 @@ export function SavingsOpportunities({
       >
         <details id="savings-building-context" className="panel savings-context">
           <summary>About your building</summary>
-          <p>
-            Reused from your saved setup and corrections. This is caller
-            context, not measurement evidence. Changes are saved in this browser
-            with the building. Unknown values are optional.
-          </p>
           <div className="form-grid">
             {(Object.keys(profileLimits) as (keyof SavingsProfile)[]).map(
               (k) => (
@@ -401,7 +395,7 @@ export function SavingsOpportunities({
                   <label htmlFor={`savings-location-${k}`}>
                     {
                       {
-                        zip_code: "ZIP (optional · not geocoded)",
+                        zip_code: "ZIP (optional)",
                         city: "City (optional)",
                         utility: "Utility (optional · unverified)",
                         rate_plan: "Rate-plan name (optional · unverified)",
@@ -430,17 +424,6 @@ export function SavingsOpportunities({
         </details>
         <details className="panel savings-applicability">
           <summary>Which equipment does your building have?</summary>
-          <p>
-            Do not infer ownership from business type or the daily analysis
-            mode. No EVs alone does not exclude scheduling: non-EV interruptible
-            loads can qualify. Yes confirms relevance only, not measurements or
-            financial evidence.
-          </p>
-          <p>
-            Unknown answers are omitted from the conversation request. Category
-            confirmations guide optional selection; deterministic calculations
-            use each project’s own applicability field.
-          </p>
           <div className="form-grid">
             {savingsCategories.map((c) => (
               <ConfirmSelect
@@ -497,9 +480,7 @@ export function SavingsOpportunities({
             </div>
           )}
           <p>
-            Provide identity and an evidence reference for each project. Leave
-            unknown measurements or costs blank; the engine will ask for missing
-            evidence.
+            Add the details you know. Leave measurements or costs blank if you are not sure.
           </p>
           <div className="savings-add">
             <div className="field">
@@ -529,9 +510,7 @@ export function SavingsOpportunities({
           </div>
           {!draft.measures.length && (
             <p className="savings-empty">
-              No projects yet. Add a relevant project, load the synthetic
-              example, or request general guidance without inventing numerical
-              inputs.
+              Choose an improvement or try the synthetic example.
             </p>
           )}
           {draft.measures.map((m, i) => (
@@ -574,16 +553,11 @@ export function SavingsOpportunities({
               </button>
             )}
           </div>
-          <p className="field-hint">
-            Explicit request only · up to 45 seconds client wait · no automatic
-            retries. A blank annual incremental cost is not zero; no rate is
-            inferred.
-          </p>
         </section>
       </form>
       <details className="panel savings-conversation">
         <summary>Help me find opportunities</summary>
-        <p>Ask for help choosing an improvement. Optional AI selects relevant opportunities; the calculation engine supplies annual estimates. For daily plan advice, use Ask Energy Advisor.</p>
+        <p>Ask for help choosing an improvement. AI can suggest relevant opportunities. For daily plan advice, use Ask Energy Advisor.</p>
         <form
           onSubmit={(e) => {
             e.preventDefault();
@@ -605,9 +579,7 @@ export function SavingsOpportunities({
             />
           </div>
           <p id="savings-ai-boundary" className="field-hint">
-            Optional explicit AI request · up to 60 seconds client wait · no
-            automatic paid requests or retries. Conversation text stays in this
-            session; only your question draft is saved.
+            Your question draft is saved in this browser. Conversations stay in this session.
           </p>
           <button
             className="secondary"
@@ -666,8 +638,7 @@ export function SavingsOpportunities({
               "Confirm equipment applicability and obtain the required evidence before acting."}
           </p>
           <p>
-            No numerical calculator is available for this category in the
-            current contract. No savings have been inferred.
+            Savings cannot be calculated for this category yet.
           </p>
           <ul>
             {descriptor?.required_inputs.map((v, i) => (
@@ -702,11 +673,9 @@ export function SavingsOpportunities({
         />
       ) : (
         <section className="panel savings-empty">
-          <h2>Ready when you have evidence</h2>
+          <h2>Ready to calculate</h2>
           <p>
-            No annual savings have been calculated yet. Your business profile is
-            not a substitute for equipment measurements, a customer rate or
-            project costs.
+            No annual savings have been calculated yet. Add an improvement to begin.
           </p>
         </section>
       )}

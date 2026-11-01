@@ -1,0 +1,25 @@
+{
+  "source": "Local Chromium and real Savings Engine; AI blocked",
+  "checks": [
+    "Exact introductory paragraphs removed; layout and expanded building/equipment inputs remain",
+    "Profile survives refresh, Yes/No/Not sure work, real LED result and calculation evidence remain available",
+    "Unknown rate stays unknown; real negative and zero net results preserved",
+    "Material input warnings remain visible",
+    "Overview, Advisor return and powerline landing remain functional"
+  ],
+  "accessibility": [
+    {
+      "name": "mobile",
+      "violations": []
+    },
+    {
+      "name": "desktop",
+      "violations": []
+    },
+    {
+      "name": "results",
+      "violations": []
+    }
+  ],
+  "errors": []
+}
