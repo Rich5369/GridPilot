@@ -1,0 +1,14 @@
+[
+  {
+    "route": "home",
+    "violations": []
+  },
+  {
+    "route": "setup",
+    "violations": []
+  },
+  {
+    "route": "example",
+    "violations": []
+  }
+]

@@ -1,11 +1,11 @@
 /* Cloud Blue product surfaces and shared semantic colors. */
 :root {
-  --gp-bg: #F4F9FF;
-  --gp-secondary-bg: #EAF4FF;
-  --gp-surface: #FFFFFF;
-  --gp-soft: #DCEEFF;
-  --gp-line: #C8DFF2;
-  --gp-primary: #2372B2;
+  --gp-bg: #EAF1F8;
+  --gp-secondary-bg: #DFEAF5;
+  --gp-surface: #F0F4F8;
+  --gp-soft: #D6E6F5;
+  --gp-line: #BDCFDF;
+  --gp-primary: #2069A5;
   --gp-primary-hover: #1966A5;
   --gp-text: #19364D;
   --gp-muted: #4E687E;
@@ -1574,4 +1574,4 @@ input[type="checkbox"], input[type="radio"] { accent-color: var(--gp-primary); }
 .site-header nav { display: flex; flex-wrap: wrap; }
 .welcome-header { flex: 0 0 auto; margin: 0 auto; }
 .welcome-header .brand { display: inline-flex; }
-.welcome-preview img { object-fit: contain; max-height: none; }
+.welcome-preview img { object-fit: contain; max-height: none; filter: brightness(.96); }
