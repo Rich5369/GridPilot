@@ -15,14 +15,19 @@ from backend.api.routes import router
 load_dotenv(Path(__file__).with_name(".env"))
 @asynccontextmanager
 async def lifespan(app):
-    from backend.ai.startup_diagnostic import list_models_on_startup
-    task = asyncio.create_task(list_models_on_startup())
+    task = None
+    # Disabled diagnostics must not load the provider SDK on every cold start.
+    # Live generation still imports it on demand through ai.service.generate.
+    if os.getenv("MODEL_API_DIAGNOSTIC_ON_STARTUP") == "1":
+        from backend.ai.startup_diagnostic import list_models_on_startup
+        task = asyncio.create_task(list_models_on_startup())
     try:
         yield
     finally:
-        task.cancel()
-        with suppress(asyncio.CancelledError):
-            await task
+        if task is not None:
+            task.cancel()
+            with suppress(asyncio.CancelledError):
+                await task
 
 
 app = FastAPI(title="GridPilot API", version="0.1.0", lifespan=lifespan)
