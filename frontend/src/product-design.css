@@ -8,6 +8,7 @@
   --gp-primary: #2069A5;
   --gp-primary-hover: #1966A5;
   --gp-text: #19364D;
+  --gp-nav-icon: #102A3A;
   --gp-muted: #4E687E;
   --gp-warning: #805318;
   --gp-warning-bg: #FFF7E8;
@@ -750,7 +751,7 @@ button:disabled {
   border: 1px solid transparent;
 }
 .sidebar nav button svg {
-  color: var(--gp-text);
+  color: var(--gp-nav-icon);
   stroke-width: 2.25;
 }
 .sidebar nav .nav-active svg {
