@@ -135,6 +135,12 @@ function RecommendationCard({
           </dd>
         </div>
         <div>
+          <dt>Incremental annual expenses</dt>
+          <dd data-financial="expenses" data-value-state={typeof r.inputs_used.annual_incremental_cost_usd === "number" ? "known" : "unknown"}>
+            {usd(typeof r.inputs_used.annual_incremental_cost_usd === "number" ? r.inputs_used.annual_incremental_cost_usd : null, "USD/year")}
+          </dd>
+        </div>
+        <div>
           <dt>Net annual savings</dt>
           <dd
             data-financial="net"

@@ -88,6 +88,7 @@ def test_outer_deadline(monkeypatch):
 
 
 def test_startup_does_not_wait_and_shutdown_cancels(monkeypatch):
+    monkeypatch.setenv('MODEL_API_DIAGNOSTIC_ON_STARTUP', '1')
     started, cancelled = [], []
     async def slow():
         started.append(True)
