@@ -129,12 +129,12 @@ it('shows loading, prevents repeat submissions and recovers after failure', asyn
   ).toHaveLength(1)
   expect(run.disabled).toBe(true)
   expect(run.getAttribute('aria-busy')).toBe('true')
-  expect(container.textContent).toContain('up to 45 seconds')
+  expect(container.textContent).toContain('up to 75 seconds')
   await act(async () =>
     rejectRequest(new DOMException('expired', 'TimeoutError')),
   )
   expect(run.disabled).toBe(false)
-  expect(container.textContent).toContain('timed out after 45 seconds')
+  expect(container.textContent).toContain('timed out after 75 seconds')
   expect(container.textContent).toContain('Your energy plan needs attention')
 })
 

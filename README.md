@@ -158,7 +158,7 @@ command. A remote host's localhost is not your browser's localhost.
 | File / variable | Purpose |
 | --- | --- |
 | `frontend/.env`: `VITE_API_BASE_URL` | Public backend origin without `/api`; development fallback `http://localhost:8000`; production requires an explicit value |
-| `frontend/.env`: `VITE_OPTIMIZATION_TIMEOUT_MS` | Optimization deadline in ms, default 45000; integer 1000–120000, invalid values fall back to default |
+| `frontend/.env`: `VITE_OPTIMIZATION_TIMEOUT_MS` | Optimization deadline in ms, default 75000; integer 1000–120000, invalid values fall back to default |
 | `backend/.env`: `CORS_ORIGINS` | Comma-separated allowed frontend origins; defaults to localhost and 127.0.0.1 on port 5173 |
 | Root `.env.example` | Reference only; the app does not load a root `.env` |
 

@@ -7,13 +7,16 @@ const baseUrl = (
   (import.meta.env.DEV ? 'http://localhost:8000' : '')
 ).replace(/\/+$/, '')
 
+// Allow a sleeping service to wake without treating startup as an outage.
+export const BACKEND_CONNECT_TIMEOUT_MS = 60000
+
 // Two sequential GLOP solves allow 10 seconds each. Leave room for
-// scheduling, serialization, network latency and a modest service cold start.
+// scheduling, serialization, network latency and a 30–45 second service cold start.
 export function optimizationTimeoutMs(value: unknown): number {
   const parsed = Number(value)
   return Number.isInteger(parsed) && parsed >= 1000 && parsed <= 120000
     ? parsed
-    : 45000
+    : 75000
 }
 export const OPTIMIZATION_TIMEOUT_MS = optimizationTimeoutMs(
   import.meta.env.VITE_OPTIMIZATION_TIMEOUT_MS,
@@ -42,7 +45,7 @@ export async function apiRequest<T>(
   if (!headers.has('Accept')) headers.set('Accept', 'application/json')
   const response = await fetch(`${baseUrl}${path}`, {
     ...init,
-    signal: init.signal ?? AbortSignal.timeout(5000),
+    signal: init.signal ?? AbortSignal.timeout(BACKEND_CONNECT_TIMEOUT_MS),
     headers,
   })
   const body: unknown = await response.json()

@@ -1,0 +1,81 @@
+{
+  "auditBaseRevision": "761f006493b6abc0a53f1f6674c1c3d734bed68a",
+  "backendTree": "72bb9440301ce4b8d238f45a25398b4d70b96cfd",
+  "localDate": "2026-11-02 America/Chicago",
+  "commands": {
+    "npm test --prefix frontend": {
+      "passed": 325,
+      "skipped": 2,
+      "failed": 0
+    },
+    "VITE_API_BASE_URL=http://127.0.0.1:8001 GRIDPILOT_LIVE_API=1 npm run test:integration --prefix frontend": {
+      "passed": 2,
+      "failed": 0
+    },
+    "node --test scripts/browser-api.test.cjs": {
+      "passed": 1,
+      "failed": 0
+    },
+    "npm run lint --prefix frontend": {
+      "exitCode": 0,
+      "existingWarnings": 2
+    },
+    "VITE_API_BASE_URL=http://127.0.0.1:8001 npm run build --prefix frontend": {
+      "exitCode": 0,
+      "typescript": "tsc -b passed",
+      "warning": "Existing main chunk exceeds 500 kB"
+    },
+    "node scripts/verify_savings_copy.cjs": {
+      "passedCheckGroups": 5,
+      "accessibilityScans": 3,
+      "violations": 0,
+      "pageErrors": 0
+    },
+    "node scripts/verify_hackathon_readiness.cjs": {
+      "exitCode": 0,
+      "coldStartDelaysMs": [
+        35000,
+        45000
+      ],
+      "accessibilityWidths": [
+        1440,
+        768,
+        390,
+        320
+      ]
+    },
+    "node scripts/verify_hackathon_scheduling.cjs": {
+      "exitCode": 0,
+      "scenarios": [
+        "flexible",
+        "joint"
+      ],
+      "widths": [
+        1440,
+        768,
+        390,
+        320
+      ],
+      "hourlyRowsComparedPerScenario": 24
+    },
+    "node scripts/verify_hackathon_advisor.cjs": {
+      "exitCode": 0,
+      "mockedSources": [
+        "meta",
+        "deterministic_fallback"
+      ],
+      "liveProviderCalls": 0
+    },
+    "node scripts/verify_hackathon_production.cjs": {
+      "exitCode": 0,
+      "productionChanges": 0,
+      "liveProviderCalls": 0
+    }
+  },
+  "limitations": [
+    "Missing external W01/O01 simulation dataset",
+    "Historical verify_savings_frontend.cjs has stale entry flow/selectors",
+    "Changed frontend verified locally, not deployed",
+    "Provider inference not retested; all AI browser checks mocked"
+  ]
+}

@@ -74,25 +74,25 @@ it('rejects incomplete, nonfinite, negative, or inconsistent response shapes', (
   ).toBe(true)
 })
 
-it('uses a longer optimization deadline and keeps health requests short', async () => {
+it('uses a longer optimization deadline and allows health requests to wait for cold starts', async () => {
   const { getHealth, OPTIMIZATION_TIMEOUT_MS } = await import('./api')
   const timeout = vi.spyOn(AbortSignal, 'timeout')
   vi.stubGlobal('fetch', vi.fn().mockResolvedValueOnce(new Response(JSON.stringify(valid)))
     .mockResolvedValueOnce(new Response(JSON.stringify({ status: 'ok', project: 'GridPilot' }))))
   await optimizeScenario(demoScenario)
   await getHealth()
-  expect(timeout.mock.calls.map(([ms]) => ms)).toEqual([OPTIMIZATION_TIMEOUT_MS, 5000])
+  expect(timeout.mock.calls.map(([ms]) => ms)).toEqual([OPTIMIZATION_TIMEOUT_MS, 60000])
   timeout.mockRestore()
 })
 it('bounds optimization timeout configuration and falls back safely', async () => {
   const { optimizationTimeoutMs } = await import('./api')
   expect(optimizationTimeoutMs('60000')).toBe(60000)
   for (const value of [undefined, '', 'NaN', '-1', '0', '999', '120001', 'Infinity', '3000.5'])
-    expect(optimizationTimeoutMs(value)).toBe(45000)
+    expect(optimizationTimeoutMs(value)).toBe(75000)
 })
 it('explains timeout without claiming the server stopped', () => {
   const message = optimizationError(new DOMException('expired', 'TimeoutError'))
-  expect(message).toContain('timed out after 45 seconds')
+  expect(message).toContain('timed out after 75 seconds')
   expect(message).toContain('server may still be processing')
 })
 it.each([422, 503, 500])('preserves HTTP %s failures without accepting results', async (status) => {
@@ -117,7 +117,7 @@ it('aborts a pending optimization when its configured deadline expires', async (
   })))
   try {
     const request = expect(optimizeScenario(demoScenario)).rejects.toMatchObject({ name: 'TimeoutError' })
-    await vi.advanceTimersByTimeAsync(45000)
+    await vi.advanceTimersByTimeAsync(75000)
     await request
   } finally {
     timeout.mockRestore()

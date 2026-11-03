@@ -6,8 +6,8 @@ export function BackendStatus() {
   return <div className="connection">
     <span role="status" className={`status ${status}`}>
       <span className="status-dot" />
-      {status === 'connected' ? 'Backend connected' : status === 'checking' ? 'Checking backend…' : 'Backend offline'}
+      {status === 'connected' ? 'Backend connected' : status === 'checking' ? 'Connecting to backend…' : status === 'waking' ? 'Backend waking up… Allow up to a minute.' : 'Backend unavailable · retry connection'}
     </span>
-    <button className="icon-button" onClick={retry} disabled={status === 'checking'} aria-label="Retry backend connection" title="Retry connection"><RefreshCw size={15} /></button>
+    <button className="icon-button" onClick={retry} disabled={status === 'checking' || status === 'waking'} aria-label="Retry backend connection" title="Retry connection"><RefreshCw size={15} /></button>
   </div>
 }
