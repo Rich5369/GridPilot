@@ -84,6 +84,17 @@ it('uses a longer optimization deadline and allows health requests to wait for c
   expect(timeout.mock.calls.map(([ms]) => ms)).toEqual([OPTIMIZATION_TIMEOUT_MS, 60000])
   timeout.mockRestore()
 })
+it('validates backend identity and uses the readiness caller signal without imposing the default health timeout', async () => {
+  const { getHealth } = await import('./api')
+  const controller = new AbortController()
+  const fetch = vi.fn().mockResolvedValueOnce(new Response(JSON.stringify({ status: 'ok', project: 'Other' })))
+    .mockResolvedValueOnce(new Response(JSON.stringify({ status: 'ok', project: 'GridPilot' })))
+  vi.stubGlobal('fetch', fetch)
+  await expect(getHealth(controller.signal)).rejects.toThrow('Unexpected health response')
+  expect(await getHealth(controller.signal)).toEqual({ status: 'ok', project: 'GridPilot' })
+  expect(fetch.mock.calls.every(([, init]) => init.signal === controller.signal)).toBe(true)
+  expect(fetch.mock.calls.every(([url, init]) => url.endsWith('/api/health') && !init.method)).toBe(true)
+})
 it('bounds optimization timeout configuration and falls back safely', async () => {
   const { optimizationTimeoutMs } = await import('./api')
   expect(optimizationTimeoutMs('60000')).toBe(60000)

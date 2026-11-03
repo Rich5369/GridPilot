@@ -1469,13 +1469,3 @@ footer {
 .operating-timeline .device-row {
   border-color: var(--gp-line);
 }
-.operating-timeline .hour-cell {
-  background: var(--gp-surface);
-  border-color: var(--gp-line);
-}
-.operating-timeline .hour-fill {
-  background: var(--gp-surface);
-}
-.operating-timeline .held .hour-fill {
-  background: var(--gp-surface);
-}
