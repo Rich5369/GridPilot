@@ -211,3 +211,12 @@ it("shows per-project advisory warnings beside results once, preserving global o
     await close();
   }
 });
+
+it.each([null, 0, 500])('shows returned incremental expenses without inferring unknown values (%s)', async (value) => {
+  const r = structuredClone(response) as SavingsResponse;
+  r.recommendations[0].inputs_used.annual_incremental_cost_usd = value;
+  const { host, close } = await render(r);
+  try {
+    expect(host.querySelector('[data-financial=expenses]')!.textContent).toBe(value === null ? 'Unknown — more information needed' : value === 0 ? '$0.00 USD/year' : '$500.00 USD/year');
+  } finally { await close(); }
+});

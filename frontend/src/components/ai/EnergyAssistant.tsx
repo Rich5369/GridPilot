@@ -51,7 +51,7 @@ export function EnergyAssistant({ editor, onChange, resultScenario, onComparePro
       const prior = conversation === submittedKey ? history : []
       const body = { request, history: prior.slice(-12).map(({ role, content }) => ({ role, content })), profile, scenario: resultScenario ?? toScenario(editor), scheduling_mode: schedulingMode, result_id: resultId ?? null }
       const response = await apiRequest<Advisor>('/api/ai/conversation', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body), signal: AbortSignal.timeout(60000),
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body), signal: AbortSignal.timeout(90000),
       })
       if (!active.current) return
       if (contextRef.current !== submittedKey) { setError('Scenario changed during the request. Please send again.'); return }

@@ -1,4 +1,4 @@
-import { apiRequest, ApiError } from "./api";
+import { apiRequest, ApiError, BACKEND_CONNECT_TIMEOUT_MS } from "./api";
 import {
   savingsCategories,
   evidenceKinds,
@@ -444,15 +444,15 @@ export function matchesSavings(
 // Catalog is read-only. Calculations may wait for the benchmark service. Provider
 // uses one 25s SDK invocation plus deterministic/EIA work; this is a client wait
 // budget, not a server deadline. No automatic retries, particularly for paid AI.
-export const SAVINGS_TIMEOUT_MS = 45000;
-export const SAVINGS_CONVERSATION_TIMEOUT_MS = 60000;
+export const SAVINGS_TIMEOUT_MS = 75000;
+export const SAVINGS_CONVERSATION_TIMEOUT_MS = 90000;
 const signal = (external: AbortSignal | undefined, ms: number) =>
   external
     ? AbortSignal.any([external, AbortSignal.timeout(ms)])
     : AbortSignal.timeout(ms);
 export async function getSavingsCatalog(abort?: AbortSignal) {
   const v = await apiRequest<unknown>("/api/savings/catalog", {
-    signal: signal(abort, 12000),
+    signal: signal(abort, BACKEND_CONNECT_TIMEOUT_MS),
   });
   if (!isSavingsCatalog(v))
     throw new Error(

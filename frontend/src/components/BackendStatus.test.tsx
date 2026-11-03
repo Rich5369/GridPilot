@@ -33,14 +33,14 @@ describe('backend connection status', () => {
   it('handles a network failure and recovers on retry', async () => {
     fetchMock.mockRejectedValueOnce(new TypeError('Failed to fetch')).mockResolvedValueOnce(healthy())
     await act(async () => root.render(<BackendStatus />))
-    expect(container.textContent).toContain('Backend offline')
+    expect(container.textContent).toContain('Backend unavailable')
     await act(async () => container.querySelector('button')!.click())
     expect(container.textContent).toContain('Backend connected')
   })
   it('treats an unexpected health response as offline', async () => {
     fetchMock.mockResolvedValue(new Response(JSON.stringify({ status: 'ok', project: 'Other' })))
     await act(async () => root.render(<BackendStatus />))
-    expect(container.textContent).toContain('Backend offline')
+    expect(container.textContent).toContain('Backend unavailable')
   })
   it('times out an unresponsive backend', async () => {
     vi.useFakeTimers()
@@ -49,9 +49,25 @@ describe('backend connection status', () => {
         signal.addEventListener('abort', () => reject(new DOMException('Aborted', 'AbortError')))
       }))
       await act(async () => root.render(<BackendStatus />))
-      expect(container.textContent).toContain('Checking backend')
-      await act(async () => { vi.advanceTimersByTime(5000) })
-      expect(container.textContent).toContain('Backend offline')
+      expect(container.textContent).toContain('Connecting to backend')
+      await act(async () => { vi.advanceTimersByTime(60000) })
+      expect(container.textContent).toContain('Backend unavailable')
+      await act(async () => { vi.advanceTimersByTime(120000) })
+      expect(fetchMock).toHaveBeenCalledTimes(1)
     } finally { vi.useRealTimers() }
   })
+})
+
+it.each([35000, 45000])('recovers after a %i ms cold start with one health request', async (delay) => {
+  vi.useFakeTimers()
+  try {
+    fetchMock.mockImplementation(() => new Promise(resolve => setTimeout(() => resolve(healthy()), delay)))
+    await act(async () => root.render(<BackendStatus />))
+    await act(async () => { vi.advanceTimersByTime(5000) })
+    expect(container.textContent).toContain('Backend waking up')
+    expect(container.querySelector('button')!.disabled).toBe(true)
+    await act(async () => { vi.advanceTimersByTime(delay - 5000) })
+    expect(container.textContent).toContain('Backend connected')
+    expect(fetchMock).toHaveBeenCalledTimes(1)
+  } finally { vi.useRealTimers() }
 })
