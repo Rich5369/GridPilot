@@ -84,7 +84,7 @@ it('uses a longer optimization deadline and allows health requests to wait for c
   expect(timeout.mock.calls.map(([ms]) => ms)).toEqual([OPTIMIZATION_TIMEOUT_MS, 60000])
   timeout.mockRestore()
 })
-it('validates backend identity and uses the readiness caller signal without imposing the default five-second timeout', async () => {
+it('validates backend identity and uses the readiness caller signal without imposing the default health timeout', async () => {
   const { getHealth } = await import('./api')
   const controller = new AbortController()
   const fetch = vi.fn().mockResolvedValueOnce(new Response(JSON.stringify({ status: 'ok', project: 'Other' })))

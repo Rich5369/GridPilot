@@ -74,51 +74,44 @@ it('stops after 90 seconds despite repeated errors and requires explicit retry f
   expect(health).toHaveBeenCalledTimes(count + 1)
 })
 
-describe('backend connection status', () => {
-  it('calls the health endpoint and shows connected', async () => {
-    fetchMock.mockResolvedValue(healthy())
-    await act(async () => root.render(<BackendStatus />))
-    expect(container.textContent).toContain('Backend connected')
-    expect(fetchMock.mock.calls[0][0]).toBe('http://localhost:8000/api/health')
-  })
-  it('handles a network failure and recovers on retry', async () => {
-    fetchMock.mockRejectedValueOnce(new TypeError('Failed to fetch')).mockResolvedValueOnce(healthy())
-    await act(async () => root.render(<BackendStatus />))
-    expect(container.textContent).toContain('Backend unavailable')
-    await act(async () => container.querySelector('button')!.click())
-    expect(container.textContent).toContain('Backend connected')
-  })
-  it('treats an unexpected health response as offline', async () => {
-    fetchMock.mockResolvedValue(new Response(JSON.stringify({ status: 'ok', project: 'Other' })))
-    await act(async () => root.render(<BackendStatus />))
-    expect(container.textContent).toContain('Backend unavailable')
-  })
-  it('times out an unresponsive backend', async () => {
-    vi.useFakeTimers()
-    try {
-      fetchMock.mockImplementation((_url, { signal }) => new Promise((_resolve, reject) => {
-        signal.addEventListener('abort', () => reject(new DOMException('Aborted', 'AbortError')))
-      }))
-      await act(async () => root.render(<BackendStatus />))
-      expect(container.textContent).toContain('Connecting to backend')
-      await act(async () => { vi.advanceTimersByTime(60000) })
-      expect(container.textContent).toContain('Backend unavailable')
-      await act(async () => { vi.advanceTimersByTime(120000) })
-      expect(fetchMock).toHaveBeenCalledTimes(1)
-    } finally { vi.useRealTimers() }
-  })
+it('aborts a hung health request at the deadline and ignores late success', async () => {
+  health.mockImplementation(() => new Promise(resolve => setTimeout(() => resolve(ok), 100_000)))
+  await render()
+  const signal = health.mock.calls[0][0]!
+  await advance(90_000)
+  expect(signal.aborted).toBe(true)
+  expect(container.textContent).toContain('Backend connection timed out')
+  await advance(10_000)
+  expect(container.textContent).toContain('Backend connection timed out')
+  expect(health).toHaveBeenCalledTimes(1)
 })
 
-it.each([35000, 45000])('recovers after a %i ms cold start with one health request', async (delay) => {
-  vi.useFakeTimers()
-  try {
-    fetchMock.mockImplementation(() => new Promise(resolve => setTimeout(() => resolve(healthy()), delay)))
-    await act(async () => root.render(<BackendStatus />))
-    await act(async () => { vi.advanceTimersByTime(5000) })
-    expect(container.textContent).toContain('Backend waking up')
-    expect(container.querySelector('button')!.disabled).toBe(true)
-    await act(async () => { vi.advanceTimersByTime(delay - 5000) })
-    expect(container.textContent).toContain('Backend connected')
-    expect(fetchMock).toHaveBeenCalledTimes(1)
-  } finally { vi.useRealTimers() }
+it('cancels without losing the retry control or letting an old request overwrite recovery', async () => {
+  let finish!: (value: typeof ok) => void
+  health.mockImplementationOnce(() => new Promise(resolve => { finish = resolve }))
+  await render()
+  const oldSignal = health.mock.calls[0][0]!
+  await click('Stop connection check')
+  expect(oldSignal.aborted).toBe(true)
+  expect(container.textContent).toContain('Connection check paused')
+  await advance(120_000)
+  expect(health).toHaveBeenCalledTimes(1)
+  health.mockResolvedValue(ok)
+  await click('Retry backend connection')
+  expect(container.textContent).toContain('Backend connected')
+  await act(async () => finish(ok))
+  expect(container.textContent).toContain('Backend connected')
+  expect(health).toHaveBeenCalledTimes(2)
+})
+
+it('aborts and clears timers on unmount', async () => {
+  health.mockRejectedValue(new Error('network unavailable'))
+  await render()
+  const signal = health.mock.calls[0][0]!
+  await act(async () => root.unmount())
+  expect(signal.aborted).toBe(true)
+  await advance(120_000)
+  expect(health).toHaveBeenCalledTimes(1)
+  // afterEach owns the final root teardown.
+  root = createRoot(container)
 })

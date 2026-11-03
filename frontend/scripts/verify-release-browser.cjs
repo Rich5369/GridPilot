@@ -45,9 +45,9 @@ async function office() {
     if (delay) {
         await page.route('**/api/health', async (r) => { health++; if (delay === 45000 && health === 1)
             return r.abort('failed'); const start = Date.now(); await sleep(delay); const response = await r.fetch({ maxRetries: 0, timeout: 10000 }); await r.fulfill({ response }); readyAt = Date.now(); evidence.health_delay_observed_ms = readyAt - start; });
-        // At 60s, compute once immediately but delay its response beyond the 45s financial budget.
+        // At 60s, compute once immediately but delay its response beyond the merged 75s financial budget.
         await page.route('**/api/savings/recommendations', async (r) => { financial++; const response = await r.fetch({ maxRetries: 0 }); if (delay === 60000 && financial === 1)
-            await sleep(60000); await r.fulfill({ response }).catch(() => { }); });
+            await sleep(80000); await r.fulfill({ response }).catch(() => { }); });
     }
     await page.locator('#setup-form button[type=submit]').click();
     await page.getByRole('heading', { name: 'Add an improvement', exact: true }).waitFor();
@@ -79,7 +79,7 @@ async function office() {
         await page.screenshot({ path: OUT + '/connecting-mobile.png', fullPage: true });
         await page.setViewportSize({ width: 1440, height: 1000 });
         if (delay === 60000) {
-            await page.getByText(/Stopped waiting for savings results/).waitFor({ timeout: 50000 });
+            await page.getByText(/Stopped waiting for savings results/).waitFor({ timeout: 85000 });
             evidence.financial_timeout_message = await page.locator('.savings-request-status').allInnerTexts();
         }
         await page.getByText('Backend connected', { exact: true }).waitFor({ timeout: 75000 });
@@ -99,7 +99,7 @@ async function office() {
             response = await retry;
             assert.equal(response.status(), 200);
             assert.equal(financial, 2);
-            evidence.checks.push('Financial response timeout at 45s retains inputs; explicit retry after readiness dispatches once');
+            evidence.checks.push('Financial response timeout at 75s retains inputs; explicit retry after readiness dispatches once');
         }
     }
     const body = await response.json();

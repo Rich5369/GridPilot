@@ -1,6 +1,6 @@
 # Frontend recovery and timeline release check
 
-Scope: frontend only, based on public main `761f006`. No backend, financial equations, solver, hosting configuration or paid inference changes.
+Scope: frontend only, based on merged main `904ac72`, with the overlapping health changes reconciled after merge `647c3f9`. No backend, financial equations, solver, hosting configuration or paid inference changes.
 
 ## Connection behavior
 
@@ -8,7 +8,7 @@ The workspace checks `/api/health` with a single **90-second overall budget**. A
 
 Cleanup aborts the active health request and clears all timers. Cancelled, unmounted and expired checks cannot overwrite later state. Backend identity validation remains required.
 
-Only health GETs retry. Health status does not trigger or replay financial calculations, optimization, catalog requests or AI messages. Existing financial/AI/optimization budgets and explicit retry controls remain unchanged. A calculation timeout does not claim that server work was cancelled. Connection checks do not clear or remount business forms, saved workspaces, evidence or question drafts.
+Only health GETs retry. Health status does not trigger or replay financial calculations, optimization, catalog requests or AI messages. The merged main budgets remain in place: 75 seconds for savings calculations, 90 seconds for Savings AI, and a configurable optimization budget with a 75-second default. Explicit retry controls remain unchanged. A calculation timeout does not claim that server work was cancelled. Connection checks do not clear or remount business forms, saved workspaces, evidence or question drafts.
 
 ## Timeline behavior
 
@@ -16,12 +16,12 @@ The scheduling panel retains its dark SaaS surface with locally scoped color tok
 
 ## Verification
 
-- Full frontend suite: **324 passed, 2 opt-in HTTP tests skipped**.
+- Full frontend suite: **327 passed, 2 opt-in HTTP tests skipped**.
 - Final targeted status/API/timeline suite: **23 passed**.
 - Type checking and production build pass. Lint has no errors and two existing Fast Refresh warnings in `CostBreakdown.tsx`. The existing large-bundle build warning remains.
 - Real Chromium with the local production build and unchanged local FastAPI backend: LED, W01 and O01 workflows pass using the official fictional inputs. Backend costs, all 24 demand/device table rows and bar heights match actual responses.
 - Actual 45-second health delay plus initial failed connection: automatic recovery, one financial submission, preserved business/evidence/question drafts, zero automatic optimization/AI requests.
-- Actual 60-second health delay and delayed financial response: automatic connection recovery, financial timeout at its existing 45 seconds, no automatic replay, one successful explicit retry after readiness.
+- Actual 60-second health delay and delayed financial response: automatic connection recovery, financial timeout at the merged 75-second limit, no automatic replay, one successful explicit retry after readiness.
 - Actual 60-second optimization response during health recovery: one solve, zero AI requests; the returned schedule and charts remain correct.
 - Fake-timer regressions additionally cover the 90-second bound, repeated failures, cancellation, late responses, retry and unmount cleanup.
 - Desktop (1440 px) and mobile (390 px): no horizontal document overflow; dark timeline keyboard focus and mobile power labels work. Measured text contrast: device label **15.4:1**, secondary label **9.0:1**, proof text **14.2:1**. Scheduled fill minimum tested contrast **3.39:1** against its cell.
