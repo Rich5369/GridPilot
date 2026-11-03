@@ -12,6 +12,9 @@ const number = (n: number) =>
       ? n.toExponential(6)
       : Number(n.toPrecision(7)).toString();
 const hour = formatHour;
+// Keep narrow tiles readable; exact response precision remains in labels/tables.
+const tilePower = (kw: number) =>
+  kw > 0 && kw < 0.001 ? '<0.001' : Number(kw.toFixed(3)).toString();
 export function OperatingTimeline({
   result,
   scenario,
@@ -192,6 +195,10 @@ export function OperatingTimeline({
               Held at baseline
             </span>
             <span>
+              <i className="idle" />
+              Available · not scheduled
+            </span>
+            <span>
               <i className="unavailable" />
               Outside availability
             </span>
@@ -274,7 +281,7 @@ export function OperatingTimeline({
                         />
                         <span className="mobile-hour">{hour(h)}</span>
                         <span className="mobile-power">
-                          {kw == null ? "—" : number(kw)} kW
+                          {kw == null ? "—" : tilePower(kw)} kW
                         </span>
                       </button>
                     );

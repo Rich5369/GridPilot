@@ -1,4 +1,15 @@
-.operating-timeline {
+.panel.operating-timeline {
+  /* Keep the existing dark scheduling surface, independent of the page theme. */
+  --gp-surface: #101e2c;
+  --gp-text: #f0f5fc;
+  --gp-muted: #b8c9d9;
+  --gp-line: #42576b;
+  --gp-primary: #8bd5ff;
+  --gp-secondary-bg: #203b51;
+  --gp-soft: #203b51;
+  color: var(--gp-text);
+  background: var(--gp-surface);
+  border-color: var(--gp-line);
   min-width: 0;
   padding: 24px;
 }
@@ -85,7 +96,11 @@
   background: #97a9d8;
 }
 .plan-legend .unavailable {
-  background: repeating-linear-gradient(135deg, #334154 0 2px, #15202d 2px 5px);
+  background: repeating-linear-gradient(135deg, #607c96 0 2px, #15202d 2px 5px);
+}
+.plan-legend .idle {
+  background: #1b303c;
+  border: 1px solid #8299ad;
 }
 .plan-axis,
 .device-row {
@@ -146,7 +161,7 @@
   min-width: 0;
 }
 .hour-cell.unavailable {
-  background: repeating-linear-gradient(135deg, #1d2a39 0 2px, #15202d 2px 6px);
+  background: repeating-linear-gradient(135deg, #607c96 0 2px, #15202d 2px 6px);
   border-color: #283749;
 }
 .hour-fill {
@@ -239,19 +254,28 @@
   .hour-cell {
     height: 54px;
   }
-  .hour-fill {
-    opacity: 0.35;
-  }
   .mobile-hour,
   .mobile-power {
     display: block;
     position: relative;
     z-index: 1;
     color: #f1f7fc;
+    background: #101e2c;
+    width: fit-content;
+    margin: auto;
+    padding: 0 3px;
+    border-radius: 2px;
     font-size: 10px;
     line-height: 1.8;
   }
+  .mobile-power {
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
   .device-table {
     grid-column: 1;
+  }
+  .panel.operating-timeline {
+    padding: 16px;
   }
 }

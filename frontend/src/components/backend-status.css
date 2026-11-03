@@ -1,0 +1,33 @@
+.backend-connection {
+  max-width: 460px;
+  align-items: flex-start;
+  min-width: 0;
+}
+.backend-connection > div {
+  min-width: 0;
+}
+.backend-connection .status {
+  color: var(--gp-text);
+}
+.backend-connection .status-dot {
+  flex-shrink: 0;
+  background: var(--gp-primary);
+}
+.backend-connection .connected .status-dot {
+  background: #18704e;
+}
+.connection-message {
+  color: var(--gp-muted);
+  font-size: 11px;
+  line-height: 1.5;
+  margin: 5px 0 0;
+}
+.backend-connection > button {
+  flex-shrink: 0;
+}
+@media (max-width: 700px) {
+  .backend-connection {
+    flex-wrap: wrap;
+    width: 100%;
+  }
+}

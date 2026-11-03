@@ -1,0 +1,200 @@
+{
+  "A-led-complete": {
+    "profile": {
+      "business_type": "Office",
+      "electricity_cost_and_period": "Fictional USD 6000/month context; no implied consumption or customer rate"
+    },
+    "measures": [
+      {
+        "id": "A-led-complete",
+        "category": "led",
+        "load_id": "standalone-A-led-complete",
+        "evidence_kind": "synthetic",
+        "evidence_reference": "Fictional standalone fixture derived from documented backend/tests/test_savings.py equations; quantities/costs are assumptions, not measured customer evidence.",
+        "applicable": true,
+        "rate": {
+          "usd_per_kwh": 0.2,
+          "source": "Fictional confirmed flat avoidable customer rate, not an EIA tariff",
+          "valid_from": "2026-01-01",
+          "valid_through": "2026-12-31",
+          "customer_applicability_confirmed": true,
+          "flat_avoidable_energy_rate_confirmed": true
+        },
+        "installation_cost_usd": 2500.0,
+        "annual_incremental_cost_usd": 0.0,
+        "fixture_count": 100,
+        "old_watts": 60.0,
+        "new_watts": 10.0,
+        "hours_per_day": 10.0,
+        "days_per_year": 250,
+        "equivalent_service_confirmed": true
+      }
+    ]
+  },
+  "W01": {
+    "operating_hours": {
+      "start_hour": 8,
+      "end_hour": 18
+    },
+    "fixed_demand_kw": [
+      3.0,
+      3.0,
+      3.0,
+      3.0,
+      3.0,
+      3.0,
+      3.0,
+      3.0,
+      6.0,
+      6.0,
+      6.0,
+      6.0,
+      6.0,
+      6.0,
+      6.0,
+      6.0,
+      6.0,
+      6.0,
+      3.0,
+      3.0,
+      3.0,
+      3.0,
+      3.0,
+      3.0
+    ],
+    "electricity_prices_usd_per_kwh": [
+      0.12,
+      0.12,
+      0.12,
+      0.12,
+      0.12,
+      0.12,
+      0.12,
+      0.12,
+      0.12,
+      0.12,
+      0.12,
+      0.12,
+      0.12,
+      0.12,
+      0.28,
+      0.28,
+      0.28,
+      0.28,
+      0.28,
+      0.28,
+      0.12,
+      0.12,
+      0.12,
+      0.12
+    ],
+    "building_max_demand_kw": 14.0,
+    "ev_requirements": [],
+    "flexible_equipment": [
+      {
+        "id": "noncritical-wash-water-pump",
+        "available_hours": {
+          "start_hour": 14,
+          "end_hour": 22
+        },
+        "energy_required_kwh": 8.0,
+        "max_power_kw": 4.0
+      },
+      {
+        "id": "noncritical-transfer-pump",
+        "available_hours": {
+          "start_hour": 10,
+          "end_hour": 16
+        },
+        "energy_required_kwh": 4.0,
+        "max_power_kw": 2.0
+      }
+    ]
+  },
+  "O01": {
+    "operating_hours": {
+      "start_hour": 8,
+      "end_hour": 18
+    },
+    "building_max_demand_kw": 25,
+    "fixed_demand_kw": [
+      3,
+      3,
+      3,
+      3,
+      3,
+      3,
+      3,
+      3,
+      3,
+      3,
+      3,
+      3,
+      3,
+      3,
+      3,
+      3,
+      3,
+      3,
+      3,
+      3,
+      3,
+      3,
+      3,
+      3
+    ],
+    "electricity_prices_usd_per_kwh": [
+      0.12,
+      0.12,
+      0.12,
+      0.12,
+      0.12,
+      0.12,
+      0.12,
+      0.12,
+      0.12,
+      0.12,
+      0.12,
+      0.12,
+      0.12,
+      0.12,
+      0.28,
+      0.28,
+      0.28,
+      0.28,
+      0.28,
+      0.28,
+      0.12,
+      0.12,
+      0.12,
+      0.12
+    ],
+    "ev_requirements": [
+      {
+        "id": "office-ev-1",
+        "arrival_hour": 15,
+        "deadline_hour": 22,
+        "energy_required_kwh": 14.4,
+        "max_charging_power_kw": 7.2
+      },
+      {
+        "id": "office-ev-2",
+        "arrival_hour": 15,
+        "deadline_hour": 22,
+        "energy_required_kwh": 14.4,
+        "max_charging_power_kw": 7.2
+      }
+    ],
+    "flexible_equipment": [
+      {
+        "id": "office-equipment",
+        "available_hours": {
+          "start_hour": 10,
+          "end_hour": 16
+        },
+        "energy_required_kwh": 6,
+        "max_power_kw": 3
+      }
+    ]
+  }
+}
