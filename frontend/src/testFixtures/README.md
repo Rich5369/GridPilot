@@ -14,3 +14,8 @@ inference or production request generated these files. The engine's real pilot
 
 Only tests/browser QA import the warehouse response. Production UI uses actual HTTP
 responses; its optional LED example is separately and visibly labeled synthetic.
+
+`advisorComparison.json` contains real local solver results for a fictional
+25 kW versus 23 kW site-cap comparison with a two-rate tariff. Its Meta source
+labels, activity text and qualitative explanation are injected UI test data,
+not genuine provider acceptance. Production components never import this fixture.

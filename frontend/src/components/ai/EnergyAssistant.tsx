@@ -3,12 +3,14 @@ import { apiRequest, ApiError } from '../../services/api'
 import { toScenario, validateEditor } from '../../data/demoScenario'
 import type { ScenarioEditor } from '../../types/dashboard'
 import type { Scenario } from '../../types/api'
+import { compareWithAdvisor, type AdvisorComparison, type ProposalChanges } from '../../services/advisorComparison'
+import { AdvisorComparisonCard } from './AdvisorComparisonCard'
 
 type Proposal = {
   source: 'meta' | 'mock'
   status: 'proposed' | 'clarification' | 'unsupported'
   message: string
-  changes: { building_max_demand_kw?: number | null; all_ev_deadline_hour?: number | null; peak_price_increase_percent?: number | null }
+  changes: ProposalChanges
   proposed_scenario: Scenario | null
 }
 type Profile = Record<string, string | number | null>
@@ -16,12 +18,14 @@ type Advisor = Omit<Proposal, 'status'> & { category: 'answer' | 'clarification_
 
 const profileFields = ['business_type', 'employee_count', 'operating_hours', 'electricity_cost_and_period', 'consumption_and_units', 'equipment', 'goals', 'restrictions']
 const fieldLabel = (key: string) => ({ electricity_cost_and_period: 'Electricity cost & billing period', consumption_and_units: 'Consumption & units' }[key] ?? key.replaceAll('_', ' '))
-const examples = ['Keep peak power demand below 15 kW.', 'Compare a lower power-cap scenario.']
+const examples = ['Keep peak power demand below 15 kW.', 'Compare my current plan with a 15 kW building power limit.']
 export function EnergyAssistant({ editor, onChange, resultScenario, onCompareProposal, schedulingMode = 'ev_only', resultId, initialProfile, onProfileChange, initialProfileLabel = 'From setup' }: {
   onProfileChange?: (profile: Profile) => void; initialProfileLabel?: string; initialProfile?: Profile; resultId?: string | null; schedulingMode?: 'ev_only' | 'joint'; editor: ScenarioEditor; onChange: (editor: ScenarioEditor) => void; resultScenario: Scenario | null; onCompareProposal?: (e: ScenarioEditor) => void
 }) {
   const [request, setRequest] = useState('')
   const [proposal, setProposal] = useState<Proposal | null>(null)
+  const [comparison, setComparison] = useState<AdvisorComparison | null>(null)
+  const [comparing, setComparing] = useState(false)
   const [snapshot, setSnapshot] = useState('')
   const [history, setHistory] = useState<{role: 'user' | 'assistant'; content: string; category?: Advisor['category']; message?: string; bullets?: string[]; warnings?: string[]; questions?: string[]}[]>([])
   const [profile, setProfile] = useState<Profile>(initialProfile ?? {})
@@ -35,21 +39,29 @@ export function EnergyAssistant({ editor, onChange, resultScenario, onComparePro
   const contextKey = JSON.stringify(resultScenario ?? draftScenario) + schedulingMode + (resultId ?? '')
   const contextRef = useRef(contextKey)
   useEffect(() => { contextRef.current = contextKey }, [contextKey])
+  const comparisonContext = contextKey + JSON.stringify(editor)
+  const comparisonContextRef = useRef(comparisonContext)
+  const comparisonController = useRef<AbortController | null>(null)
+  useEffect(() => { comparisonContextRef.current = comparisonContext }, [comparisonContext])
   const [busy, setBusy] = useState(false)
   const pending = useRef(false)
   const active = useRef(true)
-  useEffect(() => { active.current = true; return () => { active.current = false } }, [])
+  useEffect(() => { active.current = true; return () => { active.current = false; comparisonController.current?.abort() } }, [])
   const [error, setError] = useState('')
   async function send() {
     if (pending.current || !request.trim() || (!resultScenario && !validDraft)) return
     pending.current = true
-    setBusy(true); setError(''); setProposal(null)
+    setBusy(true); setError('')
+    if (stale || !comparison) { setProposal(null); setComparison(null) }
     const submittedKey = contextKey
     const current = JSON.stringify(editor)
     setSnapshot(current)
     try {
       const prior = conversation === submittedKey ? history : []
-      const body = { request, history: prior.slice(-12).map(({ role, content }) => ({ role, content })), profile, scenario: resultScenario ?? toScenario(editor), scheduling_mode: schedulingMode, result_id: resultId ?? null }
+      const retainedComparison = !stale ? comparison : null
+      const body = { request, history: prior.slice(-12).map(({ role, content }) => ({ role, content })), profile, scenario: resultScenario ?? toScenario(editor), scheduling_mode: schedulingMode,
+        result_id: retainedComparison?.current.result_id ?? resultId ?? null,
+        ...(retainedComparison ? { comparison: { changes: retainedComparison.changes, alternative_result_id: retainedComparison.alternative.result_id } } : {}) }
       const response = await apiRequest<Advisor>('/api/ai/conversation', {
         method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body), signal: AbortSignal.timeout(90000),
       })
@@ -62,13 +74,41 @@ export function EnergyAssistant({ editor, onChange, resultScenario, onComparePro
       setProfile(nextProfile)
       onProfileChange?.(nextProfile)
       setSource(response.source === 'meta' ? 'Meta · reply received' : 'MOCK MODE — NOT META AI')
-      if (response.category === 'scenario_proposal') setProposal({ ...response, status: 'proposed' })
+      if (response.category === 'scenario_proposal') { setProposal({ ...response, status: 'proposed' }); setComparison(null) }
     } catch (e) {
       if (!active.current) return
       const detail = e instanceof ApiError ? (e.body as { detail?: { message?: string } })?.detail?.message : null
       setSource('Meta unavailable · last request failed')
       setError(detail || 'AI request failed or timed out. Optimization remains available.')
     } finally { if (active.current) setBusy(false); pending.current = false }
+  }
+  async function compareReviewedProposal() {
+    if (pending.current || stale || !proposal?.proposed_scenario || !draftScenario) return
+    pending.current = true
+    setBusy(true); setComparing(true); setError(''); setComparison(null)
+    const submitted = comparisonContext
+    const controller = new AbortController()
+    comparisonController.current = controller
+    try {
+      const response = await compareWithAdvisor(resultScenario ?? draftScenario, proposal.changes,
+        proposal.proposed_scenario, schedulingMode,
+        AbortSignal.any([controller.signal, AbortSignal.timeout(120000)]))
+      if (!active.current) return
+      if (comparisonContextRef.current !== submitted) {
+        setError('Setup changed during comparison. Request a new proposal; no changes were applied.'); return
+      }
+      setComparison(response)
+    } catch (e) {
+      if (!active.current) return
+      const detail = e instanceof ApiError ? (e.body as { detail?: { message?: string } })?.detail?.message : null
+      setError(detail || (e instanceof Error && e.name === 'TimeoutError'
+        ? 'Comparison timed out. The server may still be processing; wait before retrying. No changes were applied.'
+        : e instanceof Error ? e.message : 'Comparison failed. No changes were applied.'))
+    } finally {
+      if (active.current) { setBusy(false); setComparing(false) }
+      pending.current = false
+      comparisonController.current = null
+    }
   }
   function apply(compare = false) {
     if (stale || busy || !proposal?.proposed_scenario) return
@@ -84,7 +124,7 @@ export function EnergyAssistant({ editor, onChange, resultScenario, onComparePro
     if (Object.keys(validateEditor(next)).length || Object.entries(toScenario(next)).some(([key, value]) => JSON.stringify(value) !== JSON.stringify(proposal.proposed_scenario![key as keyof Scenario]))) {
       setError('This proposal cannot be represented by the current editor. No changes applied.'); return
     }
-    if (compare) onCompareProposal?.(next); else onChange(next); setProposal(null)
+    if (compare) onCompareProposal?.(next); else onChange(next); setProposal(null); setComparison(null)
     setError(compare ? 'Alternative prepared. Run Compare both scenarios in What-if to calculate outcomes.' : 'Changes applied to draft. Run optimization to calculate feasibility and results.')
   }
   const stale = snapshot !== JSON.stringify(editor) || JSON.stringify(draftScenario) !== JSON.stringify(resultScenario ?? draftScenario) || conversation !== contextKey
@@ -108,20 +148,22 @@ export function EnergyAssistant({ editor, onChange, resultScenario, onComparePro
       {!!turn.warnings?.length && <section className="advisor-reply-section advisor-reply-notice" aria-label="Important information"><h4>Keep in mind</h4>{turn.warnings.map(warning => <p key={warning}>{warning}</p>)}</section>}
       {!!turn.questions?.length && <section className="advisor-reply-section" aria-label="Follow-up question"><h4>One question</h4><p>{turn.questions[0]}</p></section>}
     </article>)}</div>
-    {proposal && <div className="advisor-proposal" aria-label="Proposed scenario changes"><span className="advisor-eyebrow">REVIEW SCENARIO CHANGES</span><h3>Proposed operational change</h3><p className="advisor-caption">Not yet applied · feasibility and savings have not been calculated for this proposal.</p>
+    {proposal && <div className="advisor-proposal" aria-label="Proposed scenario changes"><span className="advisor-eyebrow">REVIEW SCENARIO CHANGES</span><h3>Proposed operational change</h3><p className="advisor-caption">{comparison ? 'Comparison calculated below. Changes have not been applied.' : 'Not yet applied. Review the changes, then ask Meta to compare both plans.'}</p>
       <dl>{Object.entries(proposal.changes).filter(([, v]) => v != null).map(([k, v]) => <div key={k}><dt>{{ building_max_demand_kw: "Building’s power limit", all_ev_deadline_hour: 'All vehicles ready by', peak_price_increase_percent: 'Highest electricity price increase' }[k] ?? k}</dt><dd>{v}{k === 'building_max_demand_kw' ? ' kW' : k === 'all_ev_deadline_hour' ? ':00' : '%'}</dd></div>)}</dl>
       {stale && <p>Draft differs from submitted context. Restore the submitted draft or request a new proposal after submitting it.</p>}
-      <button className="run-button" onClick={() => apply()} disabled={stale || busy}>Apply Changes</button> {onCompareProposal && <button onClick={() => apply(true)} disabled={stale || busy}>Compare as alternative</button>} <button onClick={() => setProposal(null)}>Cancel</button>
+      <button className="run-button" onClick={() => { void compareReviewedProposal() }} disabled={stale || busy}>Compare with Meta</button>
+      <button onClick={() => apply()} disabled={stale || busy}>Apply Changes</button> {onCompareProposal && <button onClick={() => apply(true)} disabled={stale || busy}>Compare as alternative</button>} <button disabled={busy} onClick={() => { setProposal(null); setComparison(null) }}>Cancel</button>
     </div>}
+    {comparison && <AdvisorComparisonCard comparison={comparison} stale={stale} />}
     <div className={`advisor-starters ${history.length ? 'has-history' : ''}`}><span className="advisor-caption">SUGGESTED QUESTIONS</span><div className="ai-examples">{['How can I reduce electricity costs without disrupting operations?', 'When is peak building demand?', 'What information do you need from me?', 'Explain this optimization result.', ...examples].map(text => <button type="button" key={text} onClick={() => setRequest(text)} disabled={busy}>{text}</button>)}</div></div>
     <form className="advisor-composer" onSubmit={e => { e.preventDefault(); void send() }}>
       <label htmlFor="ai-request">Ask about energy or describe your business</label>
       <textarea id="ai-request" value={request} maxLength={2000} onChange={e => setRequest(e.target.value)} rows={3} placeholder="Ask a question or describe your business goals…" aria-describedby="advisor-composer-help" required />
       <p id="advisor-composer-help" className="advisor-caption">Review any proposed changes before applying. Sending a message does not run optimization.</p>
       <div className="ai-actions"><button className="run-button" type="submit" disabled={busy || !request.trim() || (!resultScenario && !!Object.keys(validateEditor(editor)).length)}>Send to advisor</button>
-      <button type="button" disabled={busy} onClick={() => { setHistory([]); setProposal(null); setError('') }}>Clear conversation</button></div>
+      <button type="button" disabled={busy} onClick={() => { setHistory([]); setProposal(null); setComparison(null); setError('') }}>Clear conversation</button></div>
     </form>
-    {busy && <p className="advisor-notice" role="status">Requesting Meta assistance…</p>}
+    {busy && <p className="advisor-notice" role="status">{comparing ? 'Meta is requesting a comparison and reviewing optimizer results. This can take a moment…' : 'Requesting Meta assistance…'}</p>}
     {error && <p className="advisor-notice" role="status">{error}</p>}
 
   </section>

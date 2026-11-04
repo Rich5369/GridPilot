@@ -50,3 +50,6 @@ router.add_api_route("/conversation", converse, methods=["POST"])
 from backend.ai.savings import savings_conversation, SavingsConversationResponse
 router.add_api_route('/savings/conversation', savings_conversation, methods=['POST'],
                      response_model=SavingsConversationResponse)
+
+from backend.ai.comparison import compare, ComparisonResponse
+router.add_api_route('/compare', compare, methods=['POST'], response_model=ComparisonResponse)

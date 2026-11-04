@@ -1,0 +1,12 @@
+.advisor-comparison { border: 1px solid var(--gp-line); border-radius: 10px; padding: 18px; margin-block: 16px; background: var(--gp-surface); overflow-wrap: anywhere; }
+.advisor-comparison h3 { margin: 0 0 12px; font-size: 18px; font-weight: 650; line-height: 1.4; }
+.advisor-comparison ol { padding-left: 22px; font-size: 12px; line-height: 1.8; list-style: decimal; margin-bottom: 12px; }
+.advisor-comparison-table { overflow-x: auto; }
+.advisor-comparison table { width: 100%; table-layout: fixed; white-space: normal; border-collapse: collapse; font-size: 13px; }
+.advisor-comparison tr > :first-child { width: 44%; }
+.advisor-comparison caption { text-align: left; padding-block: 10px; color: var(--gp-muted); }
+.advisor-comparison th, .advisor-comparison td { text-align: left; padding: 10px 6px; border-bottom: 1px solid var(--gp-line); }
+.advisor-comparison ul { padding-left: 20px; font-size: 12px; line-height: 1.7; }
+.advisor-comparison details { margin-top: 16px; }
+.advisor-comparison details p { font-size: 12px; }
+@media (max-width: 400px) { .advisor-comparison { padding: 12px; } .advisor-comparison th, .advisor-comparison td { padding: 8px 3px; font-size: 11px; } }
