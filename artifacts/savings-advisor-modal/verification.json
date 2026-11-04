@@ -1,0 +1,70 @@
+{
+  "source": "Production frontend, injected AI responses, real local Savings Engine",
+  "checks": [
+    "meta: header routes to savings modal, no duplicate action/accordion, no automatic inference, question/response/follow-up retained, explicit follow-up includes history, Escape restores focus, native focus containment, evidence handoff closes modal, real $2,500/year calculation, conversation retained after calculation, daily advisor unchanged, widths 1440/768/390/320",
+    "deterministic_fallback: header routes to savings modal, no duplicate action/accordion, no automatic inference, question/response/follow-up retained, explicit follow-up includes history, Escape restores focus, native focus containment, evidence handoff closes modal, real $2,500/year calculation, conversation retained after calculation, daily advisor unchanged, widths 1440/768/390/320"
+  ],
+  "errors": [],
+  "accessibility": [
+    {
+      "source": "meta",
+      "view": "selected opportunities",
+      "width": 1440,
+      "violations": []
+    },
+    {
+      "source": "meta",
+      "view": "modal with response",
+      "width": 1440,
+      "violations": []
+    },
+    {
+      "source": "meta",
+      "view": "modal with response",
+      "width": 768,
+      "violations": []
+    },
+    {
+      "source": "meta",
+      "view": "modal with response",
+      "width": 390,
+      "violations": []
+    },
+    {
+      "source": "meta",
+      "view": "modal with response",
+      "width": 320,
+      "violations": []
+    },
+    {
+      "source": "deterministic_fallback",
+      "view": "selected opportunities",
+      "width": 1440,
+      "violations": []
+    },
+    {
+      "source": "deterministic_fallback",
+      "view": "modal with response",
+      "width": 1440,
+      "violations": []
+    },
+    {
+      "source": "deterministic_fallback",
+      "view": "modal with response",
+      "width": 768,
+      "violations": []
+    },
+    {
+      "source": "deterministic_fallback",
+      "view": "modal with response",
+      "width": 390,
+      "violations": []
+    },
+    {
+      "source": "deterministic_fallback",
+      "view": "modal with response",
+      "width": 320,
+      "violations": []
+    }
+  ]
+}

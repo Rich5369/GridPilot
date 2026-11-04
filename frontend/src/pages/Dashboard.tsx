@@ -132,6 +132,7 @@ export function Dashboard({
   const view = selectedView ?? localView
   const [savingsVisited, setSavingsVisited] = useState(view === 'savings')
   if (view === 'savings' && !savingsVisited) setSavingsVisited(true)
+  const [savingsAdvisorOpen, setSavingsAdvisorOpen] = useState(false)
   const previousView = useRef<DashboardView>('overview')
   const advisorTrigger = useRef<HTMLButtonElement>(null)
   const advisorClose = useRef<HTMLButtonElement>(null)
@@ -150,6 +151,7 @@ export function Dashboard({
   }
   const primaryView = ['configuration', 'comparison', 'whatif'].includes(view) ? 'configuration' : view
   function setView(next: DashboardView) {
+    setSavingsAdvisorOpen(false)
     setLocalView(next)
     onNavigate?.(next)
   }
@@ -339,8 +341,8 @@ export function Dashboard({
               {view === 'assistant' ? (
                 <button ref={advisorClose} className="secondary" onClick={closeAdvisor}>Close Energy Advisor</button>
               ) : (
-                <button ref={advisorTrigger} className="run-button advisor-trigger" aria-controls="energy-advisor" onClick={() => setView('assistant')}>
-                  <Sparkles size={17} aria-hidden="true" />Ask Energy Advisor
+                <button ref={advisorTrigger} className="run-button advisor-trigger" aria-controls={view === 'savings' ? 'savings-conversation' : 'energy-advisor'} aria-haspopup={view === 'savings' ? 'dialog' : undefined} onClick={() => view === 'savings' ? setSavingsAdvisorOpen(true) : setView('assistant')}>
+                  <Sparkles size={17} aria-hidden="true" />{view === 'savings' ? 'Ask Meta Energy Advisor' : 'Ask Energy Advisor'}
                 </button>
               )}
               {['overview', 'configuration', 'comparison', 'whatif'].includes(view) && (
@@ -451,6 +453,8 @@ export function Dashboard({
                 workspaceName={workspaceName}
                 businessProfile={businessProfile}
                 onProfileChange={onBusinessContextChange}
+                advisorOpen={view === 'savings' && savingsAdvisorOpen}
+                onAdvisorClose={() => setSavingsAdvisorOpen(false)}
                 initialDraft={initialSavingsDraft}
                 onDraftChange={onSavingsDraftChange}
                 onScheduling={() => setView('configuration')}

@@ -220,3 +220,16 @@ it.each([null, 0, 500])('shows returned incremental expenses without inferring u
     expect(host.querySelector('[data-financial=expenses]')!.textContent).toBe(value === null ? 'Unknown — more information needed' : value === 0 ? '$0.00 USD/year' : '$500.00 USD/year');
   } finally { await close(); }
 });
+
+it("shows the advisor response before collapsed service notices while keeping overlap guidance visible", async () => {
+  const c = structuredClone(warehouse) as SavingsConversationResponse;
+  const { host, close } = await render(c.savings, warehouseRequest.evidence as SavingsRequest, c);
+  try {
+    const selection = host.querySelector(".savings-selection")!;
+    const notice = [...host.querySelectorAll("details")].find(d => d.querySelector("summary")?.textContent === "Calculation limitations and service notices")!;
+    expect(notice.open).toBe(false);
+    expect(selection.compareDocumentPosition(notice) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(host.querySelector(".savings-no-total")!.textContent).toContain("Savings may overlap");
+    expect(notice.textContent).toContain("AI opportunity selection runs separately");
+  } finally { await close(); }
+});

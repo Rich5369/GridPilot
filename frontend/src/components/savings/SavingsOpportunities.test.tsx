@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { act, StrictMode } from "react";
+import { act, StrictMode, useState } from "react";
 import { createRoot } from "react-dom/client";
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
 import { SavingsOpportunities } from "./SavingsOpportunities";
@@ -26,6 +26,9 @@ vi.mock("../../services/savings", async (original) => ({
   converseSavings: vi.fn(),
 }));
 Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
+// jsdom does not implement the native dialog lifecycle; browser checks cover modality/focus.
+HTMLDialogElement.prototype.showModal = function () { this.open = true; };
+HTMLDialogElement.prototype.close = function () { this.open = false; };
 let host: HTMLDivElement, root: ReturnType<typeof createRoot>;
 const draft = (): SavingsDraft => ({
   ...emptySavingsDraft(),
@@ -49,24 +52,22 @@ afterEach(async () => {
   await act(async () => root.unmount());
   host.remove();
 });
+function Harness({ initialDraft }: { initialDraft: SavingsDraft }) {
+  const [open, setOpen] = useState(false);
+  return <>
+    <button onClick={() => setOpen(true)}>Ask Meta Energy Advisor</button>
+    <SavingsOpportunities
+      workspaceName="Office"
+      initialDraft={initialDraft}
+      advisorOpen={open}
+      onAdvisorClose={() => setOpen(false)}
+      businessProfile={{ business_type: "Office", employee_count: 43, operating_hours: "8 AM–5 PM", electricity_cost_and_period: "USD 1200/month" }}
+      onScheduling={vi.fn()}
+    />
+  </>;
+}
 async function mount(d: SavingsDraft = draft()) {
-  await act(async () =>
-    root.render(
-      <StrictMode>
-        <SavingsOpportunities
-          workspaceName="Office"
-          initialDraft={d}
-          businessProfile={{
-            business_type: "Office",
-            employee_count: 43,
-            operating_hours: "8 AM–5 PM",
-            electricity_cost_and_period: "USD 1200/month",
-          }}
-          onScheduling={vi.fn()}
-        />
-      </StrictMode>,
-    ),
-  );
+  await act(async () => root.render(<StrictMode><Harness initialDraft={d} /></StrictMode>));
 }
 async function click(label: string) {
   const b = [...host.querySelectorAll("button")].find(
@@ -215,6 +216,7 @@ it("does not infer scheduling exclusion, omits unknown applicability and labels 
     message: "Meta unavailable; using deterministic guidance.",
   } as SavingsConversationResponse);
   await mount(d);
+  await click("Ask Meta Energy Advisor");
   await click("Submit question");
   const req = vi.mocked(converseSavings).mock.calls[0][0];
   expect(req.category_applicability).toEqual({
@@ -253,15 +255,18 @@ it.each(["meta", "deterministic_fallback"] as const)(
     c.source = source;
     vi.mocked(converseSavings).mockResolvedValueOnce(c);
     await mount(emptySavingsDraft());
-    const section = host.querySelector<HTMLDetailsElement>("#savings-conversation")!;
+    const section = host.querySelector<HTMLDialogElement>("#savings-conversation")!;
     expect(section.open).toBe(false);
-    expect(section.compareDocumentPosition(host.querySelector("#savings-evidence")!) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(host.textContent).not.toContain("Help me find opportunities");
+    expect(host.querySelector(".savings-intro button")).toBeNull();
     await click("Ask Meta Energy Advisor");
     expect(section.open).toBe(true);
     expect(document.activeElement?.id).toBe("savings-question");
     expect(host.querySelector<HTMLTextAreaElement>("#savings-question")!.value).toBe("How can my business lower its electricity costs?");
     expect(converseSavings).not.toHaveBeenCalled();
     await input("savings-question", "Can we improve lighting?");
+    await click("Close Meta Energy Advisor");
+    expect(section.open).toBe(false);
     await click("Ask Meta Energy Advisor");
     expect(host.querySelector<HTMLTextAreaElement>("#savings-question")!.value).toBe("Can we improve lighting?");
     expect(converseSavings).not.toHaveBeenCalled();
@@ -270,10 +275,15 @@ it.each(["meta", "deterministic_fallback"] as const)(
     expect(vi.mocked(converseSavings).mock.calls[0][0].request).toBe("Can we improve lighting?");
     expect(calculateSavings).not.toHaveBeenCalled();
     expect(host.querySelector(".savings-selection h3")!.textContent).toBe(source === "meta" ? "Selected by Meta AI" : "Standard guidance — Meta unavailable");
+    await click("Close Meta Energy Advisor");
+    await click("Ask Meta Energy Advisor");
+    expect(host.querySelector("dialog .savings-selection h3")!.textContent).toBe(source === "meta" ? "Selected by Meta AI" : "Standard guidance — Meta unavailable");
+    expect(converseSavings).toHaveBeenCalledTimes(1);
     const led = host.querySelector('[data-measure-id="pilot-lighting"]')!;
     const estimate = led.querySelector("button")!;
     expect(estimate.textContent).toBe("Estimate savings");
     await act(async () => estimate.click());
+    expect(section.open).toBe(false);
     expect(host.querySelector<HTMLDetailsElement>("#savings-project-0")!.open).toBe(true);
     expect(host.querySelector("#savings-0-fixture_count")).toBeTruthy();
     expect(converseSavings).toHaveBeenCalledTimes(1);
@@ -285,4 +295,30 @@ it("preserves a saved question when opening Meta AI", async () => {
   await click("Ask Meta Energy Advisor");
   expect(host.querySelector<HTMLTextAreaElement>("#savings-question")!.value).toBe("My saved question");
   expect(converseSavings).not.toHaveBeenCalled();
+});
+
+it("retains a pending response after close and sends prior turns only on explicit follow-up", async () => {
+  let resolve!: (value: SavingsConversationResponse) => void;
+  vi.mocked(converseSavings).mockImplementationOnce(() => new Promise(r => { resolve = r; }));
+  await mount({ ...emptySavingsDraft(), question: "Lighting ideas?" });
+  await click("Ask Meta Energy Advisor");
+  await click("Submit question");
+  await click("Close Meta Energy Advisor");
+  await act(async () => resolve(warehouse as SavingsConversationResponse));
+  await click("Ask Meta Energy Advisor");
+  expect(host.querySelector("dialog .savings-selection")).toBeTruthy();
+  expect(converseSavings).toHaveBeenCalledTimes(1);
+  await input("savings-question", "What should I measure first?");
+  await click("Submit question");
+  expect(converseSavings).toHaveBeenCalledTimes(2);
+  expect(vi.mocked(converseSavings).mock.calls[1][0].history).toEqual([
+    { role: "user", content: "Lighting ideas?" },
+    { role: "assistant", content: warehouse.message.slice(0, 3000) },
+  ]);
+  const dialog = host.querySelector<HTMLDialogElement>("dialog")!;
+  await act(async () => { dialog.dispatchEvent(new Event("cancel", { cancelable: true })); });
+  expect(dialog.open).toBe(false);
+  await click("Ask Meta Energy Advisor");
+  expect(host.querySelector<HTMLTextAreaElement>("#savings-question")!.value).toBe("What should I measure first?");
+  expect(converseSavings).toHaveBeenCalledTimes(2);
 });
