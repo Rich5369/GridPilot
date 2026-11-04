@@ -35,6 +35,7 @@ import { SavingsMeasureForm, ConfirmSelect } from "./SavingsMeasureForm";
 import { SavingsResults } from "./SavingsResults";
 import states from "../../data/usStates.json";
 import "./savings-advisor.css";
+import { createPortal, flushSync } from "react-dom";
 type Accepted = {
   response: SavingsResponse;
   conversation: SavingsConversationResponse | null;
@@ -70,6 +71,7 @@ export function SavingsOpportunities({
   onScheduling,
   workspaceName,
   advisorOpen = false,
+  onEvidence,
   onAdvisorClose = () => {},
 }: {
   businessProfile?: Record<string, string | number | null>;
@@ -79,6 +81,7 @@ export function SavingsOpportunities({
   onScheduling: () => void;
   workspaceName: string;
   advisorOpen?: boolean;
+  onEvidence?: () => void;
   onAdvisorClose?: () => void;
 }) {
   const [draft, setDraft] = useState<SavingsDraft>(() => {
@@ -396,12 +399,13 @@ export function SavingsOpportunities({
           </p>
         )}
       </section>
-      <dialog
+      {createPortal(<dialog
         ref={dialogRef}
         id="savings-conversation"
         className="savings-advisor-dialog"
         aria-labelledby="savings-advisor-title"
         aria-describedby="savings-advisor-description"
+        onKeyDown={(event) => { if (event.key === "Escape") event.stopPropagation(); }}
         onCancel={(event) => { event.preventDefault(); closeAdvisor(); }}
       >
         <header className="savings-advisor-header">
@@ -451,11 +455,15 @@ export function SavingsOpportunities({
             request={advisorAccepted.request}
             confirmed={advisorAccepted.confirmed}
             stale={advisorAccepted.key !== key}
-            onAnswer={(id, category) => { closeAdvisor(); answer(id, category); }}
+            onAnswer={(id, category) => {
+              // Reveal the evidence page before its existing handler opens/focuses the form.
+              flushSync(() => { closeAdvisor(); onEvidence?.(); });
+              answer(id, category);
+            }}
             onScheduling={() => { closeAdvisor(); onScheduling(); }}
           />
         )}
-      </dialog>
+      </dialog>, document.body)}
       <form
         id="savings-evidence"
         noValidate
