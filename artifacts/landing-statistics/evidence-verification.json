@@ -1,0 +1,27 @@
+{
+  "archive": "References/final-simulation-data-2026-11-02.zip (supplied untracked workspace archive)",
+  "archive_sha256": "022e8122146868350c823d937647f71f64593b529c93786e602f32ab0f51ef55",
+  "source_commit": "761f006493b6abc0a53f1f6674c1c3d734bed68a",
+  "manifest_files_checked": 223,
+  "manifest_mismatches": 0,
+  "optimizer_source_hashes_match_pinned_commit": true,
+  "csv_sha256": "d2762c1dd25829819e87b2604cec680ab204cd5b0c4dfe6a045e0272dc03e442",
+  "eligible_percent": {
+    "n": 67,
+    "mean": 3.807724111302798
+  },
+  "controllable_eligible_daily_usd": {
+    "n": 41,
+    "mean": 4.122146282926832
+  },
+  "warehouse": {
+    "simulation_id": "W01",
+    "ev_count": "0",
+    "baseline_method": "legacy_immediate_start",
+    "baseline_valid": "True",
+    "baseline_energy_charge_usd": "19.76",
+    "optimized_energy_charge_usd": "18.4800001",
+    "eligible_savings_percent": "6.477732287449392"
+  },
+  "scope": "Recomputed from archived simulation rows, not a new solver execution or customer measurement. Zero outcomes retained; undefined and invalid-baseline outcomes excluded."
+}

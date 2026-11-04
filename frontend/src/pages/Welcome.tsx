@@ -40,6 +40,22 @@ export function Landing() {
           </li>)}
         </ol>
       </section>
+      <section className="landing-statistics" aria-label="Modeled energy savings statistics">
+        <dl className="landing-statistics-row">
+          <div><dt>Avg. Modeled Cost Reduction</dt><dd>3.81%</dd></div>
+          <div><dt>Avg. Daily Reduction</dt><dd>$4.12</dd></div>
+          <div><dt>Lower Energy Charges</dt><dd>6.48%</dd></div>
+        </dl>
+        <details className="landing-statistics-note">
+          <summary>Based on fictional simulations; actual savings may vary.</summary>
+          <div>
+            <p>3.81%: Across 67 eligible modeled comparisons, including zero reductions.</p>
+            <p>$4.12/day: Average modeled reduction across 41 valid controllable-load comparisons, including zero reductions.</p>
+            <p>6.48%: One modeled warehouse example without EVs (W01), compared with immediate-start scheduling.</p>
+            <p>Energy charges only; these scenarios represent no actual customer savings.</p>
+          </div>
+        </details>
+      </section>
     </main>
   </div>
 }
