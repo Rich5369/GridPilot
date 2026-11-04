@@ -148,13 +148,6 @@ export function EnergyAssistant({ editor, onChange, resultScenario, onComparePro
       {!!turn.warnings?.length && <section className="advisor-reply-section advisor-reply-notice" aria-label="Important information"><h4>Keep in mind</h4>{turn.warnings.map(warning => <p key={warning}>{warning}</p>)}</section>}
       {!!turn.questions?.length && <section className="advisor-reply-section" aria-label="Follow-up question"><h4>One question</h4><p>{turn.questions[0]}</p></section>}
     </article>)}</div>
-    {proposal && <div className="advisor-proposal" aria-label="Proposed scenario changes"><span className="advisor-eyebrow">REVIEW SCENARIO CHANGES</span><h3>Proposed operational change</h3><p className="advisor-caption">{comparison ? 'Comparison calculated below. Changes have not been applied.' : 'Not yet applied. Review the changes, then ask Meta to compare both plans.'}</p>
-      <dl>{Object.entries(proposal.changes).filter(([, v]) => v != null).map(([k, v]) => <div key={k}><dt>{{ building_max_demand_kw: "Building’s power limit", all_ev_deadline_hour: 'All vehicles ready by', peak_price_increase_percent: 'Highest electricity price increase' }[k] ?? k}</dt><dd>{v}{k === 'building_max_demand_kw' ? ' kW' : k === 'all_ev_deadline_hour' ? ':00' : '%'}</dd></div>)}</dl>
-      {stale && <p>Draft differs from submitted context. Restore the submitted draft or request a new proposal after submitting it.</p>}
-      <button className="run-button" onClick={() => { void compareReviewedProposal() }} disabled={stale || busy}>Compare with Meta</button>
-      <button onClick={() => apply()} disabled={stale || busy}>Apply Changes</button> {onCompareProposal && <button onClick={() => apply(true)} disabled={stale || busy}>Compare as alternative</button>} <button disabled={busy} onClick={() => { setProposal(null); setComparison(null) }}>Cancel</button>
-    </div>}
-    {comparison && <AdvisorComparisonCard comparison={comparison} stale={stale} />}
     <div className={`advisor-starters ${history.length ? 'has-history' : ''}`}><span className="advisor-caption">SUGGESTED QUESTIONS</span><div className="ai-examples">{['How can I reduce electricity costs without disrupting operations?', 'When is peak building demand?', 'What information do you need from me?', 'Explain this optimization result.', ...examples].map(text => <button type="button" key={text} onClick={() => setRequest(text)} disabled={busy}>{text}</button>)}</div></div>
     <form className="advisor-composer" onSubmit={e => { e.preventDefault(); void send() }}>
       <label htmlFor="ai-request">Ask about energy or describe your business</label>
@@ -163,6 +156,13 @@ export function EnergyAssistant({ editor, onChange, resultScenario, onComparePro
       <div className="ai-actions"><button className="run-button" type="submit" disabled={busy || !request.trim() || (!resultScenario && !!Object.keys(validateEditor(editor)).length)}>Send to advisor</button>
       <button type="button" disabled={busy} onClick={() => { setHistory([]); setProposal(null); setComparison(null); setError('') }}>Clear conversation</button></div>
     </form>
+    {proposal && <div className="advisor-proposal" aria-label="Proposed scenario changes"><span className="advisor-eyebrow">REVIEW SCENARIO CHANGES</span><h3>Proposed operational change</h3><p className="advisor-caption">{comparison ? 'Comparison calculated below. Changes have not been applied.' : 'Not yet applied. Review the changes, then ask Meta to compare both plans.'}</p>
+      <dl>{Object.entries(proposal.changes).filter(([, v]) => v != null).map(([k, v]) => <div key={k}><dt>{{ building_max_demand_kw: "Building’s power limit", all_ev_deadline_hour: 'All vehicles ready by', peak_price_increase_percent: 'Highest electricity price increase' }[k] ?? k}</dt><dd>{v}{k === 'building_max_demand_kw' ? ' kW' : k === 'all_ev_deadline_hour' ? ':00' : '%'}</dd></div>)}</dl>
+      {stale && <p>Draft differs from submitted context. Restore the submitted draft or request a new proposal after submitting it.</p>}
+      <button className="run-button" onClick={() => { void compareReviewedProposal() }} disabled={stale || busy}>Compare with Meta</button>
+      <button onClick={() => apply()} disabled={stale || busy}>Apply Changes</button> {onCompareProposal && <button onClick={() => apply(true)} disabled={stale || busy}>Compare as alternative</button>} <button disabled={busy} onClick={() => { setProposal(null); setComparison(null) }}>Cancel</button>
+    </div>}
+    {comparison && <AdvisorComparisonCard comparison={comparison} stale={stale} />}
     {busy && <p className="advisor-notice" role="status">{comparing ? 'Meta is requesting a comparison and reviewing optimizer results. This can take a moment…' : 'Requesting Meta assistance…'}</p>}
     {error && <p className="advisor-notice" role="status">{error}</p>}
 
