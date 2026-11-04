@@ -5,6 +5,7 @@ import type {
   SavingsRequest,
   SavingsCategory,
 } from "../../types/savings";
+import { isCalculatedCategory } from "../../data/savingsDraft";
 import { money } from "../../data/demoScenario";
 const number = (v: number | null, unit: string, precision = 2) =>
   v === null
@@ -43,12 +44,14 @@ function RecommendationCard({
   onAnswer,
   confirmed,
   stale,
+  selected,
 }: {
   r: SavingsRecommendation;
   rank: number;
   onAnswer: () => void;
   confirmed?: boolean;
   stale: boolean;
+  selected: boolean;
 }) {
   return (
     <article
@@ -235,7 +238,7 @@ function RecommendationCard({
       </p>
       {r.calculation_status !== "not_applicable" && confirmed !== false && (
         <button type="button" className="secondary" onClick={onAnswer}>
-          {r.annual_kwh_saved === null ? 'Add missing details' : r.annual_energy_charge_savings_usd === null ? 'Add electricity price' : r.upfront_cost_usd === null ? 'Add installation cost' : 'Edit this improvement'}
+          {selected && isCalculatedCategory(r.category) ? 'Estimate savings' : r.annual_kwh_saved === null ? 'Add missing details' : r.annual_energy_charge_savings_usd === null ? 'Add electricity price' : r.upfront_cost_usd === null ? 'Add installation cost' : 'Edit this improvement'}
         </button>
       )}
       <details className="savings-evidence">
@@ -314,6 +317,7 @@ export function SavingsResults({
         key={r.id}
         r={r}
         stale={stale}
+        selected={selected.has(r.category)}
         rank={response.recommendations.indexOf(r) + 1}
         confirmed={confirmed[r.category]}
         onAnswer={() =>
@@ -364,8 +368,8 @@ export function SavingsResults({
         <section className="panel savings-selection">
           <h3>
             {conversation.source === "meta"
-              ? "AI-assisted category selection"
-              : "AI unavailable · standard guidance"}
+              ? "Selected by Meta AI"
+              : "Standard guidance — Meta unavailable"}
           </h3>
           <p>{conversation.message}</p>
           <p>

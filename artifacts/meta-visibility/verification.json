@@ -1,0 +1,52 @@
+{
+  "source": "Production frontend, injected AI responses, real local Savings Engine",
+  "checks": [
+    "meta: top action, editable example, explicit single submit, correct heading, unknown dollars retained, selected evidence form, real $2,500/year calculation, saved drafts, Energy Advisor, desktop/mobile",
+    "deterministic_fallback: top action, editable example, explicit single submit, correct heading, unknown dollars retained, selected evidence form, real $2,500/year calculation, saved drafts, Energy Advisor, desktop/mobile"
+  ],
+  "errors": [],
+  "accessibility": [
+    {
+      "source": "meta",
+      "view": "selected opportunities",
+      "width": 1440,
+      "violations": []
+    },
+    {
+      "source": "meta",
+      "width": 1440,
+      "violations": []
+    },
+    {
+      "source": "meta",
+      "width": 390,
+      "violations": []
+    },
+    {
+      "source": "meta",
+      "width": 320,
+      "violations": []
+    },
+    {
+      "source": "deterministic_fallback",
+      "view": "selected opportunities",
+      "width": 1440,
+      "violations": []
+    },
+    {
+      "source": "deterministic_fallback",
+      "width": 1440,
+      "violations": []
+    },
+    {
+      "source": "deterministic_fallback",
+      "width": 390,
+      "violations": []
+    },
+    {
+      "source": "deterministic_fallback",
+      "width": 320,
+      "violations": []
+    }
+  ]
+}
