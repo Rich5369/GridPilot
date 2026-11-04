@@ -76,7 +76,7 @@ async function click(label: string) {
   await act(async () => b.click());
 }
 async function input(id: string, value: string) {
-  const el = host.querySelector<HTMLInputElement | HTMLSelectElement>(
+  const el = host.querySelector<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>(
     "#" + id,
   )!;
   expect(el).toBeTruthy();
@@ -84,7 +84,9 @@ async function input(id: string, value: string) {
     Object.getOwnPropertyDescriptor(
       el.tagName === "SELECT"
         ? HTMLSelectElement.prototype
-        : HTMLInputElement.prototype,
+        : el.tagName === "TEXTAREA"
+          ? HTMLTextAreaElement.prototype
+          : HTMLInputElement.prototype,
       "value",
     )!.set!.call(el, value);
     el.dispatchEvent(
@@ -213,7 +215,7 @@ it("does not infer scheduling exclusion, omits unknown applicability and labels 
     message: "Meta unavailable; using deterministic guidance.",
   } as SavingsConversationResponse);
   await mount(d);
-  await click("Ask AI to select opportunities");
+  await click("Submit question");
   const req = vi.mocked(converseSavings).mock.calls[0][0];
   expect(req.category_applicability).toEqual({
     led: true,
@@ -221,7 +223,7 @@ it("does not infer scheduling exclusion, omits unknown applicability and labels 
   });
   expect(req).not.toHaveProperty("scenario");
   expect(host.textContent).toContain(
-    "AI unavailable · standard guidance",
+    "Standard guidance — Meta unavailable",
   );
   await click("Calculate savings");
   expect(calculateSavings).toHaveBeenCalledTimes(1);
@@ -242,4 +244,45 @@ it("ignores a reply after leaving this building and keeps estimates useful if th
   root = createRoot(host);
   await act(async () => resolve(response as SavingsResponse));
   expect(host.querySelector(".savings-results")).toBeNull();
+});
+
+it.each(["meta", "deterministic_fallback"] as const)(
+  "opens the existing question flow without sending, then labels %s and opens selected evidence",
+  async (source) => {
+    const c = structuredClone(warehouse) as SavingsConversationResponse;
+    c.source = source;
+    vi.mocked(converseSavings).mockResolvedValueOnce(c);
+    await mount(emptySavingsDraft());
+    const section = host.querySelector<HTMLDetailsElement>("#savings-conversation")!;
+    expect(section.open).toBe(false);
+    expect(section.compareDocumentPosition(host.querySelector("#savings-evidence")!) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    await click("Ask Meta AI");
+    expect(section.open).toBe(true);
+    expect(document.activeElement?.id).toBe("savings-question");
+    expect(host.querySelector<HTMLTextAreaElement>("#savings-question")!.value).toBe("How can my business lower its electricity costs?");
+    expect(converseSavings).not.toHaveBeenCalled();
+    await input("savings-question", "Can we improve lighting?");
+    await click("Ask Meta AI");
+    expect(host.querySelector<HTMLTextAreaElement>("#savings-question")!.value).toBe("Can we improve lighting?");
+    expect(converseSavings).not.toHaveBeenCalled();
+    await click("Submit question");
+    expect(converseSavings).toHaveBeenCalledTimes(1);
+    expect(vi.mocked(converseSavings).mock.calls[0][0].request).toBe("Can we improve lighting?");
+    expect(calculateSavings).not.toHaveBeenCalled();
+    expect(host.querySelector(".savings-selection h3")!.textContent).toBe(source === "meta" ? "Selected by Meta AI" : "Standard guidance — Meta unavailable");
+    const led = host.querySelector('[data-measure-id="pilot-lighting"]')!;
+    const estimate = led.querySelector("button")!;
+    expect(estimate.textContent).toBe("Estimate savings");
+    await act(async () => estimate.click());
+    expect(host.querySelector<HTMLDetailsElement>("#savings-project-0")!.open).toBe(true);
+    expect(host.querySelector("#savings-0-fixture_count")).toBeTruthy();
+    expect(converseSavings).toHaveBeenCalledTimes(1);
+    expect(calculateSavings).not.toHaveBeenCalled();
+  },
+);
+it("preserves a saved question when opening Meta AI", async () => {
+  await mount({ ...emptySavingsDraft(), question: "My saved question" });
+  await click("Ask Meta AI");
+  expect(host.querySelector<HTMLTextAreaElement>("#savings-question")!.value).toBe("My saved question");
+  expect(converseSavings).not.toHaveBeenCalled();
 });

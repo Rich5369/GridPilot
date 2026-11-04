@@ -310,6 +310,20 @@ export function SavingsOpportunities({
         <p className="eyebrow">BUILDING OPPORTUNITIES · ANNUAL ESTIMATES</p>
         <p>Explore improvements for your building. Add the details you know to estimate energy savings, costs, and payback.</p>
         <p><strong>{workspaceName}</strong> · {profile.business_type ?? 'Business type not provided'}</p>
+        <button
+          type="button"
+          className="run-button"
+          aria-controls="savings-conversation"
+          onClick={() => {
+            if (!draft.question.trim())
+              update({ ...draft, question: "How can my business lower its electricity costs?" });
+            const section = document.getElementById("savings-conversation") as HTMLDetailsElement;
+            section.open = true;
+            section.querySelector("textarea")?.focus();
+          }}
+        >
+          Ask Meta AI
+        </button>{" "}
         <a className="secondary" href="#savings-building-context" onClick={(e) => { e.preventDefault(); const details = document.getElementById('savings-building-context') as HTMLDetailsElement; details.open = true; details.scrollIntoView?.({block:'start'}); details.querySelector('input')?.focus(); }}>Edit building summary</a>
         <details><summary>How this was calculated</summary><p>Modeled annual estimates are for individual improvements and must not be added into a portfolio total. Inputs are saved in this browser; results stay in this session. Annual improvements do not require a daily plan. Opening hours, monthly spending and regional benchmarks do not establish equipment measurements or your electricity rate.</p></details>
         {catalogError && (
@@ -326,6 +340,41 @@ export function SavingsOpportunities({
           </p>
         )}
       </section>
+      <details id="savings-conversation" className="panel savings-conversation">
+        <summary>Help me find opportunities</summary>
+        <p>Ask for help choosing an improvement. AI can suggest relevant opportunities. For daily plan advice, use Ask Energy Advisor.</p>
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            void submit("conversation");
+          }}
+        >
+          <div className="field">
+            <label htmlFor="savings-question">
+              Question about savings opportunities
+            </label>
+            <textarea
+              id="savings-question"
+              rows={3}
+              maxLength={2000}
+              value={draft.question}
+              onChange={(e) => update({ ...draft, question: e.target.value })}
+              aria-invalid={!!errors.question}
+              aria-describedby="savings-ai-boundary"
+            />
+          </div>
+          <p id="savings-ai-boundary" className="field-hint">
+            Your question draft is saved in this browser. Conversations stay in this session.
+          </p>
+          <button
+            className="run-button"
+            type="submit"
+            disabled={!!busy || !draft.question.trim()}
+          >
+            Submit question
+          </button>
+        </form>
+      </details>
       <form
         id="savings-evidence"
         noValidate
@@ -555,41 +604,6 @@ export function SavingsOpportunities({
           </div>
         </section>
       </form>
-      <details className="panel savings-conversation">
-        <summary>Help me find opportunities</summary>
-        <p>Ask for help choosing an improvement. AI can suggest relevant opportunities. For daily plan advice, use Ask Energy Advisor.</p>
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            void submit("conversation");
-          }}
-        >
-          <div className="field">
-            <label htmlFor="savings-question">
-              Question about savings opportunities
-            </label>
-            <textarea
-              id="savings-question"
-              rows={3}
-              maxLength={2000}
-              value={draft.question}
-              onChange={(e) => update({ ...draft, question: e.target.value })}
-              aria-invalid={!!errors.question}
-              aria-describedby="savings-ai-boundary"
-            />
-          </div>
-          <p id="savings-ai-boundary" className="field-hint">
-            Your question draft is saved in this browser. Conversations stay in this session.
-          </p>
-          <button
-            className="secondary"
-            type="submit"
-            disabled={!!busy || !draft.question.trim()}
-          >
-            Ask AI to select opportunities
-          </button>
-        </form>
-      </details>
       {!!Object.keys(errors).length && (
         <div className="savings-warning" role="alert">
           <h3>Review savings inputs</h3>

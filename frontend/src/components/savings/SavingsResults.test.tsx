@@ -127,8 +127,8 @@ it.each(["meta", "deterministic_fallback"] as const)(
       );
       expect(host.querySelector(".savings-selection")!.textContent).toContain(
         source === "meta"
-          ? "AI-assisted category selection"
-          : "AI unavailable · standard guidance",
+          ? "Selected by Meta AI"
+          : "Standard guidance — Meta unavailable",
       );
       expect(host.querySelector(".savings-general")!.textContent).toContain(
         "not selected",
