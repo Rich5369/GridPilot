@@ -34,6 +34,7 @@ import type {
 import { SavingsMeasureForm, ConfirmSelect } from "./SavingsMeasureForm";
 import { SavingsResults } from "./SavingsResults";
 import states from "../../data/usStates.json";
+import "./savings-advisor.css";
 type Accepted = {
   response: SavingsResponse;
   conversation: SavingsConversationResponse | null;
@@ -68,6 +69,8 @@ export function SavingsOpportunities({
   onDraftChange,
   onScheduling,
   workspaceName,
+  advisorOpen = false,
+  onAdvisorClose = () => {},
 }: {
   businessProfile?: Record<string, string | number | null>;
   onProfileChange?: (p: Record<string, string | number | null>) => void;
@@ -75,10 +78,20 @@ export function SavingsOpportunities({
   onDraftChange?: (d: SavingsDraft) => void;
   onScheduling: () => void;
   workspaceName: string;
+  advisorOpen?: boolean;
+  onAdvisorClose?: () => void;
 }) {
-  const [draft, setDraft] = useState<SavingsDraft>(
-    () => initialDraft ?? emptySavingsDraft(),
-  );
+  const [draft, setDraft] = useState<SavingsDraft>(() => {
+    const saved = initialDraft ?? emptySavingsDraft();
+    return saved.question.trim() ? saved : {
+      ...saved,
+      question: "How can my business lower its electricity costs?",
+    };
+  });
+  const update = useCallback((next: SavingsDraft) => {
+    setDraft(next);
+    onDraftChange?.(next);
+  }, [onDraftChange]);
   const [localProfile, setLocalProfile] = useState(() =>
     mapSavingsProfile(businessProfile),
   );
@@ -97,6 +110,20 @@ export function SavingsOpportunities({
     [busy, setBusy] = useState<"calculation" | "conversation" | null>(null),
     [accepted, setAccepted] = useState<Accepted | null>(null),
     [replaceExample, setReplaceExample] = useState(false);
+  const dialogRef = useRef<HTMLDialogElement>(null);
+  const [advisorAccepted, setAdvisorAccepted] = useState<Accepted | null>(null);
+  function closeAdvisor() {
+    dialogRef.current?.close();
+    onAdvisorClose();
+  }
+  useEffect(() => {
+    const dialog = dialogRef.current;
+    if (!dialog) return;
+    if (advisorOpen && !dialog.open) {
+      dialog.showModal();
+      dialog.querySelector("textarea")?.focus();
+    } else if (!advisorOpen && dialog.open) dialog.close();
+  }, [advisorOpen]);
   const [history, setHistory] = useState<{
     context: string;
     turns: { role: "user" | "assistant"; content: string }[];
@@ -154,10 +181,6 @@ export function SavingsOpportunities({
       ?.querySelector<HTMLInputElement>("input")
       ?.focus({ preventScroll: true });
   }, [activeProject]);
-  function update(next: SavingsDraft) {
-    setDraft(next);
-    onDraftChange?.(next);
-  }
   function updateProfile(k: keyof SavingsProfile, value: string) {
     const next = {
       ...profile,
@@ -250,14 +273,16 @@ export function SavingsOpportunities({
         conversation?.savings ??
         (await calculateSavings(request, controller.signal));
       if (!mounted.current || id !== sequence.current) return;
-      setAccepted({
+      const nextAccepted = {
         response,
         conversation,
         request,
         confirmed,
         key: submittedKey,
         question,
-      });
+      };
+      setAccepted(nextAccepted);
+      if (conversation) setAdvisorAccepted(nextAccepted);
       if (conversation)
         setHistory({
           context,
@@ -267,7 +292,7 @@ export function SavingsOpportunities({
             { role: "assistant", content: conversation.message.slice(0, 3000) },
           ].slice(-12) as { role: "user" | "assistant"; content: string }[],
         });
-      setMessage("Savings estimates ready.");
+      setMessage(conversation ? "Your savings guidance is ready. Choose an opportunity below to add details or estimate savings." : "Savings calculation complete. Review the estimates and any missing details below.");
     } catch (e) {
       if (!mounted.current || id !== sequence.current) return;
       const failure = savingsFailure(e);
@@ -304,26 +329,57 @@ export function SavingsOpportunities({
   const descriptor = catalog?.categories.find(
     (d) => d.category === investigation,
   );
+  const feedback = (<>
+      {!!Object.keys(errors).length && (
+        <div className="savings-warning" role="alert">
+          <h3>Review savings inputs</h3>
+          <ul>
+            {Object.entries(errors).map(([path, msg]) => (
+              <li key={path}>
+                <strong>{path}: </strong>
+                {msg}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+      {busy && (
+        <p className="savings-request-status" role="status">
+          {busy === "conversation"
+            ? "Requesting optional category selection…"
+            : "Calculating your submitted project evidence…"}{" "}
+          Inputs remain editable; changed evidence makes an earlier response
+          stale.
+        </p>
+      )}
+      {message && (
+        <p className="savings-request-status" role="status">
+          {message}
+        </p>
+      )}
+      {canRetry && !busy && (
+        <button
+          type="button"
+          className="secondary"
+          onClick={() => { closeAdvisor(); void submit("calculation"); }}
+        >
+          Retry calculation without AI
+        </button>
+      )}
+      {canRetry && (advisorOpen ? advisorAccepted : accepted) && (
+        <p className="savings-warning" role="status">
+          The latest request did not produce a new accepted response. Results
+          below are from the previous successful submission, not the failed or
+          canceled attempt.
+        </p>
+      )}
+  </>);
   return (
     <div className="savings-workspace">
       <section className="panel savings-intro">
         <p className="eyebrow">BUILDING OPPORTUNITIES · ANNUAL ESTIMATES</p>
         <p>Explore improvements for your building. Add the details you know to estimate energy savings, costs, and payback.</p>
         <p><strong>{workspaceName}</strong> · {profile.business_type ?? 'Business type not provided'}</p>
-        <button
-          type="button"
-          className="run-button"
-          aria-controls="savings-conversation"
-          onClick={() => {
-            if (!draft.question.trim())
-              update({ ...draft, question: "How can my business lower its electricity costs?" });
-            const section = document.getElementById("savings-conversation") as HTMLDetailsElement;
-            section.open = true;
-            section.querySelector("textarea")?.focus();
-          }}
-        >
-          Ask Meta Energy Advisor
-        </button>{" "}
         <a className="secondary" href="#savings-building-context" onClick={(e) => { e.preventDefault(); const details = document.getElementById('savings-building-context') as HTMLDetailsElement; details.open = true; details.scrollIntoView?.({block:'start'}); details.querySelector('input')?.focus(); }}>Edit building summary</a>
         <details><summary>How this was calculated</summary><p>Modeled annual estimates are for individual improvements and must not be added into a portfolio total. Inputs are saved in this browser; results stay in this session. Annual improvements do not require a daily plan. Opening hours, monthly spending and regional benchmarks do not establish equipment measurements or your electricity rate.</p></details>
         {catalogError && (
@@ -340,9 +396,19 @@ export function SavingsOpportunities({
           </p>
         )}
       </section>
-      <details id="savings-conversation" className="panel savings-conversation">
-        <summary>Help me find opportunities</summary>
-        <p>Ask for help choosing an improvement. AI can suggest relevant opportunities. For daily plan advice, use Ask Energy Advisor.</p>
+      <dialog
+        ref={dialogRef}
+        id="savings-conversation"
+        className="savings-advisor-dialog"
+        aria-labelledby="savings-advisor-title"
+        aria-describedby="savings-advisor-description"
+        onCancel={(event) => { event.preventDefault(); closeAdvisor(); }}
+      >
+        <header className="savings-advisor-header">
+          <h2 id="savings-advisor-title">Meta Energy Advisor</h2>
+          <button type="button" className="secondary" onClick={closeAdvisor}>Close Meta Energy Advisor</button>
+        </header>
+        <p id="savings-advisor-description">Ask about annual savings opportunities for your building. Submit a question to get suggestions and the details needed to estimate savings.</p>
         <form
           onSubmit={(e) => {
             e.preventDefault();
@@ -356,6 +422,7 @@ export function SavingsOpportunities({
             <textarea
               id="savings-question"
               rows={3}
+              placeholder="How can my business lower its electricity costs?"
               maxLength={2000}
               value={draft.question}
               onChange={(e) => update({ ...draft, question: e.target.value })}
@@ -374,7 +441,21 @@ export function SavingsOpportunities({
             Submit question
           </button>
         </form>
-      </details>
+
+        {advisorOpen && feedback}
+        {busy && <button type="button" className="secondary" onClick={cancel}>Cancel advisor request</button>}
+        {advisorOpen && advisorAccepted && (
+          <SavingsResults
+            response={advisorAccepted.response}
+            conversation={advisorAccepted.conversation}
+            request={advisorAccepted.request}
+            confirmed={advisorAccepted.confirmed}
+            stale={advisorAccepted.key !== key}
+            onAnswer={(id, category) => { closeAdvisor(); answer(id, category); }}
+            onScheduling={() => { closeAdvisor(); onScheduling(); }}
+          />
+        )}
+      </dialog>
       <form
         id="savings-evidence"
         noValidate
@@ -604,42 +685,7 @@ export function SavingsOpportunities({
           </div>
         </section>
       </form>
-      {!!Object.keys(errors).length && (
-        <div className="savings-warning" role="alert">
-          <h3>Review savings inputs</h3>
-          <ul>
-            {Object.entries(errors).map(([path, msg]) => (
-              <li key={path}>
-                <strong>{path}: </strong>
-                {msg}
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
-      {busy && (
-        <p className="savings-request-status" role="status">
-          {busy === "conversation"
-            ? "Requesting optional category selection…"
-            : "Calculating your submitted project evidence…"}{" "}
-          Inputs remain editable; changed evidence makes an earlier response
-          stale.
-        </p>
-      )}
-      {message && (
-        <p className="savings-request-status" role="status">
-          {message}
-        </p>
-      )}
-      {canRetry && !busy && (
-        <button
-          type="button"
-          className="secondary"
-          onClick={() => void submit("calculation")}
-        >
-          Retry calculation without AI
-        </button>
-      )}
+      {!advisorOpen && feedback}
       {investigation && (
         <section
           id="savings-investigation"
@@ -668,14 +714,7 @@ export function SavingsOpportunities({
           ))}
         </section>
       )}
-      {canRetry && accepted && (
-        <p className="savings-warning" role="status">
-          The latest request did not produce a new accepted response. Results
-          below are from the previous successful submission, not the failed or
-          canceled attempt.
-        </p>
-      )}
-      {accepted ? (
+      {!advisorOpen && (accepted ? (
         <SavingsResults
           response={accepted.response}
           conversation={accepted.conversation}
@@ -692,7 +731,7 @@ export function SavingsOpportunities({
             No annual savings have been calculated yet. Add an improvement to begin.
           </p>
         </section>
-      )}
+      ))}
     </div>
   );
 }

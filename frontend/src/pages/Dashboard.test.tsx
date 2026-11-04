@@ -642,3 +642,33 @@ it('opens one Advisor entry, returns to the previous view and retains the compos
   expect(container.querySelector('h1')!.textContent).toBe('Energy plan')
   expect(fetchMock.mock.calls.filter(([u]) => String(u).includes('/api/ai/'))).toHaveLength(0)
 })
+
+it('routes the Savings header action to the savings modal and keeps the daily advisor on other pages', async () => {
+  HTMLDialogElement.prototype.showModal = function () { this.open = true }
+  HTMLDialogElement.prototype.close = function () { this.open = false }
+  await act(async () => root.render(<Dashboard />))
+  await click('Savings opportunities')
+  await click('Ask Meta Energy Advisor')
+  await vi.waitFor(async () => {
+    await act(async () => {})
+    expect(container.querySelector('#savings-conversation')).toBeTruthy()
+  })
+  const dialog = container.querySelector<HTMLDialogElement>('#savings-conversation')!
+  expect(dialog.open).toBe(true)
+  expect(container.querySelector('h1')!.textContent).toBe('Savings opportunities')
+  expect(dialog.querySelector('#savings-question')).toBeTruthy()
+  expect(dialog.textContent).toContain('Submit question')
+  expect(fetchMock.mock.calls.some(([url]) => String(url).includes('/api/ai/'))).toBe(false)
+  await input('savings-question', 'My saved savings question')
+  await click('Close Meta Energy Advisor')
+  expect(dialog.open).toBe(false)
+  await click('Ask Meta Energy Advisor')
+  expect(container.querySelector<HTMLTextAreaElement>('#savings-question')!.value).toBe('My saved savings question')
+  await click('Close Meta Energy Advisor')
+  await click('Overview')
+  await click('Ask Energy Advisor')
+  expect(container.querySelector('h1')!.textContent).toBe('Energy Advisor')
+  expect(dialog.open).toBe(false)
+  await click('Close Energy Advisor')
+  expect(container.querySelector('h1')!.textContent).toBe('Energy overview')
+})

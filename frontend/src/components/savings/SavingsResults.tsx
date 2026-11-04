@@ -351,19 +351,6 @@ export function SavingsResults({
           submitted profile and inputs. Recalculate explicitly.
         </p>
       )}
-      <p className="savings-no-total">
-        Modeled annual estimates — do not add these improvements together. Savings may overlap.
-      </p>
-      {!!globalWarnings.length && (
-        <div className="savings-warning" role="note">
-          <h3>Important warnings and overlapping estimates</h3>
-          <ul>
-            {globalWarnings.map((w, i) => (
-              <li key={i}>{w}</li>
-            ))}
-          </ul>
-        </div>
-      )}
       {conversation && (
         <section className="panel savings-selection">
           <h3>
@@ -404,6 +391,20 @@ export function SavingsResults({
             </ul>
           </details>
         </section>
+      )}
+      <p className="savings-no-total">
+        Modeled annual estimates — do not add these improvements together. Savings may overlap.
+      </p>
+      {!!globalWarnings.length && (
+        <details className="savings-warning">
+          <summary>Calculation limitations and service notices</summary>
+          <p>These notices describe the calculation service. AI opportunity selection runs separately.</p>
+          <ul>
+            {globalWarnings.map((w, i) => (
+              <li key={i}>{w}</li>
+            ))}
+          </ul>
+        </details>
       )}
       <h2>Your submitted projects</h2>
       {projects.length ? (
