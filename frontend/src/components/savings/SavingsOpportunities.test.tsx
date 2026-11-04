@@ -256,13 +256,13 @@ it.each(["meta", "deterministic_fallback"] as const)(
     const section = host.querySelector<HTMLDetailsElement>("#savings-conversation")!;
     expect(section.open).toBe(false);
     expect(section.compareDocumentPosition(host.querySelector("#savings-evidence")!) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
-    await click("Ask Meta AI");
+    await click("Ask Meta Energy Advisor");
     expect(section.open).toBe(true);
     expect(document.activeElement?.id).toBe("savings-question");
     expect(host.querySelector<HTMLTextAreaElement>("#savings-question")!.value).toBe("How can my business lower its electricity costs?");
     expect(converseSavings).not.toHaveBeenCalled();
     await input("savings-question", "Can we improve lighting?");
-    await click("Ask Meta AI");
+    await click("Ask Meta Energy Advisor");
     expect(host.querySelector<HTMLTextAreaElement>("#savings-question")!.value).toBe("Can we improve lighting?");
     expect(converseSavings).not.toHaveBeenCalled();
     await click("Submit question");
@@ -282,7 +282,7 @@ it.each(["meta", "deterministic_fallback"] as const)(
 );
 it("preserves a saved question when opening Meta AI", async () => {
   await mount({ ...emptySavingsDraft(), question: "My saved question" });
-  await click("Ask Meta AI");
+  await click("Ask Meta Energy Advisor");
   expect(host.querySelector<HTMLTextAreaElement>("#savings-question")!.value).toBe("My saved question");
   expect(converseSavings).not.toHaveBeenCalled();
 });

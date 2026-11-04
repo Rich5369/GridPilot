@@ -40,7 +40,7 @@ const report = { source: 'Production frontend, injected AI responses, real local
       await page.getByLabel(/Business type/).selectOption('Office');
       await page.getByRole('radio', { name: /Find savings opportunities/ }).check();
       await page.getByRole('button', { name: 'Continue', exact: true }).click();
-      const ask = page.getByRole('button', { name: 'Ask Meta AI', exact: true });
+      const ask = page.getByRole('button', { name: 'Ask Meta Energy Advisor', exact: true });
       await ask.waitFor();
       assert((await ask.boundingBox()).y < 700);
       assert.equal(ai, 0);
