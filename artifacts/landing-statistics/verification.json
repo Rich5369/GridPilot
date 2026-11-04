@@ -1,0 +1,167 @@
+{
+  "viewports": [
+    {
+      "width": 1366,
+      "height": 768,
+      "scrollWidth": 1366,
+      "scrollHeight": 768,
+      "sections": [
+        {
+          "name": "landing-hero",
+          "y": 91,
+          "height": 383.046875
+        },
+        {
+          "name": "landing-steps",
+          "y": 490.046875,
+          "height": 119.875
+        },
+        {
+          "name": "landing-statistics",
+          "y": 625.921875,
+          "height": 130.078125
+        }
+      ],
+      "photoHeight": 378.671875
+    },
+    {
+      "width": 1440,
+      "height": 900,
+      "scrollWidth": 1440,
+      "scrollHeight": 900,
+      "sections": [
+        {
+          "name": "landing-hero",
+          "y": 115,
+          "height": 417.546875
+        },
+        {
+          "name": "landing-steps",
+          "y": 559.546875,
+          "height": 131.375
+        },
+        {
+          "name": "landing-statistics",
+          "y": 717.921875,
+          "height": 146.078125
+        }
+      ],
+      "photoHeight": 378.671875
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "scrollWidth": 1920,
+      "scrollHeight": 1080,
+      "sections": [
+        {
+          "name": "landing-hero",
+          "y": 115,
+          "height": 587.546875
+        },
+        {
+          "name": "landing-steps",
+          "y": 734.546875,
+          "height": 131.375
+        },
+        {
+          "name": "landing-statistics",
+          "y": 897.921875,
+          "height": 146.078125
+        }
+      ],
+      "photoHeight": 378.671875
+    },
+    {
+      "width": 768,
+      "height": 1024,
+      "scrollWidth": 768,
+      "scrollHeight": 1024,
+      "sections": [
+        {
+          "name": "landing-hero",
+          "y": 115,
+          "height": 468.734375
+        },
+        {
+          "name": "landing-steps",
+          "y": 614.453125,
+          "height": 196.75
+        },
+        {
+          "name": "landing-statistics",
+          "y": 841.921875,
+          "height": 146.078125
+        }
+      ],
+      "photoHeight": 208
+    },
+    {
+      "width": 390,
+      "height": 844,
+      "scrollWidth": 390,
+      "scrollHeight": 1331,
+      "sections": [
+        {
+          "name": "landing-hero",
+          "y": 165.5,
+          "height": 548.40625
+        },
+        {
+          "name": "landing-steps",
+          "y": 753.90625,
+          "height": 345.0625
+        },
+        {
+          "name": "landing-statistics",
+          "y": 1122.96875,
+          "height": 167.765625
+        }
+      ],
+      "photoHeight": 228
+    },
+    {
+      "width": 320,
+      "height": 568,
+      "scrollWidth": 320,
+      "scrollHeight": 1695,
+      "sections": [
+        {
+          "name": "landing-hero",
+          "y": 165.5,
+          "height": 625.203125
+        },
+        {
+          "name": "landing-steps",
+          "y": 830.703125,
+          "height": 493.84375
+        },
+        {
+          "name": "landing-statistics",
+          "y": 1348.546875,
+          "height": 306.046875
+        }
+      ],
+      "photoHeight": 181.328125
+    }
+  ],
+  "accessibility": [
+    {
+      "width": 1366,
+      "violations": []
+    },
+    {
+      "width": 390,
+      "violations": []
+    },
+    {
+      "width": 320,
+      "violations": []
+    }
+  ],
+  "errors": [],
+  "checks": [
+    "Exact values/labels and order; unchanged image bytes/dimensions; all desktop sizes fit without scrolling; no mobile overflow; keyboard disclosure; enlarged text; both header/hero CTA routes; saved setup draft retained. Health stubbed; AI blocked; no live calculations."
+  ],
+  "status": "passed"
+}
