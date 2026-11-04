@@ -42,15 +42,15 @@ afterEach(async () => {
   fetchMock.mockReset()
 })
 async function click(label: string) {
-  if (['What-if comparisons', 'Results and equipment'].includes(label) && ![...container.querySelectorAll('button')].some(b => b.textContent === label)) await click('Energy plan')
-  const b = [...container.querySelectorAll('button')].find(
+  if (['What-if comparisons', 'Results and equipment'].includes(label) && ![...document.body.querySelectorAll('button')].some(b => b.textContent === label)) await click('Energy plan')
+  const b = [...document.body.querySelectorAll('button')].find(
     (b) => b.textContent === label,
   )!
   expect(b).toBeTruthy()
   await act(async () => b.click())
 }
 async function input(id: string, value: string) {
-  const element = container.querySelector<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>(
+  const element = document.body.querySelector<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>(
     `#${id}`,
   )!
   await act(async () => {
@@ -79,7 +79,7 @@ it('shows current draft inputs without fictional result metrics and validates ed
     container.querySelector('#deadline')!.getAttribute('aria-invalid'),
   ).toBe('true')
   expect(
-    [...container.querySelectorAll('button')].find(
+    [...document.body.querySelectorAll('button')].find(
       (b) => b.textContent === 'Calculate energy plan',
     )!.disabled,
   ).toBe(true)
@@ -115,7 +115,7 @@ it('shows loading, prevents repeat submissions and recovers after failure', asyn
         rejectRequest = reject
       }),
   )
-  const run = [...container.querySelectorAll('button')].find(
+  const run = [...document.body.querySelectorAll('button')].find(
     (b) => b.textContent === 'Calculate energy plan',
   )!
   await act(async () => {
@@ -302,7 +302,7 @@ it('guides configuration to results and labels demonstration inputs on overview'
 })
 
 async function selectProfile(value: string, prefix = 'current') {
-  const element = container.querySelector<HTMLSelectElement>(
+  const element = document.body.querySelector<HTMLSelectElement>(
     `#${prefix}-fixed-demand-mode`,
   )!
   await act(async () => {
@@ -354,7 +354,7 @@ it('submits custom demand, marks edited results stale, validates and restores th
       .getAttribute('aria-invalid'),
   ).toBe('true')
   expect(
-    [...container.querySelectorAll('button')].find(
+    [...document.body.querySelectorAll('button')].find(
       (b) => b.textContent === 'Calculate energy plan',
     )!.disabled,
   ).toBe(true)
@@ -651,9 +651,9 @@ it('routes the Savings header action to the savings modal and keeps the daily ad
   await click('Ask Meta Energy Advisor')
   await vi.waitFor(async () => {
     await act(async () => {})
-    expect(container.querySelector('#savings-conversation')).toBeTruthy()
+    expect(document.body.querySelector('#savings-conversation')).toBeTruthy()
   })
-  const dialog = container.querySelector<HTMLDialogElement>('#savings-conversation')!
+  const dialog = document.body.querySelector<HTMLDialogElement>('#savings-conversation')!
   expect(dialog.open).toBe(true)
   expect(container.querySelector('h1')!.textContent).toBe('Savings opportunities')
   expect(dialog.querySelector('#savings-question')).toBeTruthy()
@@ -663,7 +663,7 @@ it('routes the Savings header action to the savings modal and keeps the daily ad
   await click('Close Meta Energy Advisor')
   expect(dialog.open).toBe(false)
   await click('Ask Meta Energy Advisor')
-  expect(container.querySelector<HTMLTextAreaElement>('#savings-question')!.value).toBe('My saved savings question')
+  expect(document.body.querySelector<HTMLTextAreaElement>('#savings-question')!.value).toBe('My saved savings question')
   await click('Close Meta Energy Advisor')
   await click('Overview')
   await click('Ask Energy Advisor')
@@ -671,4 +671,63 @@ it('routes the Savings header action to the savings modal and keeps the daily ad
   expect(dialog.open).toBe(false)
   await click('Close Energy Advisor')
   expect(container.querySelector('h1')!.textContent).toBe('Energy overview')
+})
+
+it.each(['overview', 'configuration', 'savings', 'building', 'comparison', 'whatif', 'assistant', 'markets'] as const)(
+  'opens the shared Meta advisor on %s without navigating or sending AI requests',
+  async (view) => {
+    HTMLDialogElement.prototype.showModal = function () { this.open = true }
+    HTMLDialogElement.prototype.close = function () { this.open = false }
+    const onNavigate = vi.fn()
+    await act(async () => root.render(<Dashboard selectedView={view} onNavigate={onNavigate} />))
+    const heading = container.querySelector('h1')!.textContent
+    await click('Ask Meta Energy Advisor')
+    await vi.waitFor(async () => {
+      await act(async () => {})
+      expect(document.querySelector<HTMLDialogElement>('#savings-conversation')?.open).toBe(true)
+    })
+    const dialog = document.querySelector<HTMLDialogElement>('#savings-conversation')!
+    expect(dialog.parentElement).toBe(document.body)
+    expect(container.querySelector('h1')!.textContent).toBe(heading)
+    await input('savings-question', 'Keep this shared question')
+    await click('Close Meta Energy Advisor')
+    expect(document.activeElement?.textContent).toBe('Ask Meta Energy Advisor')
+    await click('Ask Meta Energy Advisor')
+    expect(document.querySelector<HTMLTextAreaElement>('#savings-question')!.value).toBe('Keep this shared question')
+    expect(fetchMock.mock.calls.some(([url]) => String(url).includes('/api/ai/'))).toBe(false)
+    await act(async () => {
+      dialog.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }))
+      dialog.dispatchEvent(new Event('cancel', { cancelable: true }))
+    })
+    expect(onNavigate).not.toHaveBeenCalled()
+    expect(dialog.open).toBe(false)
+  },
+)
+
+it('hands a Meta recommendation from My building to the visible Savings evidence form', async () => {
+  const savings = await import('../services/savings')
+  const fixture = await import('../testFixtures/warehouseSavingsConversation.json')
+  const { default: catalog } = await import('../testFixtures/savingsCatalog.json')
+  const catalogSpy = vi.spyOn(savings, 'getSavingsCatalog').mockResolvedValue(catalog as unknown as import('../types/savings').SavingsCatalog)
+  const converseSpy = vi.spyOn(savings, 'converseSavings').mockResolvedValue(fixture.default as unknown as import('../types/savings').SavingsConversationResponse)
+  HTMLDialogElement.prototype.showModal = function () { this.open = true }
+  HTMLDialogElement.prototype.close = function () { this.open = false }
+  try {
+    await act(async () => root.render(<Dashboard />))
+    await click('My building')
+    await click('Ask Meta Energy Advisor')
+    await vi.waitFor(async () => {
+      await act(async () => {})
+      expect(document.querySelector<HTMLDialogElement>('#savings-conversation')?.open).toBe(true)
+    })
+    await click('Submit question')
+    const card = document.querySelector('[data-measure-id="pilot-lighting"]')!
+    await act(async () => card.querySelector<HTMLButtonElement>('button')!.click())
+    expect(container.querySelector('h1')!.textContent).toBe('Savings opportunities')
+    expect(document.querySelector<HTMLDialogElement>('#savings-conversation')!.open).toBe(false)
+    const form = container.querySelector<HTMLDetailsElement>('#savings-project-0')!
+    expect(form.open).toBe(true)
+    expect(form.closest('[hidden]')).toBeNull()
+    expect(converseSpy).toHaveBeenCalledTimes(1)
+  } finally { catalogSpy.mockRestore(); converseSpy.mockRestore() }
 })
