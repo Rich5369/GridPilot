@@ -1429,7 +1429,7 @@ button:disabled {
 }
 /* Annual savings evidence stays visually and numerically separate from daily runs. */
 .savings-workspace { display: grid; gap: 20px; min-width: 0; }
-.savings-workspace > .panel, .savings-projects, .savings-context, .savings-applicability, .savings-conversation { padding: 24px; }
+.savings-workspace > .panel, .savings-projects, .savings-context, .savings-applicability { padding: 24px; }
 .savings-workspace p, .savings-workspace li { font-size: 13px; line-height: 1.8; }
 .savings-workspace h2 { margin: 0 0 12px; font-size: 20px; }
 .savings-workspace h3 { font-size: 17px; margin: 12px 0; }
@@ -1470,7 +1470,7 @@ button:disabled {
 .savings-workspace a { color: var(--gp-primary); text-decoration: underline; text-underline-offset: 3px; }
 .savings-workspace button { max-width: 100%; white-space: normal; line-height: 1.6; }
 @media(max-width:1000px){.savings-card-grid { grid-template-columns: minmax(0,1fr); }}
-@media(max-width:600px){.savings-workspace .form-grid { grid-template-columns: minmax(0,1fr); }.savings-workspace > .panel, .savings-projects, .savings-context, .savings-applicability, .savings-conversation, .savings-card { padding: 18px; }.savings-values { grid-template-columns: minmax(0,1fr); }.savings-actions > button { width: 100%; }}
+@media(max-width:600px){.savings-workspace .form-grid { grid-template-columns: minmax(0,1fr); }.savings-workspace > .panel, .savings-projects, .savings-context, .savings-applicability, .savings-card { padding: 18px; }.savings-values { grid-template-columns: minmax(0,1fr); }.savings-actions > button { width: 100%; }}
 .savings-values dd[data-value-state=unknown] { color: var(--gp-muted); font-size: 14px; }
 .savings-values dd[data-value-state=negative] { color: var(--gp-warning); }
 
