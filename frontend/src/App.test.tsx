@@ -279,7 +279,7 @@ it("retains edited advisor business context without storing its conversation", a
   seed(saved(true));
   await mount();
   await click("Continue to your building");
-  await click("Ask Energy Advisor");
+  await click("Ask Meta Energy Advisor");
   await input(".advisor-fields label:nth-child(2) input", "43");
   await input(".advisor-fields label:nth-child(6) input", "Warehouse vans");
   const stored = JSON.parse(localStorage.getItem(WORKSPACE_KEY)!);
@@ -357,7 +357,7 @@ it("restores a dashboard section directly, handles history and Home Continue wit
   await mount();
   expect(host.querySelector<HTMLInputElement>("#limit")!.value).toBe("17");
   expect(host.textContent).toContain("No optimizer result has been restored");
-  await click("Ask Energy Advisor");
+  await click("Ask Meta Energy Advisor");
   expect(location.hash).toBe("#assistant");
   await act(async () => {
     history.replaceState(null, "", "#configuration");

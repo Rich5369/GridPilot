@@ -1,5 +1,6 @@
 # Savings Meta advisor modal
 
+Historical verification of the superseded modal UI. The current correction is documented in [Full-page Meta advisor](full-page-meta-advisor.md).
 The Savings page header now opens the existing Meta savings conversation in a native modal. The standalone “Help me find opportunities” accordion and duplicate introduction-card action have been removed. The introduction retains Edit building summary and How this was calculated.
 
 Question drafts, retained responses, selected recommendations and follow-up history survive closing/reopening. Opening never sends an AI request. Only Submit question submits the current question. Closing during a pending request keeps waiting; Cancel advisor request explicitly stops waiting. Escape and the close button dismiss the modal; native modality contains keyboard focus and restores it to the opener. The close action remains visible when scrolling results.

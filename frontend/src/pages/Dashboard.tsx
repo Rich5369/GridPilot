@@ -132,10 +132,8 @@ export function Dashboard({
   const view = selectedView ?? localView
   const [savingsVisited, setSavingsVisited] = useState(view === 'savings')
   if (view === 'savings' && !savingsVisited) setSavingsVisited(true)
-  const [savingsAdvisorOpen, setSavingsAdvisorOpen] = useState(false)
   const previousView = useRef<DashboardView>('overview')
   const advisorTrigger = useRef<HTMLButtonElement>(null)
-  const metaAdvisorTrigger = useRef<HTMLButtonElement>(null)
   const advisorClose = useRef<HTMLButtonElement>(null)
   const wasAdvisor = useRef(false)
   useEffect(() => {
@@ -152,7 +150,6 @@ export function Dashboard({
   }
   const primaryView = ['configuration', 'comparison', 'whatif'].includes(view) ? 'configuration' : view
   function setView(next: DashboardView) {
-    setSavingsAdvisorOpen(false)
     setLocalView(next)
     onNavigate?.(next)
   }
@@ -339,14 +336,11 @@ export function Dashboard({
               </p>
             </div>
             <div className="page-heading-actions">
-              <button ref={metaAdvisorTrigger} className="run-button advisor-trigger" aria-controls="savings-conversation" aria-haspopup="dialog" onClick={() => { setSavingsVisited(true); setSavingsAdvisorOpen(true) }}>
-                <Sparkles size={17} aria-hidden="true" />Ask Meta Energy Advisor
-              </button>
               {view === 'assistant' ? (
                 <button ref={advisorClose} className="secondary" onClick={closeAdvisor}>Close Energy Advisor</button>
               ) : (
-                <button ref={advisorTrigger} className="secondary" aria-controls="energy-advisor" onClick={() => setView('assistant')}>
-                  Ask Energy Advisor
+                <button ref={advisorTrigger} className="run-button advisor-trigger" aria-controls="energy-advisor" onClick={() => setView('assistant')}>
+                  <Sparkles size={17} aria-hidden="true" />Ask Meta Energy Advisor
                 </button>
               )}
               {['overview', 'configuration', 'comparison', 'whatif'].includes(view) && (
@@ -457,9 +451,6 @@ export function Dashboard({
                 workspaceName={workspaceName}
                 businessProfile={businessProfile}
                 onProfileChange={onBusinessContextChange}
-                advisorOpen={savingsAdvisorOpen}
-                onAdvisorClose={() => { setSavingsAdvisorOpen(false); metaAdvisorTrigger.current?.focus(); }}
-                onEvidence={() => setView('savings')}
                 initialDraft={initialSavingsDraft}
                 onDraftChange={onSavingsDraftChange}
                 onScheduling={() => setView('configuration')}

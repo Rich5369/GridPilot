@@ -1,5 +1,6 @@
 # Meta advisor on every dashboard page
 
+Historical verification of the superseded modal UI. The current correction is documented in [Full-page Meta advisor](full-page-meta-advisor.md).
 The shared header shows Ask Meta Energy Advisor on all eight dashboard views. It opens the same retained savings conversation over the current page; opening does not submit a request. The separate Ask Energy Advisor action retains daily scheduling, scenario comparison and Apply behavior.
 
 The native modal is rendered into document.body so hidden Savings content cannot hide it on other pages. Estimate savings reveals the Savings page before the existing evidence handler opens/focuses the form. Questions, responses and follow-up history remain shared across views. Escape closes only the modal, including when the underlying page is the daily Energy Advisor; focus returns to the Meta opener.

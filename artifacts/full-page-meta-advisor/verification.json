@@ -1,0 +1,30 @@
+{
+  "views": [
+    "overview",
+    "savings",
+    "configuration",
+    "building",
+    "comparison",
+    "whatif",
+    "markets"
+  ],
+  "widths": [
+    1440,
+    390
+  ],
+  "fullPageComponent": "EnergyAssistant (unchanged)",
+  "modalCount": 0,
+  "aiRequests": 1,
+  "inference": "injected mock test reply; no genuine Meta inference",
+  "preserved": [
+    "business context",
+    "suggested questions",
+    "composer",
+    "conversation history",
+    "scenario review",
+    "Apply Changes",
+    "Compare with Meta",
+    "return navigation"
+  ],
+  "errors": []
+}
